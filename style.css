@@ -1,0 +1,23 @@
+.kable_wrapper {
+  border-spacing: 20px 0;
+  border-collapse: separate;
+  border: none;
+  margin: auto;
+}
+.kable_wrapper > tbody > tr > td {
+  vertical-align: top;
+}
+p.caption {
+  color: #777;
+  margin-top: 10px;
+}
+p code {
+  white-space: inherit;
+}
+pre {
+  word-break: normal;
+  word-wrap: normal;
+}
+pre code {
+  white-space: inherit;
+}
