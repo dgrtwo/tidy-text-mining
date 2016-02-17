@@ -13,13 +13,10 @@ link-citations: yes
 
 This is a _sample_ book written in **Markdown**. You can use anything that Pandoc's Markdown supports, e.g., a math equation $a^2 + b^2 = c^2$.
 
-For now, you have to install the development versions of **bookdown**, **rmarkdown**, and **knitr**:
+For now, you have to install the development versions of **bookdown** from Github:
 
 ```{r eval=FALSE}
-install.packages(
-  c("bookdown", "knitr"),
-  repos = c("http://yihui.name/xran", "http://cran.rstudio.com")
-)
+devtools::install_github("rstudio/bookdown")
 ```
 
 Remember each Rmd file contains one and only one chapter.
