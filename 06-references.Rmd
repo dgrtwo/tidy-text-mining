@@ -1,3 +1,7 @@
+---
+knit: bookdown::preview_chapter
+---
+
 `r if (knitr:::is_html_output()) '# References'`
 
 ```{r include=FALSE}
