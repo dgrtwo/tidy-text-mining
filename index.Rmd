@@ -3,15 +3,6 @@ title: "A Minimal Book Example"
 author: "Yihui Xie"
 date: "`r Sys.Date()`"
 knit: "bookdown::render_book"
-output:
-  bookdown::html_chapters:
-    css: style.css
-    md_extensions: +markdown_in_html_blocks
-  bookdown::pdf_book:
-    includes:
-      in_header: preamble.tex
-    keep_tex: yes
-    latex_engine: xelatex
 documentclass: book
 bibliography: [book.bib, packages.bib]
 biblio-style: apalike
