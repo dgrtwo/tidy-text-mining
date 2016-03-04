@@ -17,3 +17,5 @@ bookdown::pdf_book:
     in_header: preamble.tex
   latex_engine: xelatex
   citation_package: natbib
+bookdown::html_chapters:
+  css: [style.css, toc.css]
