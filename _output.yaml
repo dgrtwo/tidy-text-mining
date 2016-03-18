@@ -1,10 +1,7 @@
 bookdown::gitbook:
   css: style.css
   config:
-    toolbar:
-      position: fixed
     toc:
-      collapse: no
       before: |
         <li><a href="./">A Minimal Book Example</a></li>
       after: |
