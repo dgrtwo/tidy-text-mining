@@ -12,6 +12,8 @@ bookdown::gitbook:
     edit:
       link: https://github.com/rstudio/bookdown-demo/edit/master/inst/examples/%s
       text: "Edit"
+bookdown::tufte_html_book:
+  css: [style.css, toc.css]
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex
