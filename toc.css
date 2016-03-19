@@ -122,3 +122,6 @@
 #TOC .has-sub ul li.last > a {
   border-bottom: 0;
 }
+#TOC ul {
+  font-size: 1.2rem;
+}
