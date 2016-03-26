@@ -5,7 +5,7 @@ bookdown::gitbook:
       before: |
         <li><a href="./">A Minimal Book Example</a></li>
       after: |
-        <li><a href="https://www.rstudio.com" target="blank">Published with RStudio Press</a></li>
+        <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
     edit:
       link: https://github.com/rstudio/bookdown-demo/edit/master/inst/examples/%s
       text: "Edit"
