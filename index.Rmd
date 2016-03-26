@@ -21,4 +21,4 @@ For now, you have to install the development versions of **bookdown** from Githu
 devtools::install_github("rstudio/bookdown")
 ```
 
-Remember each Rmd file contains one and only one chapter.
+Remember each Rmd file contains one and only one chapter, and a chapter is defined by the first-level heading `#`.
