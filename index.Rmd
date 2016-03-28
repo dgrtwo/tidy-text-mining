@@ -3,6 +3,7 @@ title: "A Minimal Book Example"
 author: "Yihui Xie"
 date: "`r Sys.Date()`"
 knit: "bookdown::render_book"
+site: true
 documentclass: book
 bibliography: [book.bib, packages.bib]
 biblio-style: apalike
