@@ -8,13 +8,9 @@ bookdown::gitbook:
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
     edit:
       link: https://github.com/rstudio/bookdown-demo/edit/master/inst/examples/%s
-      text: "Edit"
-bookdown::tufte_html_book:
-  css: [style.css, toc.css]
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex
   latex_engine: xelatex
   citation_package: natbib
-bookdown::html_book:
-  css: [style.css, toc.css]
+bookdown::epub_book: default
