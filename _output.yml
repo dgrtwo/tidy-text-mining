@@ -7,7 +7,7 @@ bookdown::gitbook:
       after: |
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
     edit:
-      link: https://github.com/rstudio/bookdown-demo/edit/master/inst/examples/%s
+      link: https://github.com/rstudio/bookdown-demo/edit/master/%s
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex
