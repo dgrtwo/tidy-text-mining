@@ -2,7 +2,6 @@
 title: "A Minimal Book Example"
 author: "Yihui Xie"
 date: "`r Sys.Date()`"
-knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
