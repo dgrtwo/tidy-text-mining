@@ -24,6 +24,8 @@ devtools::install_github("rstudio/bookdown")
 
 Remember each Rmd file contains one and only one chapter, and a chapter is defined by the first-level heading `#`.
 
+To compile this example to PDF, you need to install XeLaTeX.
+
 ```{r include=FALSE}
 # automatically create a bib database for R packages
 knitr::write_bib(c(
