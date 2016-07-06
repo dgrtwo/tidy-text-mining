@@ -1,21 +1,35 @@
 # Introduction {#intro}
 
-You can label chapter and section titles using `{#label}` after them, e.g., we can reference Chapter \@ref(intro). If you do not manually label them, there will be automatic labels anyway, e.g., Chapter \@ref(methods).
+This intro will be changed a lot to serve as a general and friendly intro to the topic.
 
-Figures and tables with captions will be placed in `figure` and `table` environments, respectively.
+## What is tidy text?
 
-```{r nice-fig, fig.cap='Here is a nice figure!', out.width='80%', fig.asp=.75, fig.align='center'}
-par(mar = c(4, 4, .1, .1))
-plot(pressure, type = 'b', pch = 19)
-```
+As described by Hadley Wickham[@tidydata], tidy data has a specific structure:
 
-Reference a figure by its code chunk label with the `fig:` prefix, e.g., see Figure \@ref(fig:nice-fig). Similarly, you can reference tables generated from `knitr::kable()`, e.g., see Table \@ref(tab:nice-tab).
+* each variable is a column
+* each observation is a row
+* each type of observational unit is a table
 
-```{r nice-tab, tidy=FALSE}
-knitr::kable(
-  head(iris, 20), caption = 'Here is a nice table!',
-  booktabs = TRUE
-)
-```
+Tidy data sets allow manipulation with a standard set of "tidy" tools, including popular packages such as dplyr[@R-dplyr], ggplot2[@R-ggplot2], and broom[@R-broom]. These tools do not yet, however, have the infrastructure to work fluently with text data and natural language processing tools. In developing this package, we provide functions and supporting data sets to allow conversion of text to and from tidy formats, and to switch seamlessly between tidy tools and existing text mining packages.
 
-You can write citations, too. For example, we are using the **bookdown** package [@R-bookdown] in this sample book, which was built on top of R Markdown and **knitr** [@xie2015]. ddd aaa
+We define the tidy text format as being one-token-per-document-per-row, and provide functionality to tokenize by commonly used units of text including words, n-grams, and sentences. At the same time, the tidytext package doesn't expect a user to keep text data in a tidy form at all times during an analysis. The package includes functions to `tidy` objects (see the broom package[@R-broom]) from popular text mining R packages such as tm[@tm] and quanteda[@R-quanteda]. This allows, for example, a workflow with easy reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications. The models can then be re-converted into a tidy form for interpretation and visualization with ggplot2.
+
+
+## Outline
+
+We start by introducing the tidy text format, and some of the ways dplyr, tidyr and tidytext allow informative analyses of this structure.
+
+* **Chapter 2** outlines the tidy text format and the `unnest_tokens` function. It also introduces the gutenbergr and janeaustenr packages, which provide useful literary text datasets that we'll use throughout this book.
+* **Chapter 3** shows how to perform sentiment analysis on a tidy text dataset, using the `sentiments` dataset from tidytext and `inner_join` from dplyr
+* **Chapter 4** describes the method of TF-IDF (term frequency times inverse document frequency), for identifying terms that are especially specific to a particular document. (Other document stuff in this chapter perhaps?)
+
+Text won't be tidy at all stages of an analysis.
+
+* **Chapter 5** introduces methods for tidying document-term matrices and Corpus objects from the tm and quanteda packages, as well as for casting tidy text datasets into those formats.
+* **Chapter 6** introduces the concept of topic modeling, and uses the `tidy` method for interpreting and visualizing the output of the topicmodels package. 
+* **Chapter 7** (TODO) introduces tidying methods for the glove package, which offer an interface to word2vec models. (*These methods are still being implemented so this chapter is far from written!*)
+
+We conclude with two tidy text analyses that bring together multiple text-mining approaches we've learned.
+
+* **Chapter 8** demonstrates an application of a tidy text analysis on the Yelp restaurant review dataset. We show a few approaches to predicting a star rating from a review's text, and see how well sentiment analysis (from Chapter 3) does at this task.
+* **Chapter 9** TODO: find at least one other in-depth exploration of text data. Optional but I think would conclude the book well.

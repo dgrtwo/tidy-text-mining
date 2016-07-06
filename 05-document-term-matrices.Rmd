@@ -1,0 +1,220 @@
+# Tidying and casting document-term matrices
+
+```{r echo = FALSE}
+library(knitr)
+opts_chunk$set(message = FALSE, warning = FALSE)
+
+options(width = 100, dplyr.width = 150)
+```
+
+Intro text here.
+
+## Tidying a document-term matrix
+
+Many existing text mining datasets are in the form of a `DocumentTermMatrix` class (from the tm package). For example, consider the corpus of 2246 Associated Press articles from the topicmodels package:
+
+```{r AssociatedPress}
+library(tm)
+data("AssociatedPress", package = "topicmodels")
+AssociatedPress
+```
+
+If we want to analyze this with tidy tools, we need to turn it into a one-token-per-document-per-row data frame first. The `tidy` function does this. (For more on the tidy verb, [see the broom package](https://github.com/dgrtwo/broom)).
+
+```{r ap_td, dependson = "AssociatedPress"}
+library(dplyr)
+library(tidytext)
+
+ap_td <- tidy(AssociatedPress)
+```
+
+Just as shown in [this vignette](tidytext.html), having the text in this format is convenient for analysis with the tidytext package. For example, you can perform sentiment analysis on these newspaper articles.
+
+```{r ap_sentiments, dependson = "ap_td"}
+bing <- sentiments %>%
+  filter(lexicon == "bing") %>%
+  select(word, sentiment)
+
+ap_sentiments <- ap_td %>%
+  inner_join(bing, by = c(term = "word"))
+
+ap_sentiments
+```
+
+We can find the most negative documents:
+
+```{r most_negative_docs, dependson = "ap_sentiments"}
+library(tidyr)
+
+ap_sentiments %>%
+  count(document, sentiment, wt = count) %>%
+  ungroup() %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative) %>%
+  arrange(sentiment)
+```
+
+Or visualize which words contributed to positive and negative sentiment:
+
+```{r dependson = "ap_sentiments", fig.width = 7, fig.height = 5}
+library(ggplot2)
+
+ap_sentiments %>%
+  count(sentiment, term, wt = count) %>%
+  ungroup() %>%
+  filter(n >= 150) %>%
+  mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
+  mutate(term = reorder(term, n)) %>%
+  ggplot(aes(term, n, fill = sentiment)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ylab("Contribution to sentiment")
+```
+
+Note that a tidier is also available for the `dfm` class from the quanteda package:
+
+```{r quanteda_corpus}
+data("inaugCorpus", package = "quanteda")
+d <- quanteda::dfm(inaugCorpus)
+
+d
+
+tidy(d)
+```
+
+## Casting tidy text data into a DocumentTermMatrix
+
+Some existing text mining tools or algorithms work only on sparse document-term matrices. Therefore, tidytext provides `cast_` verbs for converting from a tidy form to these matrices.
+
+```{r}
+ap_td
+
+# cast into a Document-Term Matrix
+ap_td %>%
+  cast_dtm(document, term, count)
+
+# cast into a Term-Document Matrix
+ap_td %>%
+  cast_tdm(term, document, count)
+
+# cast into quanteda's dfm
+ap_td %>%
+  cast_dfm(term, document, count)
+
+
+# cast into a Matrix object
+m <- ap_td %>%
+  cast_sparse(document, term, count)
+class(m)
+dim(m)
+```
+
+This allows for easy reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications.
+
+## Tidying corpus objects with metadata
+
+You can also tidy Corpus objects from the tm package. For example, consider a Corpus containing 20 documents:
+
+```{r reuters}
+reut21578 <- system.file("texts", "crude", package = "tm")
+reuters <- VCorpus(DirSource(reut21578),
+                   readerControl = list(reader = readReut21578XMLasPlain))
+
+reuters
+```
+
+The `tidy` verb creates a table with one row per document:
+
+```{r reuters_td, dependson = "reuters"}
+reuters_td <- tidy(reuters)
+reuters_td
+```
+
+Similarly, you can `tidy` a `corpus` object from the quanteda package:
+
+```{r inaug_td}
+library(quanteda)
+
+data("inaugCorpus")
+
+inaugCorpus
+
+inaug_td <- tidy(inaugCorpus)
+inaug_td
+```
+
+This lets us work with tidy tools like `unnest_tokens` to analyze the text alongside the metadata.
+
+```{r inaug_words, dependson = "inaug_td"}
+inaug_words <- inaug_td %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words)
+
+inaug_words
+```
+
+We could then, for example, see how the appearance of a word changes over time:
+
+```{r inaug_freq, dependson = "inaug_words"}
+inaug_freq <- inaug_words %>%
+  count(Year, word) %>%
+  ungroup() %>%
+  complete(Year, word, fill = list(n = 0)) %>%
+  group_by(Year) %>%
+  mutate(year_total = sum(n),
+         percent = n / year_total) %>%
+  ungroup()
+
+inaug_freq
+```
+
+For example, we can use the broom package to perform logistic regression on each word.
+
+```{r models, dependson = "inaug_freq"}
+models <- inaug_freq %>%
+  group_by(word) %>%
+  filter(sum(n) > 50) %>%
+  do(tidy(glm(cbind(n, year_total - n) ~ Year, .,
+              family = "binomial"))) %>%
+  ungroup() %>%
+  filter(term == "Year")
+
+models
+
+models %>%
+  filter(term == "Year") %>%
+  arrange(desc(abs(estimate)))
+```
+
+You can show these models as a volcano plot, which compares the effect size with the significance:
+
+```{r dependson = "models"}
+library(ggplot2)
+theme_set(theme_bw())
+
+models %>%
+  mutate(adjusted.p.value = p.adjust(p.value)) %>%
+  ggplot(aes(estimate, adjusted.p.value)) +
+  geom_point() +
+  scale_y_log10() +
+  geom_text(aes(label = word), vjust = 1, hjust = 1,
+            check_overlap = TRUE) +
+  xlab("Estimated change over time") +
+  ylab("Adjusted p-value")
+```
+
+We can also use the ggplot2 package to display the top 6 terms that have changed in frequency over time.
+
+```{r dependson = "models"}
+library(scales)
+
+models %>%
+  top_n(6, abs(estimate)) %>%
+  inner_join(inaug_freq) %>%
+  ggplot(aes(Year, percent)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~ word) +
+  scale_y_continuous(labels = percent_format()) +
+  ylab("Frequency of word in speech")
+```

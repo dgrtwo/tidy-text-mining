@@ -1,0 +1,3 @@
+# Some analysis goes here {#placeholder}
+
+I don't know what will go here, but I'd like to have one more analysis that touches on all of the areas of tidy text analysis. If we can't find one we'll skip it!

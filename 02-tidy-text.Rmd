@@ -1,0 +1,107 @@
+# The Tidy Text Format {#tidytext}
+
+```{r echo = FALSE}
+library(knitr)
+opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
+
+options(width = 100, dplyr.width = 100)
+```
+
+Intro text may go here about the one-token-per-document-per-row and about what is explored in the chapter.
+
+## The `unnest_tokens` function
+
+```{r text}
+text <- c("Because I could not stop for Death -",
+          "He kindly stopped for me -",
+          "The Carriage held but just Ourselves -",
+          "and Immortality")
+
+text
+```
+
+This is a typical character vector that we might want to analyze. In order to turn it into a tidy text dataset, we first need to put it into a data frame:
+
+```{r text_df, dependson = "text"}
+library(dplyr)
+text_df <- data_frame(line = 1:4, text = text)
+
+text_df
+```
+
+Notice that this data frame isn't yet compatible with tidy tools. We can't filter out words or count which occur most frequently, since each row is made up of multiple coimbined tokens. We need to turn this into **one-token-per-document-per-row**.
+
+To do this, we use tidytext's `unnest_tokens` function:
+
+```{r dependson = "text_df", R.options = list(dplyr.print_max = 10)}
+text_df %>%
+  unnest_tokens(word, text)
+```
+
+We've now split each row so that there's one token (word) in each row of the new data frame. Also notice:
+
+* Other columns, such as the line number each word came from, are retained
+* Punctuation has been stripped
+* By default, `unnest_tokens` turns the tokens lowercase, which makes them easier to compare or combine with other datasets. (Use the `to_lower = FALSE` argument to turn off this behavior).
+
+Having the text data in this format lets us manipulate, process, and visualize the text using the standard set of tidy tools; namely dplyr, tidyr, ggplot2, and broom.
+
+## Example: the works of Jane Austen
+
+Let's use the text of Jane Austen's 6 completed, published novels from the [janeaustenr](https://cran.r-project.org/package=janeaustenr) package, and transform them into a tidy format. janeaustenr provides them as a one-row-per-line format:
+
+```{r original_books}
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+
+original_books <- austen_books() %>%
+  group_by(book) %>%
+  mutate(linenumber = row_number(),
+         chapter = cumsum(str_detect(text, regex("^chapter [\\divxlc]",
+                                                 ignore_case = TRUE)))) %>%
+  ungroup()
+
+original_books
+```
+
+To work with this as a tidy dataset, we need to restructure it as **one-token-per-row** format. The `unnest_tokens` function is a way to convert a dataframe with a text column to be one-token-per-row:
+
+```{r tidy_books_raw, dependson = "original_books"}
+library(tidytext)
+tidy_books <- original_books %>%
+  unnest_tokens(word, text)
+
+tidy_books
+```
+
+This function uses the [tokenizers package](https://github.com/lmullen/tokenizers) to separate each line into words. The default tokenizing is for words, but other options include characters, ngrams, sentences, lines, paragraphs, or separation around a regex pattern.
+
+Now that the data is in one-word-per-row format, we can manipulate it with tidy tools like dplyr. We can remove stop words (kept in the tidytext dataset `stop_words`) with an `anti_join`.
+
+```{r tidy_books, dependson = "tidy_books_raw"}
+data("stop_words")
+
+tidy_books <- tidy_books %>%
+  anti_join(stop_words)
+```
+
+We can also use `count` to find the most common words in all the books as a whole.
+
+```{r dependson = "tidy_books"}
+tidy_books %>%
+  count(word, sort = TRUE) 
+```
+
+For example, this allows us to visualize the popular words using ggplot2:
+
+```{r}
+library(ggplot2)
+
+tidy_books %>%
+  count(word, sort = TRUE)
+```
+
+### The gutenbergr package
+
+TODO: Now that we've introduced the janeaustenr package, also include a brief intro to the gutenberg package.

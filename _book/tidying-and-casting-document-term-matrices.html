@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Tidy Text Mining</title>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta name="description" content="A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools">
+  <meta name="generator" content="bookdown 0.0.74 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Tidy Text Mining" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools" />
+  <meta name="github-repo" content="dgrtwo/tidy-text-mining" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Tidy Text Mining" />
+  
+  <meta name="twitter:description" content="A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools" />
+  
+
+<meta name="author" content="Julia Silge and David Robinson">
+
+<meta name="date" content="2016-07-06">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="tfidf.html">
+<link rel="next" href="topicmodeling.html">
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Tidy Text Mining</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#what-is-tidy-text"><i class="fa fa-check"></i><b>1.1</b> What is tidy text?</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#outline"><i class="fa fa-check"></i><b>1.2</b> Outline</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="tidytext.html"><a href="tidytext.html"><i class="fa fa-check"></i><b>2</b> The Tidy Text Format</a><ul>
+<li class="chapter" data-level="2.1" data-path="tidytext.html"><a href="tidytext.html#the-unnest_tokens-function"><i class="fa fa-check"></i><b>2.1</b> The <code>unnest_tokens</code> function</a></li>
+<li class="chapter" data-level="2.2" data-path="tidytext.html"><a href="tidytext.html#example-the-works-of-jane-austen"><i class="fa fa-check"></i><b>2.2</b> Example: the works of Jane Austen</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="tidytext.html"><a href="tidytext.html#the-gutenbergr-package"><i class="fa fa-check"></i><b>2.2.1</b> The gutenbergr package</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="sentiment.html"><a href="sentiment.html"><i class="fa fa-check"></i><b>3</b> Sentiment Analysis with Tidy Data</a><ul>
+<li class="chapter" data-level="3.1" data-path="sentiment.html"><a href="sentiment.html#the-sentiments-dataset"><i class="fa fa-check"></i><b>3.1</b> The sentiments dataset</a></li>
+<li class="chapter" data-level="3.2" data-path="sentiment.html"><a href="sentiment.html#sentiment-analysis-with-inner-join"><i class="fa fa-check"></i><b>3.2</b> Sentiment analysis with inner join</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="sentiment.html"><a href="sentiment.html#most-common-positive-and-negative-words"><i class="fa fa-check"></i><b>3.2.1</b> Most common positive and negative words</a></li>
+<li class="chapter" data-level="3.2.2" data-path="sentiment.html"><a href="sentiment.html#wordclouds"><i class="fa fa-check"></i><b>3.2.2</b> Wordclouds</a></li>
+<li class="chapter" data-level="3.2.3" data-path="sentiment.html"><a href="sentiment.html#looking-at-units-beyond-just-words"><i class="fa fa-check"></i><b>3.2.3</b> Looking at units beyond just words</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="tfidf.html"><a href="tfidf.html"><i class="fa fa-check"></i><b>4</b> TF-IDF: Analyzing word and document frequency</a><ul>
+<li class="chapter" data-level="4.1" data-path="tfidf.html"><a href="tfidf.html#term-frequency-and-inverse-document-frequency"><i class="fa fa-check"></i><b>4.1</b> Term frequency and inverse document frequency</a></li>
+<li class="chapter" data-level="4.2" data-path="tfidf.html"><a href="tfidf.html#the-bind_tf_idf-function"><i class="fa fa-check"></i><b>4.2</b> The bind_tf_idf function</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="tidying-and-casting-document-term-matrices.html"><a href="tidying-and-casting-document-term-matrices.html"><i class="fa fa-check"></i><b>5</b> Tidying and casting document-term matrices</a><ul>
+<li class="chapter" data-level="5.1" data-path="tidying-and-casting-document-term-matrices.html"><a href="tidying-and-casting-document-term-matrices.html#tidying-a-document-term-matrix"><i class="fa fa-check"></i><b>5.1</b> Tidying a document-term matrix</a></li>
+<li class="chapter" data-level="5.2" data-path="tidying-and-casting-document-term-matrices.html"><a href="tidying-and-casting-document-term-matrices.html#casting-tidy-text-data-into-a-documenttermmatrix"><i class="fa fa-check"></i><b>5.2</b> Casting tidy text data into a DocumentTermMatrix</a></li>
+<li class="chapter" data-level="5.3" data-path="tidying-and-casting-document-term-matrices.html"><a href="tidying-and-casting-document-term-matrices.html#tidying-corpus-objects-with-metadata"><i class="fa fa-check"></i><b>5.3</b> Tidying corpus objects with metadata</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="topicmodeling.html"><a href="topicmodeling.html"><i class="fa fa-check"></i><b>6</b> Topic Modeling</a><ul>
+<li class="chapter" data-level="6.1" data-path="topicmodeling.html"><a href="topicmodeling.html#can-we-tell-the-difference-between-dickens-wells-verne-and-austen"><i class="fa fa-check"></i><b>6.1</b> Can we tell the difference between Dickens, Wells, Verne, and Austen?</a></li>
+<li class="chapter" data-level="6.2" data-path="topicmodeling.html"><a href="topicmodeling.html#setup"><i class="fa fa-check"></i><b>6.2</b> Setup</a></li>
+<li class="chapter" data-level="6.3" data-path="topicmodeling.html"><a href="topicmodeling.html#latent-dirichlet-allocation-with-the-topicmodels-package"><i class="fa fa-check"></i><b>6.3</b> Latent Dirichlet Allocation with the topicmodels package</a></li>
+<li class="chapter" data-level="6.4" data-path="topicmodeling.html"><a href="topicmodeling.html#per-document-classification"><i class="fa fa-check"></i><b>6.4</b> Per-document classification</a><ul>
+<li class="chapter" data-level="6.4.1" data-path="topicmodeling.html"><a href="topicmodeling.html#by-word-assignments-augment"><i class="fa fa-check"></i><b>6.4.1</b> By word assignments: <code>augment</code></a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="word2vec.html"><a href="word2vec.html"><i class="fa fa-check"></i><b>7</b> Tidying word2vec Models from the glove Package</a></li>
+<li class="chapter" data-level="8" data-path="yelp.html"><a href="yelp.html"><i class="fa fa-check"></i><b>8</b> Predicting ratings from text in the Yelp food reviews dataset</a><ul>
+<li class="chapter" data-level="8.1" data-path="yelp.html"><a href="yelp.html#setup-1"><i class="fa fa-check"></i><b>8.1</b> Setup</a></li>
+<li class="chapter" data-level="8.2" data-path="yelp.html"><a href="yelp.html#tidy-sentiment-analysis"><i class="fa fa-check"></i><b>8.2</b> Tidy sentiment analysis</a></li>
+<li class="chapter" data-level="8.3" data-path="yelp.html"><a href="yelp.html#which-words-are-positive-or-negative"><i class="fa fa-check"></i><b>8.3</b> Which words are positive or negative?</a></li>
+<li class="chapter" data-level="8.4" data-path="yelp.html"><a href="yelp.html#comparing-to-sentiment-analysis"><i class="fa fa-check"></i><b>8.4</b> Comparing to sentiment analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="placeholder.html"><a href="placeholder.html"><i class="fa fa-check"></i><b>9</b> Some analysis goes here</a></li>
+<li class="chapter" data-level="10" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>10</b> References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Tidy Text Mining</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="tidying-and-casting-document-term-matrices" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Tidying and casting document-term matrices</h1>
+<p>Intro text here.</p>
+<div id="tidying-a-document-term-matrix" class="section level2">
+<h2><span class="header-section-number">5.1</span> Tidying a document-term matrix</h2>
+<p>Many existing text mining datasets are in the form of a <code>DocumentTermMatrix</code> class (from the tm package). For example, consider the corpus of 2246 Associated Press articles from the topicmodels package:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tm)
+<span class="kw">data</span>(<span class="st">&quot;AssociatedPress&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;topicmodels&quot;</span>)
+AssociatedPress</code></pre></div>
+<pre><code>## &lt;&lt;DocumentTermMatrix (documents: 2246, terms: 10473)&gt;&gt;
+## Non-/sparse entries: 302031/23220327
+## Sparsity           : 99%
+## Maximal term length: 18
+## Weighting          : term frequency (tf)</code></pre>
+<p>If we want to analyze this with tidy tools, we need to turn it into a one-token-per-document-per-row data frame first. The <code>tidy</code> function does this. (For more on the tidy verb, <a href="https://github.com/dgrtwo/broom">see the broom package</a>).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
+<span class="kw">library</span>(tidytext)
+
+ap_td &lt;-<span class="st"> </span><span class="kw">tidy</span>(AssociatedPress)</code></pre></div>
+<p>Just as shown in <a href="tidytext.html">this vignette</a>, having the text in this format is convenient for analysis with the tidytext package. For example, you can perform sentiment analysis on these newspaper articles.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bing &lt;-<span class="st"> </span>sentiments %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(lexicon ==<span class="st"> &quot;bing&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">select</span>(word, sentiment)
+
+ap_sentiments &lt;-<span class="st"> </span>ap_td %&gt;%
+<span class="st">  </span><span class="kw">inner_join</span>(bing, <span class="dt">by =</span> <span class="kw">c</span>(<span class="dt">term =</span> <span class="st">&quot;word&quot;</span>))
+
+ap_sentiments</code></pre></div>
+<pre><code>## # A tibble: 30,094 x 4
+##    document    term count sentiment
+##       &lt;int&gt;   &lt;chr&gt; &lt;dbl&gt;     &lt;chr&gt;
+## 1         1 assault     1  negative
+## 2         1 complex     1  negative
+## 3         1   death     1  negative
+## 4         1    died     1  negative
+## 5         1    good     2  positive
+## 6         1 illness     1  negative
+## 7         1  killed     2  negative
+## 8         1    like     2  positive
+## 9         1   liked     1  positive
+## 10        1 miracle     1  positive
+## # ... with 30,084 more rows</code></pre>
+<p>We can find the most negative documents:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyr)
+
+ap_sentiments %&gt;%
+<span class="st">  </span><span class="kw">count</span>(document, sentiment, <span class="dt">wt =</span> count) %&gt;%
+<span class="st">  </span><span class="kw">ungroup</span>() %&gt;%
+<span class="st">  </span><span class="kw">spread</span>(sentiment, n, <span class="dt">fill =</span> <span class="dv">0</span>) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">sentiment =</span> positive -<span class="st"> </span>negative) %&gt;%
+<span class="st">  </span><span class="kw">arrange</span>(sentiment)</code></pre></div>
+<pre><code>## # A tibble: 2,190 x 4
+##    document negative positive sentiment
+##       &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1      1251       54        6       -48
+## 2      1380       53        5       -48
+## 3       531       51        9       -42
+## 4        43       45       11       -34
+## 5      1263       44       10       -34
+## 6      2178       40        6       -34
+## 7       334       45       12       -33
+## 8      1664       38        5       -33
+## 9      2147       47       14       -33
+## 10      516       38        6       -32
+## # ... with 2,180 more rows</code></pre>
+<p>Or visualize which words contributed to positive and negative sentiment:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
+
+ap_sentiments %&gt;%
+<span class="st">  </span><span class="kw">count</span>(sentiment, term, <span class="dt">wt =</span> count) %&gt;%
+<span class="st">  </span><span class="kw">ungroup</span>() %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(n &gt;=<span class="st"> </span><span class="dv">150</span>) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n =</span> <span class="kw">ifelse</span>(sentiment ==<span class="st"> &quot;negative&quot;</span>, -n, n)) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">term =</span> <span class="kw">reorder</span>(term, n)) %&gt;%
+<span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(term, n, <span class="dt">fill =</span> sentiment)) +
+<span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&quot;identity&quot;</span>) +
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">90</span>, <span class="dt">hjust =</span> <span class="dv">1</span>)) +
+<span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Contribution to sentiment&quot;</span>)</code></pre></div>
+<p><img src="tidy-text-mining_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p>Note that a tidier is also available for the <code>dfm</code> class from the quanteda package:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;inaugCorpus&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;quanteda&quot;</span>)
+d &lt;-<span class="st"> </span>quanteda::<span class="kw">dfm</span>(inaugCorpus)</code></pre></div>
+<pre><code>## Creating a dfm from a corpus ...
+##    ... lowercasing
+##    ... tokenizing
+##    ... indexing documents: 57 documents
+##    ... indexing features: 9,214 feature types
+##    ... created a 57 x 9215 sparse dfm
+##    ... complete. 
+## Elapsed time: 0.183 seconds.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d</code></pre></div>
+<pre><code>## Document-feature matrix of: 57 documents, 9,215 features.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tidy</span>(d)</code></pre></div>
+<pre><code>## # A tibble: 43,719 x 3
+##           document            term count
+## *            &lt;chr&gt;           &lt;chr&gt; &lt;dbl&gt;
+## 1  1789-Washington fellow-citizens     1
+## 2       1797-Adams fellow-citizens     3
+## 3   1801-Jefferson fellow-citizens     2
+## 4     1809-Madison fellow-citizens     1
+## 5     1813-Madison fellow-citizens     1
+## 6      1817-Monroe fellow-citizens     5
+## 7      1821-Monroe fellow-citizens     1
+## 8    1841-Harrison fellow-citizens    11
+## 9        1845-Polk fellow-citizens     1
+## 10     1849-Taylor fellow-citizens     1
+## # ... with 43,709 more rows</code></pre>
+</div>
+<div id="casting-tidy-text-data-into-a-documenttermmatrix" class="section level2">
+<h2><span class="header-section-number">5.2</span> Casting tidy text data into a DocumentTermMatrix</h2>
+<p>Some existing text mining tools or algorithms work only on sparse document-term matrices. Therefore, tidytext provides <code>cast_</code> verbs for converting from a tidy form to these matrices.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ap_td</code></pre></div>
+<pre><code>## # A tibble: 302,031 x 3
+##    document       term count
+## *     &lt;int&gt;      &lt;chr&gt; &lt;dbl&gt;
+## 1         1     adding     1
+## 2         1      adult     2
+## 3         1        ago     1
+## 4         1    alcohol     1
+## 5         1  allegedly     1
+## 6         1      allen     1
+## 7         1 apparently     2
+## 8         1   appeared     1
+## 9         1   arrested     1
+## 10        1    assault     1
+## # ... with 302,021 more rows</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># cast into a Document-Term Matrix</span>
+ap_td %&gt;%
+<span class="st">  </span><span class="kw">cast_dtm</span>(document, term, count)</code></pre></div>
+<pre><code>## &lt;&lt;DocumentTermMatrix (documents: 2246, terms: 10473)&gt;&gt;
+## Non-/sparse entries: 302031/23220327
+## Sparsity           : 99%
+## Maximal term length: 18
+## Weighting          : term frequency (tf)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># cast into a Term-Document Matrix</span>
+ap_td %&gt;%
+<span class="st">  </span><span class="kw">cast_tdm</span>(term, document, count)</code></pre></div>
+<pre><code>## &lt;&lt;TermDocumentMatrix (terms: 10473, documents: 2246)&gt;&gt;
+## Non-/sparse entries: 302031/23220327
+## Sparsity           : 99%
+## Maximal term length: 18
+## Weighting          : term frequency (tf)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># cast into quanteda&#39;s dfm</span>
+ap_td %&gt;%
+<span class="st">  </span><span class="kw">cast_dfm</span>(term, document, count)</code></pre></div>
+<pre><code>## Document-feature matrix of: 10,473 documents, 2,246 features.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># cast into a Matrix object</span>
+m &lt;-<span class="st"> </span>ap_td %&gt;%
+<span class="st">  </span><span class="kw">cast_sparse</span>(document, term, count)
+<span class="kw">class</span>(m)</code></pre></div>
+<pre><code>## [1] &quot;dgCMatrix&quot;
+## attr(,&quot;package&quot;)
+## [1] &quot;Matrix&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(m)</code></pre></div>
+<pre><code>## [1]  2246 10473</code></pre>
+<p>This allows for easy reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications.</p>
+</div>
+<div id="tidying-corpus-objects-with-metadata" class="section level2">
+<h2><span class="header-section-number">5.3</span> Tidying corpus objects with metadata</h2>
+<p>You can also tidy Corpus objects from the tm package. For example, consider a Corpus containing 20 documents:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">reut21578 &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;texts&quot;</span>, <span class="st">&quot;crude&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;tm&quot;</span>)
+reuters &lt;-<span class="st"> </span><span class="kw">VCorpus</span>(<span class="kw">DirSource</span>(reut21578),
+                   <span class="dt">readerControl =</span> <span class="kw">list</span>(<span class="dt">reader =</span> readReut21578XMLasPlain))
+
+reuters</code></pre></div>
+<pre><code>## &lt;&lt;VCorpus&gt;&gt;
+## Metadata:  corpus specific: 0, document level (indexed): 0
+## Content:  documents: 20</code></pre>
+<p>The <code>tidy</code> verb creates a table with one row per document:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">reuters_td &lt;-<span class="st"> </span><span class="kw">tidy</span>(reuters)
+reuters_td</code></pre></div>
+<pre><code>## # A tibble: 20 x 17
+##                        author       datetimestamp description
+##                         &lt;chr&gt;              &lt;time&gt;       &lt;chr&gt;
+## 1                        &lt;NA&gt; 1987-02-26 12:00:56            
+## 2  BY TED D&#39;AFFLISIO, Reuters 1987-02-26 12:34:11            
+## 3                        &lt;NA&gt; 1987-02-26 13:18:00            
+## 4                        &lt;NA&gt; 1987-02-26 13:21:01            
+## 5                        &lt;NA&gt; 1987-02-26 14:00:57            
+## 6                        &lt;NA&gt; 1987-02-28 22:25:46            
+## 7    By Jeremy Clift, Reuters 1987-02-28 22:39:14            
+## 8                        &lt;NA&gt; 1987-03-01 00:27:27            
+## 9                        &lt;NA&gt; 1987-03-01 03:22:30            
+## 10                       &lt;NA&gt; 1987-03-01 13:31:44            
+## 11                       &lt;NA&gt; 1987-03-01 20:05:49            
+## 12                       &lt;NA&gt; 1987-03-02 02:39:23            
+## 13                       &lt;NA&gt; 1987-03-02 02:43:22            
+## 14                       &lt;NA&gt; 1987-03-02 02:43:41            
+## 15                       &lt;NA&gt; 1987-03-02 03:25:42            
+## 16                       &lt;NA&gt; 1987-03-02 06:20:05            
+## 17                       &lt;NA&gt; 1987-03-02 06:28:26            
+## 18                       &lt;NA&gt; 1987-03-02 07:13:46            
+## 19 By BERNICE NAPACH, Reuters 1987-03-02 09:38:34            
+## 20                       &lt;NA&gt; 1987-03-02 09:49:06            
+##                                              heading    id language            origin
+##                                                &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;             &lt;chr&gt;
+## 1           DIAMOND SHAMROCK (DIA) CUTS CRUDE PRICES   127       en Reuters-21578 XML
+## 2    OPEC MAY HAVE TO MEET TO FIRM PRICES - ANALYSTS   144       en Reuters-21578 XML
+## 3          TEXACO CANADA &lt;TXC&gt; LOWERS CRUDE POSTINGS   191       en Reuters-21578 XML
+## 4          MARATHON PETROLEUM REDUCES CRUDE POSTINGS   194       en Reuters-21578 XML
+## 5          HOUSTON OIL &lt;HO&gt; RESERVES STUDY COMPLETED   211       en Reuters-21578 XML
+## 6      KUWAIT SAYS NO PLANS FOR EMERGENCY OPEC TALKS   236       en Reuters-21578 XML
+## 7  INDONESIA SEEN AT CROSSROADS OVER ECONOMIC CHANGE   237       en Reuters-21578 XML
+## 8              SAUDI RIYAL DEPOSIT RATES REMAIN FIRM   242       en Reuters-21578 XML
+## 9            QATAR UNVEILS BUDGET FOR FISCAL 1987/88   246       en Reuters-21578 XML
+## 10   SAUDI ARABIA REITERATES COMMITMENT TO OPEC PACT   248       en Reuters-21578 XML
+## 11    SAUDI FEBRUARY CRUDE OUTPUT PUT AT 3.5 MLN BPD   273       en Reuters-21578 XML
+## 12 GULF ARAB DEPUTY OIL MINISTERS TO MEET IN BAHRAIN   349       en Reuters-21578 XML
+## 13 SAUDI ARABIA REITERATES COMMITMENT TO OPEC ACCORD   352       en Reuters-21578 XML
+## 14  KUWAIT MINISTER SAYS NO EMERGENCY OPEC TALKS SET   353       en Reuters-21578 XML
+## 15          PHILADELPHIA PORT CLOSED BY TANKER CRASH   368       en Reuters-21578 XML
+## 16     STUDY GROUP URGES INCREASED U.S. OIL RESERVES   489       en Reuters-21578 XML
+## 17     STUDY GROUP URGES INCREASED U.S. OIL RESERVES   502       en Reuters-21578 XML
+## 18    UNOCAL &lt;UCL&gt; UNIT CUTS CRUDE OIL POSTED PRICES   543       en Reuters-21578 XML
+## 19      NYMEX WILL EXPAND OFF-HOUR TRADING APRIL ONE   704       en Reuters-21578 XML
+## 20     ARGENTINE OIL PRODUCTION DOWN IN JANUARY 1987   708       en Reuters-21578 XML
+## # ... with 10 more variables: topics &lt;chr&gt;, lewissplit &lt;chr&gt;, cgisplit &lt;chr&gt;, oldid &lt;chr&gt;,
+## #   topics_cat &lt;list&gt;, places &lt;list&gt;, people &lt;chr&gt;, orgs &lt;chr&gt;, exchanges &lt;chr&gt;, text &lt;chr&gt;</code></pre>
+<p>Similarly, you can <code>tidy</code> a <code>corpus</code> object from the quanteda package:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(quanteda)
+
+<span class="kw">data</span>(<span class="st">&quot;inaugCorpus&quot;</span>)
+
+inaugCorpus</code></pre></div>
+<pre><code>## Corpus consisting of 57 documents and 3 docvars.</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">inaug_td &lt;-<span class="st"> </span><span class="kw">tidy</span>(inaugCorpus)
+inaug_td</code></pre></div>
+<pre><code>## # A tibble: 57 x 4
+##                                                                                                                                                        text
+##                                                                                                                                                       &lt;chr&gt;
+## 1  Fellow-Citizens of the Senate and of the House of Representatives:\n\nAmong the vicissitudes incident to life no event could have filled me with greater
+## 2    Fellow citizens, I am again called upon by the voice of my country to execute the functions of its Chief Magistrate. When the occasion proper for it s
+## 3    When it was first perceived, in early times, that no middle course for America remained between unlimited submission to a foreign legislature and a to
+## 4  Friends and Fellow Citizens:\n\nCalled upon to undertake the duties of the first executive office of our country, I avail myself of the presence of that
+## 5    Proceeding, fellow citizens, to that qualification which the Constitution requires before my entrance on the charge again conferred on me, it is my du
+## 6    Unwilling to depart from examples of the most revered authority, I avail myself of the occasion now presented to express the profound impression made 
+## 7    About to add the solemnity of an oath to the obligations imposed by a second call to the station in which my country heretofore placed me, I find in t
+## 8    I should be destitute of feeling if I was not deeply affected by the strong proof which my fellow-citizens have given me of their confidence in callin
+## 9    Fellow citizens, I shall not attempt to describe the grateful emotions which the new and very distinguished proof of the confidence of my fellow citiz
+## 10   In compliance with an usage coeval with the existence of our Federal Constitution, and sanctioned by the example of my predecessors in the career upon
+## # ... with 47 more rows, and 3 more variables: Year &lt;int&gt;, President &lt;chr&gt;, FirstName &lt;chr&gt;</code></pre>
+<p>This lets us work with tidy tools like <code>unnest_tokens</code> to analyze the text alongside the metadata.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">inaug_words &lt;-<span class="st"> </span>inaug_td %&gt;%
+<span class="st">  </span><span class="kw">unnest_tokens</span>(word, text) %&gt;%
+<span class="st">  </span><span class="kw">anti_join</span>(stop_words)
+
+inaug_words</code></pre></div>
+<pre><code>## # A tibble: 49,621 x 4
+##     Year President FirstName         word
+##    &lt;int&gt;     &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;
+## 1   2013     Obama    Barack        waves
+## 2   2013     Obama    Barack     realizes
+## 3   2013     Obama    Barack philadelphia
+## 4   2013     Obama    Barack          400
+## 5   2013     Obama    Barack           40
+## 6   2013     Obama    Barack   absolutism
+## 7   2013     Obama    Barack      contour
+## 8   2013     Obama    Barack      newtown
+## 9   2013     Obama    Barack        lanes
+## 10  2013     Obama    Barack   appalachia
+## # ... with 49,611 more rows</code></pre>
+<p>We could then, for example, see how the appearance of a word changes over time:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">inaug_freq &lt;-<span class="st"> </span>inaug_words %&gt;%
+<span class="st">  </span><span class="kw">count</span>(Year, word) %&gt;%
+<span class="st">  </span><span class="kw">ungroup</span>() %&gt;%
+<span class="st">  </span><span class="kw">complete</span>(Year, word, <span class="dt">fill =</span> <span class="kw">list</span>(<span class="dt">n =</span> <span class="dv">0</span>)) %&gt;%
+<span class="st">  </span><span class="kw">group_by</span>(Year) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">year_total =</span> <span class="kw">sum</span>(n),
+         <span class="dt">percent =</span> n /<span class="st"> </span>year_total) %&gt;%
+<span class="st">  </span><span class="kw">ungroup</span>()
+
+inaug_freq</code></pre></div>
+<pre><code>## # A tibble: 490,200 x 5
+##     Year        word     n year_total     percent
+##    &lt;int&gt;       &lt;chr&gt; &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
+## 1   1789           1     0        529 0.000000000
+## 2   1789       1,000     0        529 0.000000000
+## 3   1789         100     0        529 0.000000000
+## 4   1789 100,000,000     0        529 0.000000000
+## 5   1789 120,000,000     0        529 0.000000000
+## 6   1789         125     0        529 0.000000000
+## 7   1789          13     0        529 0.000000000
+## 8   1789        14th     1        529 0.001890359
+## 9   1789        15th     0        529 0.000000000
+## 10  1789          16     0        529 0.000000000
+## # ... with 490,190 more rows</code></pre>
+<p>For example, we can use the broom package to perform logistic regression on each word.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">models &lt;-<span class="st"> </span>inaug_freq %&gt;%
+<span class="st">  </span><span class="kw">group_by</span>(word) %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(<span class="kw">sum</span>(n) &gt;<span class="st"> </span><span class="dv">50</span>) %&gt;%
+<span class="st">  </span><span class="kw">do</span>(<span class="kw">tidy</span>(<span class="kw">glm</span>(<span class="kw">cbind</span>(n, year_total -<span class="st"> </span>n) ~<span class="st"> </span>Year, .,
+              <span class="dt">family =</span> <span class="st">&quot;binomial&quot;</span>))) %&gt;%
+<span class="st">  </span><span class="kw">ungroup</span>() %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(term ==<span class="st"> &quot;Year&quot;</span>)
+
+models</code></pre></div>
+<pre><code>## # A tibble: 113 x 6
+##              word  term     estimate   std.error  statistic      p.value
+##             &lt;chr&gt; &lt;chr&gt;        &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;
+## 1             act  Year  0.006894234 0.002191596  3.1457591 1.656564e-03
+## 2          action  Year  0.001634417 0.001959204  0.8342250 4.041542e-01
+## 3  administration  Year -0.006979577 0.001882474 -3.7076616 2.091819e-04
+## 4         america  Year  0.018890081 0.001584306 11.9232506 8.954525e-33
+## 5        american  Year  0.007084142 0.001321897  5.3590709 8.365105e-08
+## 6       americans  Year  0.032657656 0.003659114  8.9250184 4.456252e-19
+## 7       authority  Year -0.005640373 0.002336159 -2.4143787 1.576207e-02
+## 8        business  Year  0.003745929 0.002016455  1.8576801 6.321445e-02
+## 9          called  Year -0.001935068 0.002088388 -0.9265844 3.541423e-01
+## 10        century  Year  0.016480566 0.002495844  6.6032027 4.023687e-11
+## # ... with 103 more rows</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">models %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(term ==<span class="st"> &quot;Year&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(<span class="kw">abs</span>(estimate)))</code></pre></div>
+<pre><code>## # A tibble: 113 x 6
+##         word  term    estimate   std.error statistic      p.value
+##        &lt;chr&gt; &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;
+## 1  americans  Year  0.03265766 0.003659114  8.925018 4.456252e-19
+## 2    america  Year  0.01889008 0.001584306 11.923251 8.954525e-33
+## 3    century  Year  0.01648057 0.002495844  6.603203 4.023687e-11
+## 4       live  Year  0.01448914 0.002490610  5.817506 5.973212e-09
+## 5  democracy  Year  0.01432438 0.002394738  5.981606 2.209489e-09
+## 6        god  Year  0.01402582 0.001921362  7.299935 2.879058e-13
+## 7    freedom  Year  0.01366336 0.001320242 10.349129 4.223092e-25
+## 8    foreign  Year -0.01364998 0.002058045 -6.632497 3.300543e-11
+## 9      earth  Year  0.01303351 0.002291996  5.686532 1.296449e-08
+## 10     world  Year  0.01233715 0.001000739 12.328042 6.398240e-35
+## # ... with 103 more rows</code></pre>
+<p>You can show these models as a volcano plot, which compares the effect size with the significance:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
+<span class="kw">theme_set</span>(<span class="kw">theme_bw</span>())
+
+models %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">adjusted.p.value =</span> <span class="kw">p.adjust</span>(p.value)) %&gt;%
+<span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(estimate, adjusted.p.value)) +
+<span class="st">  </span><span class="kw">geom_point</span>() +
+<span class="st">  </span><span class="kw">scale_y_log10</span>() +
+<span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label =</span> word), <span class="dt">vjust =</span> <span class="dv">1</span>, <span class="dt">hjust =</span> <span class="dv">1</span>,
+            <span class="dt">check_overlap =</span> <span class="ot">TRUE</span>) +
+<span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Estimated change over time&quot;</span>) +
+<span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Adjusted p-value&quot;</span>)</code></pre></div>
+<p><img src="tidy-text-mining_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p>We can also use the ggplot2 package to display the top 6 terms that have changed in frequency over time.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(scales)
+
+models %&gt;%
+<span class="st">  </span><span class="kw">top_n</span>(<span class="dv">6</span>, <span class="kw">abs</span>(estimate)) %&gt;%
+<span class="st">  </span><span class="kw">inner_join</span>(inaug_freq) %&gt;%
+<span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(Year, percent)) +
+<span class="st">  </span><span class="kw">geom_point</span>() +
+<span class="st">  </span><span class="kw">geom_smooth</span>() +
+<span class="st">  </span><span class="kw">facet_wrap</span>(~<span class="st"> </span>word) +
+<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> <span class="kw">percent_format</span>()) +
+<span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Frequency of word in speech&quot;</span>)</code></pre></div>
+<p><img src="tidy-text-mining_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="tfidf.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="topicmodeling.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/dgrtwo/tidy-text-mining/edit/master/05-document-term-matrices.Rmd",
+"text": null
+},
+"download": ["tidy-text-mining.pdf", "tidy-text-mining.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

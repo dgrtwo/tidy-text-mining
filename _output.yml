@@ -3,11 +3,11 @@ bookdown::gitbook:
   config:
     toc:
       before: |
-        <li><a href="./">A Minimal Book Example</a></li>
+        <li><a href="./">Tidy Text Mining</a></li>
       after: |
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
     edit:
-      link: https://github.com/rstudio/bookdown-demo/edit/master/%s
+      link: https://github.com/dgrtwo/tidy-text-mining/edit/master/%s
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Tidy Text Mining</title>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta name="description" content="A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools">
+  <meta name="generator" content="bookdown 0.0.74 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Tidy Text Mining" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools" />
+  <meta name="github-repo" content="dgrtwo/tidy-text-mining" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Tidy Text Mining" />
+  
+  <meta name="twitter:description" content="A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools" />
+  
+
+<meta name="author" content="Julia Silge and David Robinson">
+
+<meta name="date" content="2016-07-06">
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="tidytext.html">
+<link rel="next" href="tfidf.html">
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Tidy Text Mining</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#what-is-tidy-text"><i class="fa fa-check"></i><b>1.1</b> What is tidy text?</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#outline"><i class="fa fa-check"></i><b>1.2</b> Outline</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="tidytext.html"><a href="tidytext.html"><i class="fa fa-check"></i><b>2</b> The Tidy Text Format</a><ul>
+<li class="chapter" data-level="2.1" data-path="tidytext.html"><a href="tidytext.html#the-unnest_tokens-function"><i class="fa fa-check"></i><b>2.1</b> The <code>unnest_tokens</code> function</a></li>
+<li class="chapter" data-level="2.2" data-path="tidytext.html"><a href="tidytext.html#example-the-works-of-jane-austen"><i class="fa fa-check"></i><b>2.2</b> Example: the works of Jane Austen</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="tidytext.html"><a href="tidytext.html#the-gutenbergr-package"><i class="fa fa-check"></i><b>2.2.1</b> The gutenbergr package</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="sentiment.html"><a href="sentiment.html"><i class="fa fa-check"></i><b>3</b> Sentiment Analysis with Tidy Data</a><ul>
+<li class="chapter" data-level="3.1" data-path="sentiment.html"><a href="sentiment.html#the-sentiments-dataset"><i class="fa fa-check"></i><b>3.1</b> The sentiments dataset</a></li>
+<li class="chapter" data-level="3.2" data-path="sentiment.html"><a href="sentiment.html#sentiment-analysis-with-inner-join"><i class="fa fa-check"></i><b>3.2</b> Sentiment analysis with inner join</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="sentiment.html"><a href="sentiment.html#most-common-positive-and-negative-words"><i class="fa fa-check"></i><b>3.2.1</b> Most common positive and negative words</a></li>
+<li class="chapter" data-level="3.2.2" data-path="sentiment.html"><a href="sentiment.html#wordclouds"><i class="fa fa-check"></i><b>3.2.2</b> Wordclouds</a></li>
+<li class="chapter" data-level="3.2.3" data-path="sentiment.html"><a href="sentiment.html#looking-at-units-beyond-just-words"><i class="fa fa-check"></i><b>3.2.3</b> Looking at units beyond just words</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="tfidf.html"><a href="tfidf.html"><i class="fa fa-check"></i><b>4</b> TF-IDF: Analyzing word and document frequency</a><ul>
+<li class="chapter" data-level="4.1" data-path="tfidf.html"><a href="tfidf.html#term-frequency-and-inverse-document-frequency"><i class="fa fa-check"></i><b>4.1</b> Term frequency and inverse document frequency</a></li>
+<li class="chapter" data-level="4.2" data-path="tfidf.html"><a href="tfidf.html#the-bind_tf_idf-function"><i class="fa fa-check"></i><b>4.2</b> The bind_tf_idf function</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="tidying-and-casting-document-term-matrices.html"><a href="tidying-and-casting-document-term-matrices.html"><i class="fa fa-check"></i><b>5</b> Tidying and casting document-term matrices</a><ul>
+<li class="chapter" data-level="5.1" data-path="tidying-and-casting-document-term-matrices.html"><a href="tidying-and-casting-document-term-matrices.html#tidying-a-document-term-matrix"><i class="fa fa-check"></i><b>5.1</b> Tidying a document-term matrix</a></li>
+<li class="chapter" data-level="5.2" data-path="tidying-and-casting-document-term-matrices.html"><a href="tidying-and-casting-document-term-matrices.html#casting-tidy-text-data-into-a-documenttermmatrix"><i class="fa fa-check"></i><b>5.2</b> Casting tidy text data into a DocumentTermMatrix</a></li>
+<li class="chapter" data-level="5.3" data-path="tidying-and-casting-document-term-matrices.html"><a href="tidying-and-casting-document-term-matrices.html#tidying-corpus-objects-with-metadata"><i class="fa fa-check"></i><b>5.3</b> Tidying corpus objects with metadata</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="topicmodeling.html"><a href="topicmodeling.html"><i class="fa fa-check"></i><b>6</b> Topic Modeling</a><ul>
+<li class="chapter" data-level="6.1" data-path="topicmodeling.html"><a href="topicmodeling.html#can-we-tell-the-difference-between-dickens-wells-verne-and-austen"><i class="fa fa-check"></i><b>6.1</b> Can we tell the difference between Dickens, Wells, Verne, and Austen?</a></li>
+<li class="chapter" data-level="6.2" data-path="topicmodeling.html"><a href="topicmodeling.html#setup"><i class="fa fa-check"></i><b>6.2</b> Setup</a></li>
+<li class="chapter" data-level="6.3" data-path="topicmodeling.html"><a href="topicmodeling.html#latent-dirichlet-allocation-with-the-topicmodels-package"><i class="fa fa-check"></i><b>6.3</b> Latent Dirichlet Allocation with the topicmodels package</a></li>
+<li class="chapter" data-level="6.4" data-path="topicmodeling.html"><a href="topicmodeling.html#per-document-classification"><i class="fa fa-check"></i><b>6.4</b> Per-document classification</a><ul>
+<li class="chapter" data-level="6.4.1" data-path="topicmodeling.html"><a href="topicmodeling.html#by-word-assignments-augment"><i class="fa fa-check"></i><b>6.4.1</b> By word assignments: <code>augment</code></a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="word2vec.html"><a href="word2vec.html"><i class="fa fa-check"></i><b>7</b> Tidying word2vec Models from the glove Package</a></li>
+<li class="chapter" data-level="8" data-path="yelp.html"><a href="yelp.html"><i class="fa fa-check"></i><b>8</b> Predicting ratings from text in the Yelp food reviews dataset</a><ul>
+<li class="chapter" data-level="8.1" data-path="yelp.html"><a href="yelp.html#setup-1"><i class="fa fa-check"></i><b>8.1</b> Setup</a></li>
+<li class="chapter" data-level="8.2" data-path="yelp.html"><a href="yelp.html#tidy-sentiment-analysis"><i class="fa fa-check"></i><b>8.2</b> Tidy sentiment analysis</a></li>
+<li class="chapter" data-level="8.3" data-path="yelp.html"><a href="yelp.html#which-words-are-positive-or-negative"><i class="fa fa-check"></i><b>8.3</b> Which words are positive or negative?</a></li>
+<li class="chapter" data-level="8.4" data-path="yelp.html"><a href="yelp.html#comparing-to-sentiment-analysis"><i class="fa fa-check"></i><b>8.4</b> Comparing to sentiment analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="placeholder.html"><a href="placeholder.html"><i class="fa fa-check"></i><b>9</b> Some analysis goes here</a></li>
+<li class="chapter" data-level="10" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>10</b> References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Tidy Text Mining</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="sentiment" class="section level1">
+<h1><span class="header-section-number">Chapter 3</span> Sentiment Analysis with Tidy Data</h1>
+<div id="the-sentiments-dataset" class="section level2">
+<h2><span class="header-section-number">3.1</span> The sentiments dataset</h2>
+<p>The</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sentiments</code></pre></div>
+<pre><code>## # A tibble: 23,165 x 4
+##           word sentiment lexicon score
+##          &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt; &lt;int&gt;
+## 1       abacus     trust     nrc    NA
+## 2      abandon      fear     nrc    NA
+## 3      abandon  negative     nrc    NA
+## 4      abandon   sadness     nrc    NA
+## 5    abandoned     anger     nrc    NA
+## 6    abandoned      fear     nrc    NA
+## 7    abandoned  negative     nrc    NA
+## 8    abandoned   sadness     nrc    NA
+## 9  abandonment     anger     nrc    NA
+## 10 abandonment      fear     nrc    NA
+## # ... with 23,155 more rows</code></pre>
+</div>
+<div id="sentiment-analysis-with-inner-join" class="section level2">
+<h2><span class="header-section-number">3.2</span> Sentiment analysis with inner join</h2>
+<p>Sentiment analysis can be done as an inner join. Three sentiment lexicons are in the tidytext package in the <code>sentiment</code> dataset. Let’s look at the words with a joy score from the NRC lexicon. What are the most common joy words in <em>Emma</em>?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nrcjoy &lt;-<span class="st"> </span>sentiments %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(lexicon ==<span class="st"> &quot;nrc&quot;</span>, sentiment ==<span class="st"> &quot;joy&quot;</span>)
+
+tidy_books %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(book ==<span class="st"> &quot;Emma&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">semi_join</span>(nrcjoy) %&gt;%
+<span class="st">  </span><span class="kw">count</span>(word, <span class="dt">sort =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>## # A tibble: 298 x 2
+##         word     n
+##        &lt;chr&gt; &lt;int&gt;
+## 1     friend   166
+## 2       hope   143
+## 3      happy   125
+## 4       love   117
+## 5       deal    92
+## 6      found    92
+## 7  happiness    76
+## 8     pretty    68
+## 9       true    66
+## 10   comfort    65
+## # ... with 288 more rows</code></pre>
+<p>Or instead we could examine how sentiment changes during each novel. Let’s find a sentiment score for each word using the Bing lexicon, then count the number of positive and negative words in defined sections of each novel.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyr)
+bing &lt;-<span class="st"> </span>sentiments %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(lexicon ==<span class="st"> &quot;bing&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">select</span>(-score)
+
+janeaustensentiment &lt;-<span class="st"> </span>tidy_books %&gt;%
+<span class="st">  </span><span class="kw">inner_join</span>(bing) %&gt;%
+<span class="st">  </span><span class="kw">count</span>(book, <span class="dt">index =</span> linenumber %/%<span class="st"> </span><span class="dv">80</span>, sentiment) %&gt;%
+<span class="st">  </span><span class="kw">spread</span>(sentiment, n, <span class="dt">fill =</span> <span class="dv">0</span>) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">sentiment =</span> positive -<span class="st"> </span>negative)</code></pre></div>
+<p>Now we can plot these sentiment scores across the plot trajectory of each novel.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
+
+<span class="kw">ggplot</span>(janeaustensentiment, <span class="kw">aes</span>(index, sentiment, <span class="dt">fill =</span> book)) +
+<span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">show.legend =</span> <span class="ot">FALSE</span>) +
+<span class="st">  </span><span class="kw">facet_wrap</span>(~book, <span class="dt">ncol =</span> <span class="dv">2</span>, <span class="dt">scales =</span> <span class="st">&quot;free_x&quot;</span>)</code></pre></div>
+<p><img src="tidy-text-mining_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<div id="most-common-positive-and-negative-words" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Most common positive and negative words</h3>
+<p>One advantage of having the data frame with both sentiment and word is that we can analyze word counts that contribute to each sentiment.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bing_word_counts &lt;-<span class="st"> </span>tidy_books %&gt;%
+<span class="st">  </span><span class="kw">inner_join</span>(bing) %&gt;%
+<span class="st">  </span><span class="kw">count</span>(word, sentiment, <span class="dt">sort =</span> <span class="ot">TRUE</span>) %&gt;%
+<span class="st">  </span><span class="kw">ungroup</span>()
+
+bing_word_counts</code></pre></div>
+<pre><code>## # A tibble: 2,555 x 3
+##          word sentiment     n
+##         &lt;chr&gt;     &lt;chr&gt; &lt;int&gt;
+## 1  abominable  negative    17
+## 2  abominably  negative     7
+## 3   abominate  negative     3
+## 4      abound  positive     1
+## 5      abrupt  negative     5
+## 6    abruptly  negative    12
+## 7     absence  negative   111
+## 8      absurd  negative    19
+## 9   absurdity  negative    12
+## 10  abundance  positive    14
+## # ... with 2,545 more rows</code></pre>
+<p>This can be shown visually, and we can pipe straight into ggplot2 because of the way we are consistently using tools built for handling tidy data frames.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bing_word_counts %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(n &gt;<span class="st"> </span><span class="dv">150</span>) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n =</span> <span class="kw">ifelse</span>(sentiment ==<span class="st"> &quot;negative&quot;</span>, -n, n)) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">word =</span> <span class="kw">reorder</span>(word, n)) %&gt;%
+<span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(word, n, <span class="dt">fill =</span> sentiment)) +
+<span class="st">  </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&quot;identity&quot;</span>) +
+<span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">90</span>, <span class="dt">hjust =</span> <span class="dv">1</span>)) +
+<span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Contribution to sentiment&quot;</span>)</code></pre></div>
+<p><img src="tidy-text-mining_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>This lets us spot an anomaly in the sentiment analysis; the word “miss” is coded as negative but it is used as a title for young, unmarried women in Jane Austen’s works. If it were appropriate for our purposes, we could easily add “miss” to a custom stop-words list using <code>bind_rows</code>.</p>
+</div>
+<div id="wordclouds" class="section level3">
+<h3><span class="header-section-number">3.2.2</span> Wordclouds</h3>
+<p>We’ve seen that this tidy text mining approach works well with ggplot2, but having our data in a tidy format is useful for other plots as well.</p>
+<p>For example, consider the wordcloud package. Let’s look at the most common words in Jane Austen’s works as a whole again.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(wordcloud)
+
+tidy_books %&gt;%
+<span class="st">  </span><span class="kw">count</span>(word) %&gt;%
+<span class="st">  </span><span class="kw">with</span>(<span class="kw">wordcloud</span>(word, n, <span class="dt">max.words =</span> <span class="dv">100</span>))</code></pre></div>
+<p><img src="tidy-text-mining_files/figure-html/unnamed-chunk-12-1.png" width="576" /></p>
+<p>In other functions, such as <code>comparison.cloud</code>, you may need to turn it into a matrix with reshape2’s <code>acast</code>. Let’s do the sentiment analysis to tag positive and negative words using an inner join, then find the most common positive and negative words. Until the step where we need to send the data to <code>comparison.cloud</code>, this can all be done with joins, piping, and dplyr because our data is in tidy format.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(reshape2)
+
+tidy_books %&gt;%
+<span class="st">  </span><span class="kw">inner_join</span>(bing) %&gt;%
+<span class="st">  </span><span class="kw">count</span>(word, sentiment, <span class="dt">sort =</span> <span class="ot">TRUE</span>) %&gt;%
+<span class="st">  </span><span class="kw">acast</span>(word ~<span class="st"> </span>sentiment, <span class="dt">value.var =</span> <span class="st">&quot;n&quot;</span>, <span class="dt">fill =</span> <span class="dv">0</span>) %&gt;%
+<span class="st">  </span><span class="kw">comparison.cloud</span>(<span class="dt">colors =</span> <span class="kw">c</span>(<span class="st">&quot;#F8766D&quot;</span>, <span class="st">&quot;#00BFC4&quot;</span>),
+                   <span class="dt">max.words =</span> <span class="dv">100</span>)</code></pre></div>
+<p><img src="tidy-text-mining_files/figure-html/wordcloud-1.png" width="480" /></p>
+</div>
+<div id="looking-at-units-beyond-just-words" class="section level3">
+<h3><span class="header-section-number">3.2.3</span> Looking at units beyond just words</h3>
+<p>Lots of useful work can be done by tokenizing at the word level, but sometimes it is useful or necessary to look at different units of text. For example, some sentiment analysis algorithms look beyond only unigrams (i.e. single words) to try to understand the sentiment of a sentence as a whole. These algorithms try to understand that</p>
+<blockquote>
+<p>I am not having a good day.</p>
+</blockquote>
+<p>is a sad sentence, not a happy one, because of negation. The <a href="http://stanfordnlp.github.io/CoreNLP/">Stanford CoreNLP</a> tools and the <a href="https://github.com/trinker/sentimentr">sentimentr R package</a> (currently available on Github but not CRAN) are examples of such sentiment analysis algorithms. For these, we may want to tokenize text into sentences.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">PandP_sentences &lt;-<span class="st"> </span><span class="kw">data_frame</span>(<span class="dt">text =</span> prideprejudice) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">unnest_tokens</span>(sentence, text, <span class="dt">token =</span> <span class="st">&quot;sentences&quot;</span>)</code></pre></div>
+<p>Let’s look at just one.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">PandP_sentences$sentence[<span class="dv">2</span>]</code></pre></div>
+<pre><code>## [1] &quot;however little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered the rightful property of some one or other of their daughters.&quot;</code></pre>
+<p>The sentence tokenizing does seem to have a bit of trouble with UTF-8 encoded text, especially with sections of dialogue; it does much better with punctuation in ASCII.</p>
+<p>Another option in <code>unnest_tokens</code> is to split into tokens using a regex pattern. We could use this, for example, to split the text of Jane Austen’s novels into a data frame by chapter.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">austen_chapters &lt;-<span class="st"> </span><span class="kw">austen_books</span>() %&gt;%
+<span class="st">  </span><span class="kw">group_by</span>(book) %&gt;%
+<span class="st">  </span><span class="kw">unnest_tokens</span>(chapter, text, <span class="dt">token =</span> <span class="st">&quot;regex&quot;</span>, <span class="dt">pattern =</span> <span class="st">&quot;Chapter|CHAPTER [</span><span class="ch">\\</span><span class="st">dIVXLC]&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">ungroup</span>()
+austen_chapters %&gt;%<span class="st"> </span><span class="kw">group_by</span>(book) %&gt;%<span class="st"> </span><span class="kw">summarise</span>(<span class="dt">chapters =</span> <span class="kw">n</span>())</code></pre></div>
+<pre><code>## # A tibble: 6 x 2
+##                  book chapters
+##                &lt;fctr&gt;    &lt;int&gt;
+## 1 Sense &amp; Sensibility       51
+## 2   Pride &amp; Prejudice       62
+## 3      Mansfield Park       49
+## 4                Emma       56
+## 5    Northanger Abbey       32
+## 6          Persuasion       25</code></pre>
+<p>We have recovered the correct number of chapters in each novel (plus an “extra” row for each novel title). In this data frame, each row corresponds to one chapter.</p>
+<p>Near the beginning of this vignette, we used a similar regex to find where all the chapters were in Austen’s novels for a tidy data frame organized by one-word-per-row. We can use tidy text analysis to ask questions such as what are the most negative chapters in each of Jane Austen’s novels? First, let’s get the list of negative words from the Bing lexicon. Second, let’s make a dataframe of how many words are in each chapter so we can normalize for the length of chapters. Then, let’s find the number of negative words in each chapter and divide by the total words in each chapter. Which chapter has the highest proportion of negative words?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bingnegative &lt;-<span class="st"> </span>sentiments %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(lexicon ==<span class="st"> &quot;bing&quot;</span>, sentiment ==<span class="st"> &quot;negative&quot;</span>)
+
+wordcounts &lt;-<span class="st"> </span>tidy_books %&gt;%
+<span class="st">  </span><span class="kw">group_by</span>(book, chapter) %&gt;%
+<span class="st">  </span><span class="kw">summarize</span>(<span class="dt">words =</span> <span class="kw">n</span>())
+
+tidy_books %&gt;%
+<span class="st">  </span><span class="kw">semi_join</span>(bingnegative) %&gt;%
+<span class="st">  </span><span class="kw">group_by</span>(book, chapter) %&gt;%
+<span class="st">  </span><span class="kw">summarize</span>(<span class="dt">negativewords =</span> <span class="kw">n</span>()) %&gt;%
+<span class="st">  </span><span class="kw">left_join</span>(wordcounts, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;book&quot;</span>, <span class="st">&quot;chapter&quot;</span>)) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">ratio =</span> negativewords/words) %&gt;%
+<span class="st">  </span><span class="kw">filter</span>(chapter !=<span class="st"> </span><span class="dv">0</span>) %&gt;%
+<span class="st">  </span><span class="kw">top_n</span>(<span class="dv">1</span>)</code></pre></div>
+<pre><code>## Source: local data frame [6 x 5]
+## Groups: book [6]
+## 
+##                  book chapter negativewords words     ratio
+##                (fctr)   (int)         (int) (int)     (dbl)
+## 1 Sense &amp; Sensibility      29           172  1135 0.1515419
+## 2   Pride &amp; Prejudice      34           108   646 0.1671827
+## 3      Mansfield Park      45           132   884 0.1493213
+## 4                Emma      15           147  1012 0.1452569
+## 5    Northanger Abbey      27            55   337 0.1632047
+## 6          Persuasion      21           215  1948 0.1103696</code></pre>
+<p>These are the chapters with the most negative words in each book, normalized for number of words in the chapter. What is happening in these chapters? In Chapter 29 of <em>Sense and Sensibility</em> Marianne finds out what an awful person Willoughby is by letter, and in Chapter 34 of <em>Pride and Prejudice</em> Mr. Darcy proposes for the first time (so badly!). Chapter 45 of <em>Mansfield Park</em> is almost the end, when Tom is sick with consumption and Mary is revealed as mercenary and uncaring, Chapter 15 of <em>Emma</em> is when horrifying Mr. Elton proposes, and Chapter 27 of <em>Northanger Abbey</em> is a short chapter where Catherine gets a terrible letter from her inconstant friend Isabella. Chapter 21 of <em>Persuasion</em> is when Anne’s friend tells her all about Mr. Elliott’s immoral past.</p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="tidytext.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="tfidf.html" class="navigation navigation-next " aria-label="Next page""><i class="fa fa-angle-right"></i></a>
+
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/dgrtwo/tidy-text-mining/edit/master/03-sentiment-analysis.Rmd",
+"text": null
+},
+"download": ["tidy-text-mining.pdf", "tidy-text-mining.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

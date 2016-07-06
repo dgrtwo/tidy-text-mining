@@ -1,0 +1,207 @@
+# Predicting ratings from text in the Yelp food reviews dataset {#yelp}
+
+Intro goes here
+
+## Setup
+
+I've downloaded the `yelp_dataset_challenge_academic_dataset` folder from [here](https://www.yelp.com/dataset_challenge).[^termsofuse] First I read and process them.
+
+```{r review_lines}
+library(readr)
+library(dplyr)
+
+# You may have used the built-in readLines before, but read_lines from
+# readr is faster for large files
+
+# we're reading only 100,000 in this example
+# you can try it with the full dataset too, it's just a little slower!
+# in the final version of the book we're probably going to read all, it
+# just makes this chapter take a while to compile
+
+infile <- "~/Downloads/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_review.json"
+review_lines <- read_lines(infile, n_max = 100000)
+```
+
+```{r reviews, dependson = "review_lines"}
+library(stringr)
+
+# Each line is a JSON object- the fastest way to process is to combine into a
+# single JSON string and use jsonlite::fromJSON
+reviews_combined <- str_c("[", str_c(review_lines, collapse = ", "), "]")
+
+reviews <- jsonlite::fromJSON(reviews_combined) %>%
+  jsonlite::flatten() %>%
+  tbl_df()
+```
+
+```{r dependson = "reviews"}
+reviews
+```
+
+## Tidy sentiment analysis
+
+Right now, there is one row for each review. To analyze in the [tidy text](http://github.com/juliasilge/tidytext) framework, we need to use the `unnest_tokens` function and turn this into one-row-per-term-per-document:
+
+```{r review_words, dependson = "reviews"}
+library(tidytext)
+
+review_words <- reviews %>%
+  select(review_id, business_id, stars, text) %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word,
+         str_detect(word, "^[a-z']+$"))
+
+review_words
+```
+
+Notice that there is now one-row-per-term-per-document: the In this cleaning process we've also removed "stopwords" (such as "I", "the", "and", etc), and removing things things that are formatting (e.g. "----") rather than a word.
+
+
+Now I'm going to do sentiment analysis on each review. We'll use the AFINN lexicon, which provides a positivity score for each word, from -5 (most negative) to 5 (most positive).
+
+```{r AFINN}
+AFINN <- sentiments %>%
+  filter(lexicon == "AFINN") %>%
+  select(word, afinn_score = score)
+
+AFINN
+```
+
+Now as described [in this post](http://juliasilge.com/blog/Life-Changing-Magic/), our sentiment analysis is just an inner-join operation followed by a summary:
+
+```{r}
+reviews_sentiment <- review_words %>%
+  inner_join(AFINN, by = "word") %>%
+  group_by(review_id, stars) %>%
+  summarize(sentiment = mean(afinn_score))
+
+reviews_sentiment
+```
+
+Now we can see how our estimates did!
+
+```{r cache = FALSE}
+library(ggplot2)
+theme_set(theme_bw())
+```
+
+```{r}
+ggplot(reviews_sentiment, aes(stars, sentiment, group = stars)) +
+  geom_boxplot() +
+  ylab("Average sentiment score")
+```
+
+Well, it's a good start! Our sentiment scores are correlated with positivity ratings. But we do see that there's a large amount of prediction error- some 5-star reviews have a highly negative sentiment score, and vice versa.
+
+## Which words are positive or negative?
+
+We're interested in analyzing the properties of words. Which are suggestive of positive reviews, and which are negative? To do this, we'll create a per-word summary.
+
+```{r words_filtered, dependson = "review_words"}
+review_words_counted <- review_words %>%
+  count(review_id, business_id, stars, word) %>%
+  ungroup()
+
+review_words_counted
+```
+
+```{r word_summaries}
+word_summaries <- review_words_counted %>%
+  group_by(word) %>%
+  summarize(reviews = n(),
+            uses = sum(n),
+            average_stars = mean(stars)) %>%
+  ungroup()
+
+word_summaries
+```
+
+We can start by looking only at words that appear in at least 100 (out of `r nrow(reviews)`) reviews. This makes sense both because words that appear more rarely will have a noisier measurement (a few good or bad reviews could shift the balance), and because they're less likely to be useful in classifying future reviews or text.
+
+```{r word_summaries_filtered, dependson = word_summaries}
+word_summaries_filtered <- word_summaries %>%
+  filter(reviews >= 100)
+
+word_summaries_filtered
+```
+
+What were the most positive and negative words?
+
+```{r}
+word_summaries_filtered %>%
+  arrange(desc(average_stars))
+
+word_summaries_filtered %>%
+  arrange(average_stars)
+```
+
+Makes a lot of sense! We can also plot positivity by frequency:
+
+```{r word_summaries_filtered_plot, dependson = "word_summaries_filtered"}
+ggplot(word_summaries_filtered, aes(reviews, average_stars)) +
+  geom_point() +
+  geom_text(aes(label = word), check_overlap = TRUE, vjust = 1, hjust = 1) +
+  scale_x_log10() +
+  geom_hline(yintercept = mean(reviews$stars), color = "red", lty = 2) +
+  xlab("# of reviews") +
+  ylab("Average Stars")
+```
+
+Note that some of the most common words (e.g. "food") are pretty neutral. There are some common words that are pretty positive (e.g. "amazing", "awesome") and others that are pretty negative ("bad", "told").
+
+## Comparing to sentiment analysis
+
+When we perform sentiment analysis, we're often comparing to a pre-existing lexicon, one that was developed.
+
+The tidytext package also comes with several tidy sentiment analysis lexicons:
+
+```{r}
+sentiments
+```
+
+We might expect that more positive words are associated with higher star reviews. Does this hold? We can combine and compare the two datasets with `inner_join`.
+
+```{r words_afinn, dependson = "AFINN"}
+words_afinn <- word_summaries_filtered %>%
+  inner_join(AFINN)
+
+words_afinn
+
+ggplot(words_afinn, aes(afinn_score, average_stars, group = afinn_score)) +
+  geom_boxplot() +
+  xlab("AFINN score of word") +
+  ylab("Average stars of reviews with this word")
+```
+
+Just like in our per-review predictions, there's a very clear trend. AFINN sentiment analysis works, at least a little bit!
+
+But we may want to see some of those details. Which positive/negative words were most successful in predicting a positive/negative review, and which broke the trend?
+
+```{r words_afinn_plot, dependson = "words_afinn", fig.width = 10, fig.height = 10, echo = FALSE}
+words_afinn %>%
+  ggplot(aes(afinn_score, average_stars)) +
+  geom_point(aes(size = reviews)) +
+  geom_text(aes(label = word), vjust = 1, hjust = 1, check_overlap = TRUE) +
+  geom_smooth(method = "lm", se = FALSE) +
+  xlab("AFINN Sentiment Score") +
+  ylab("Average Yelp Stars")
+  expand_limits(x = -6)
+```
+
+For example, we can see that most curse words have an AFINN score of -4, and that while some words, like "wtf", successfully predict a negative review, others, like "damn", are often positive. (They're likely part of "damn good", or something similar). Some of the words that AFINN most underestimated included "die" ("the pork chops are to **die** for!"), and one of the words it most overestimated was "joke" ("the service is a complete **joke**!").
+
+One other way we could look at mis
+
+```{r word_summaries_filtered_plot_AFINN, dependson = "word_summaries_filtered", echo = FALSE}
+word_summaries_filtered %>%
+  inner_join(AFINN, by = "word") %>%
+  ggplot(aes(reviews, average_stars, color = afinn_score)) +
+  geom_point() +
+  geom_text(aes(label = word), check_overlap = TRUE, vjust = 1, hjust = 1) +
+  scale_x_log10() +
+  geom_hline(yintercept = mean(reviews$stars), color = "red", lty = 2) +
+  scale_color_gradient2(low = "red", high = "blue", midpoint = 0) +
+  labs(x = "# of reviews",
+       y = "Average Stars",
+       color = "AFINN")
+```
