@@ -34,6 +34,7 @@ Notice that this data frame isn't yet compatible with tidy tools. We can't filte
 To do this, we use tidytext's `unnest_tokens` function:
 
 ```{r dependson = "text_df", R.options = list(dplyr.print_max = 10)}
+library(tidytext)
 text_df %>%
   unnest_tokens(word, text)
 ```
