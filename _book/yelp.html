@@ -25,7 +25,7 @@
 
 <meta name="author" content="Julia Silge and David Robinson">
 
-<meta name="date" content="2016-07-06">
+<meta name="date" content="2016-07-07">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -204,7 +204,7 @@ reviews &lt;-<span class="st"> </span>jsonlite::<span class="kw">fromJSON</span>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">reviews</code></pre></div>
 <pre><code>## # A tibble: 100,000 x 10
 ##                   user_id              review_id stars       date
-##                     &lt;chr&gt;                  &lt;chr&gt; &lt;int&gt;      &lt;chr&gt;
+## *                   &lt;chr&gt;                  &lt;chr&gt; &lt;int&gt;      &lt;chr&gt;
 ## 1  PUFPaY9KxDAcGqfsorJp3Q Ya85v4eqdd6k9Od8HbQjyA     4 2012-08-01
 ## 2  Iu6AxdBYGR4A0wspR9BYHA KPvLNJ21_4wbYNctrOwWdQ     5 2014-02-13
 ## 3  auESFwWvW42h6alXgFxAXQ fFSoGV46Yxuwbr3fHNuZig     5 2015-10-31
@@ -276,7 +276,7 @@ reviews_sentiment</code></pre></div>
 ## Groups: review_id [?]
 ## 
 ##                 review_id stars  sentiment
-##                     (chr) (int)      (dbl)
+##                     &lt;chr&gt; &lt;int&gt;      &lt;dbl&gt;
 ## 1  __-r0eC3hZlaejvuliC8zQ     5  4.0000000
 ## 2  __56FUEaW57kZEm56OZk7w     5  0.8333333
 ## 3  __6tOxx2VcvGR02d2ILkuw     5  1.7500000
@@ -287,7 +287,7 @@ reviews_sentiment</code></pre></div>
 ## 8  __ELCJ0wzDM2QNRfVUq26Q     5  3.5000000
 ## 9  __esH_kgJZeS8k3i6HaG7Q     5  0.2142857
 ## 10 __GXnNfKFLqFhMtpCTTT2g     3  0.8750000
-## ..                    ...   ...        ...</code></pre>
+## # ... with 93,937 more rows</code></pre>
 <p>Now we can see how our estimates did!</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
 <span class="kw">theme_set</span>(<span class="kw">theme_bw</span>())</code></pre></div>

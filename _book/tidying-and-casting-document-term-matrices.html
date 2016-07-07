@@ -25,7 +25,7 @@
 
 <meta name="author" content="Julia Silge and David Robinson">
 
-<meta name="date" content="2016-07-06">
+<meta name="date" content="2016-07-07">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -262,13 +262,13 @@ d &lt;-<span class="st"> </span>quanteda::<span class="kw">dfm</span>(inaugCorpu
 ##    ... indexing features: 9,214 feature types
 ##    ... created a 57 x 9215 sparse dfm
 ##    ... complete. 
-## Elapsed time: 0.183 seconds.</code></pre>
+## Elapsed time: 0.17 seconds.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d</code></pre></div>
 <pre><code>## Document-feature matrix of: 57 documents, 9,215 features.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tidy</span>(d)</code></pre></div>
 <pre><code>## # A tibble: 43,719 x 3
 ##           document            term count
-## *            &lt;chr&gt;           &lt;chr&gt; &lt;dbl&gt;
+##              &lt;chr&gt;           &lt;chr&gt; &lt;dbl&gt;
 ## 1  1789-Washington fellow-citizens     1
 ## 2       1797-Adams fellow-citizens     3
 ## 3   1801-Jefferson fellow-citizens     2
@@ -287,7 +287,7 @@ d &lt;-<span class="st"> </span>quanteda::<span class="kw">dfm</span>(inaugCorpu
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ap_td</code></pre></div>
 <pre><code>## # A tibble: 302,031 x 3
 ##    document       term count
-## *     &lt;int&gt;      &lt;chr&gt; &lt;dbl&gt;
+##       &lt;int&gt;      &lt;chr&gt; &lt;dbl&gt;
 ## 1         1     adding     1
 ## 2         1      adult     2
 ## 3         1        ago     1
@@ -347,26 +347,26 @@ reuters_td</code></pre></div>
 <pre><code>## # A tibble: 20 x 17
 ##                        author       datetimestamp description
 ##                         &lt;chr&gt;              &lt;time&gt;       &lt;chr&gt;
-## 1                        &lt;NA&gt; 1987-02-26 12:00:56            
-## 2  BY TED D&#39;AFFLISIO, Reuters 1987-02-26 12:34:11            
-## 3                        &lt;NA&gt; 1987-02-26 13:18:00            
-## 4                        &lt;NA&gt; 1987-02-26 13:21:01            
-## 5                        &lt;NA&gt; 1987-02-26 14:00:57            
-## 6                        &lt;NA&gt; 1987-02-28 22:25:46            
-## 7    By Jeremy Clift, Reuters 1987-02-28 22:39:14            
-## 8                        &lt;NA&gt; 1987-03-01 00:27:27            
-## 9                        &lt;NA&gt; 1987-03-01 03:22:30            
-## 10                       &lt;NA&gt; 1987-03-01 13:31:44            
-## 11                       &lt;NA&gt; 1987-03-01 20:05:49            
-## 12                       &lt;NA&gt; 1987-03-02 02:39:23            
-## 13                       &lt;NA&gt; 1987-03-02 02:43:22            
-## 14                       &lt;NA&gt; 1987-03-02 02:43:41            
-## 15                       &lt;NA&gt; 1987-03-02 03:25:42            
-## 16                       &lt;NA&gt; 1987-03-02 06:20:05            
-## 17                       &lt;NA&gt; 1987-03-02 06:28:26            
-## 18                       &lt;NA&gt; 1987-03-02 07:13:46            
-## 19 By BERNICE NAPACH, Reuters 1987-03-02 09:38:34            
-## 20                       &lt;NA&gt; 1987-03-02 09:49:06            
+## 1                        &lt;NA&gt; 1987-02-26 10:00:56            
+## 2  BY TED D&#39;AFFLISIO, Reuters 1987-02-26 10:34:11            
+## 3                        &lt;NA&gt; 1987-02-26 11:18:00            
+## 4                        &lt;NA&gt; 1987-02-26 11:21:01            
+## 5                        &lt;NA&gt; 1987-02-26 12:00:57            
+## 6                        &lt;NA&gt; 1987-02-28 20:25:46            
+## 7    By Jeremy Clift, Reuters 1987-02-28 20:39:14            
+## 8                        &lt;NA&gt; 1987-02-28 22:27:27            
+## 9                        &lt;NA&gt; 1987-03-01 01:22:30            
+## 10                       &lt;NA&gt; 1987-03-01 11:31:44            
+## 11                       &lt;NA&gt; 1987-03-01 18:05:49            
+## 12                       &lt;NA&gt; 1987-03-02 00:39:23            
+## 13                       &lt;NA&gt; 1987-03-02 00:43:22            
+## 14                       &lt;NA&gt; 1987-03-02 00:43:41            
+## 15                       &lt;NA&gt; 1987-03-02 01:25:42            
+## 16                       &lt;NA&gt; 1987-03-02 04:20:05            
+## 17                       &lt;NA&gt; 1987-03-02 04:28:26            
+## 18                       &lt;NA&gt; 1987-03-02 05:13:46            
+## 19 By BERNICE NAPACH, Reuters 1987-03-02 07:38:34            
+## 20                       &lt;NA&gt; 1987-03-02 07:49:06            
 ##                                              heading    id language            origin
 ##                                                &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;             &lt;chr&gt;
 ## 1           DIAMOND SHAMROCK (DIA) CUTS CRUDE PRICES   127       en Reuters-21578 XML
@@ -402,7 +402,7 @@ inaugCorpus</code></pre></div>
 inaug_td</code></pre></div>
 <pre><code>## # A tibble: 57 x 4
 ##                                                                                                                                                        text
-##                                                                                                                                                       &lt;chr&gt;
+## *                                                                                                                                                     &lt;chr&gt;
 ## 1  Fellow-Citizens of the Senate and of the House of Representatives:\n\nAmong the vicissitudes incident to life no event could have filled me with greater
 ## 2    Fellow citizens, I am again called upon by the voice of my country to execute the functions of its Chief Magistrate. When the occasion proper for it s
 ## 3    When it was first perceived, in early times, that no middle course for America remained between unlimited submission to a foreign legislature and a to

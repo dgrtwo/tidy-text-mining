@@ -25,7 +25,7 @@
 
 <meta name="author" content="Julia Silge and David Robinson">
 
-<meta name="date" content="2016-07-06">
+<meta name="date" content="2016-07-07">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -194,18 +194,18 @@ total_words &lt;-<span class="st"> </span>book_words %&gt;%<span class="st"> </s
 book_words &lt;-<span class="st"> </span><span class="kw">left_join</span>(book_words, total_words)
 book_words</code></pre></div>
 <pre><code>## # A tibble: 40,379 x 4
-##                   book  word     n  total
-##                 &lt;fctr&gt; &lt;chr&gt; &lt;int&gt;  &lt;int&gt;
-## 1  Sense &amp; Sensibility    to  4116 119957
-## 2  Sense &amp; Sensibility   the  4105 119957
-## 3  Sense &amp; Sensibility    of  3571 119957
-## 4  Sense &amp; Sensibility   and  3490 119957
-## 5  Sense &amp; Sensibility   her  2543 119957
-## 6  Sense &amp; Sensibility     a  2092 119957
-## 7  Sense &amp; Sensibility     i  1998 119957
-## 8  Sense &amp; Sensibility    in  1979 119957
-## 9  Sense &amp; Sensibility   was  1861 119957
-## 10 Sense &amp; Sensibility    it  1755 119957
+##                 book  word     n  total
+##               &lt;fctr&gt; &lt;chr&gt; &lt;int&gt;  &lt;int&gt;
+## 1     Mansfield Park   the  6206 160460
+## 2     Mansfield Park    to  5475 160460
+## 3     Mansfield Park   and  5438 160460
+## 4               Emma    to  5239 160996
+## 5               Emma   the  5201 160996
+## 6               Emma   and  4896 160996
+## 7     Mansfield Park    of  4778 160460
+## 8  Pride &amp; Prejudice   the  4331 122204
+## 9               Emma    of  4291 160996
+## 10 Pride &amp; Prejudice    to  4162 122204
 ## # ... with 40,369 more rows</code></pre>
 <p>The usual suspects are here, “the”, “and”, “to”, and so forth. Let’s look at the distribution of <code>n/total</code> for each novel, the number of times a word appears in a novel divided by the total number of terms (words) in that novel. This is exactly what term frequency is.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
@@ -223,18 +223,18 @@ book_words</code></pre></div>
 <span class="st">  </span><span class="kw">bind_tf_idf</span>(word, book, n)
 book_words</code></pre></div>
 <pre><code>## # A tibble: 40,379 x 7
-##                   book  word     n  total         tf   idf tf_idf
-##                 &lt;fctr&gt; &lt;chr&gt; &lt;int&gt;  &lt;int&gt;      &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-## 1  Sense &amp; Sensibility    to  4116 119957 0.03431230     0      0
-## 2  Sense &amp; Sensibility   the  4105 119957 0.03422060     0      0
-## 3  Sense &amp; Sensibility    of  3571 119957 0.02976900     0      0
-## 4  Sense &amp; Sensibility   and  3490 119957 0.02909376     0      0
-## 5  Sense &amp; Sensibility   her  2543 119957 0.02119926     0      0
-## 6  Sense &amp; Sensibility     a  2092 119957 0.01743958     0      0
-## 7  Sense &amp; Sensibility     i  1998 119957 0.01665597     0      0
-## 8  Sense &amp; Sensibility    in  1979 119957 0.01649758     0      0
-## 9  Sense &amp; Sensibility   was  1861 119957 0.01551389     0      0
-## 10 Sense &amp; Sensibility    it  1755 119957 0.01463024     0      0
+##                 book  word     n  total         tf   idf tf_idf
+##               &lt;fctr&gt; &lt;chr&gt; &lt;int&gt;  &lt;int&gt;      &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1     Mansfield Park   the  6206 160460 0.03867631     0      0
+## 2     Mansfield Park    to  5475 160460 0.03412065     0      0
+## 3     Mansfield Park   and  5438 160460 0.03389007     0      0
+## 4               Emma    to  5239 160996 0.03254118     0      0
+## 5               Emma   the  5201 160996 0.03230515     0      0
+## 6               Emma   and  4896 160996 0.03041069     0      0
+## 7     Mansfield Park    of  4778 160460 0.02977689     0      0
+## 8  Pride &amp; Prejudice   the  4331 122204 0.03544074     0      0
+## 9               Emma    of  4291 160996 0.02665284     0      0
+## 10 Pride &amp; Prejudice    to  4162 122204 0.03405780     0      0
 ## # ... with 40,369 more rows</code></pre>
 <p>Notice that idf and thus tf-idf are zero for these extremely common words. These are all words that appear in all six of Jane Austen’s novels, so the idf term (which will then be the natural log of 1) is zero. The inverse document frequency (and thus tf-idf) is very low (near zero) for words that occur in many of the documents in a collection; this is how this approach decreases the weight for common words. The inverse document frequency will be a higher number for words that occur in fewer of the documents in the collection. Let’s look at terms with high tf-idf in Jane Austen’s works.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">book_words %&gt;%

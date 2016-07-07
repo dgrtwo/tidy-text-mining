@@ -25,7 +25,7 @@
 
 <meta name="author" content="Julia Silge and David Robinson">
 
-<meta name="date" content="2016-07-06">
+<meta name="date" content="2016-07-07">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -246,18 +246,18 @@ janeaustensentiment &lt;-<span class="st"> </span>tidy_books %&gt;%
 
 bing_word_counts</code></pre></div>
 <pre><code>## # A tibble: 2,555 x 3
-##          word sentiment     n
-##         &lt;chr&gt;     &lt;chr&gt; &lt;int&gt;
-## 1  abominable  negative    17
-## 2  abominably  negative     7
-## 3   abominate  negative     3
-## 4      abound  positive     1
-## 5      abrupt  negative     5
-## 6    abruptly  negative    12
-## 7     absence  negative   111
-## 8      absurd  negative    19
-## 9   absurdity  negative    12
-## 10  abundance  positive    14
+##         word sentiment     n
+##        &lt;chr&gt;     &lt;chr&gt; &lt;int&gt;
+## 1       miss  negative  1855
+## 2      happy  positive   534
+## 3       love  positive   495
+## 4   pleasure  positive   462
+## 5       poor  negative   424
+## 6  happiness  positive   369
+## 7    comfort  positive   292
+## 8      doubt  negative   281
+## 9  affection  positive   272
+## 10 perfectly  positive   271
 ## # ... with 2,545 more rows</code></pre>
 <p>This can be shown visually, and we can pipe straight into ggplot2 because of the way we are consistently using tools built for handling tidy data frames.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bing_word_counts %&gt;%
@@ -341,7 +341,7 @@ tidy_books %&gt;%
 ## Groups: book [6]
 ## 
 ##                  book chapter negativewords words     ratio
-##                (fctr)   (int)         (int) (int)     (dbl)
+##                &lt;fctr&gt;   &lt;int&gt;         &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;
 ## 1 Sense &amp; Sensibility      29           172  1135 0.1515419
 ## 2   Pride &amp; Prejudice      34           108   646 0.1671827
 ## 3      Mansfield Park      45           132   884 0.1493213

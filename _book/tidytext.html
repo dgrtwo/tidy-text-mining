@@ -25,7 +25,7 @@
 
 <meta name="author" content="Julia Silge and David Robinson">
 
-<meta name="date" content="2016-07-06">
+<meta name="date" content="2016-07-07">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -193,14 +193,15 @@ text_df &lt;-<span class="st"> </span><span class="kw">data_frame</span>(<span c
 text_df</code></pre></div>
 <pre><code>## # A tibble: 4 x 2
 ##    line                                   text
-## * &lt;int&gt;                                  &lt;chr&gt;
+##   &lt;int&gt;                                  &lt;chr&gt;
 ## 1     1   Because I could not stop for Death -
 ## 2     2             He kindly stopped for me -
 ## 3     3 The Carriage held but just Ourselves -
 ## 4     4                        and Immortality</code></pre>
 <p>Notice that this data frame isn’t yet compatible with tidy tools. We can’t filter out words or count which occur most frequently, since each row is made up of multiple coimbined tokens. We need to turn this into <strong>one-token-per-document-per-row</strong>.</p>
 <p>To do this, we use tidytext’s <code>unnest_tokens</code> function:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">text_df %&gt;%
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidytext)
+text_df %&gt;%
 <span class="st">  </span><span class="kw">unnest_tokens</span>(word, text)</code></pre></div>
 <pre><code>## # A tibble: 20 x 2
 ##     line    word
