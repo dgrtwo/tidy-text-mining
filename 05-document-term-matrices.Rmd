@@ -2,33 +2,53 @@
 
 ```{r echo = FALSE}
 library(knitr)
-opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 
-options(width = 100, dplyr.width = 150)
+options(width = 100, dplyr.width = 150,
+        fig.height = 5, fig.width = 5)
 ```
 
-Intro text here.
+So far, we've been analyzing data in a tidy text structure: a data frame with one-token-per-document-per-row. This lets us use the popular tidy suite of tools.
+
+But many of the existing tools for natural language processing don't work with this structure of text. The [CRAN Task View for Natural Language Processing] lists a large selection of tools.
+
+We'll learn to use the `tidy` verb, as implemented by the tidytext package, to turn .
 
 ## Tidying a document-term matrix
 
-Many existing text mining datasets are in the form of a `DocumentTermMatrix` class (from the tm package). For example, consider the corpus of 2246 Associated Press articles from the topicmodels package:
+Many existing text mining datasets expect and provide a **document-term matrix**, or DTM. A DTM is a matrix where:
+
+* Each row represents one document
+* Each column represents one term
+* Each value contains the number of appearances of that term in that document
+
+DTMs are usually implemented as sparse matrices, meaning the vast majority of values are 0.
+
+One commonly used implementation of DTMs in R is the `DocumentTermMatrix` class in the tm package. For example, consider the corpus of 2246 Associated Press articles from the topicmodels package:
 
 ```{r AssociatedPress}
 library(tm)
+
 data("AssociatedPress", package = "topicmodels")
+class(AssociatedPress)
 AssociatedPress
 ```
 
-If we want to analyze this with tidy tools, we need to turn it into a one-token-per-document-per-row data frame first. The `tidy` function does this. (For more on the tidy verb, [see the broom package](https://github.com/dgrtwo/broom)).
+We see that this dataset contains `r nrow(AssociatedPress)` documents (each of them an AP article) and `r ncol(AssociatedPress)` terms (words).
+
+If we want to analyze this with tidy tools, we need to turn it into a one-token-per-document-per-row data frame first. The broom package [@R-broom] introduced the `tidy` verb, which takes a non-tidy object and turns it into a data frame. The `tidytext` package implements that method for `DocumentTermClass` objects:
 
 ```{r ap_td, dependson = "AssociatedPress"}
 library(dplyr)
 library(tidytext)
 
 ap_td <- tidy(AssociatedPress)
+ap_td
 ```
 
-Just as shown in [this vignette](tidytext.html), having the text in this format is convenient for analysis with the tidytext package. For example, you can perform sentiment analysis on these newspaper articles.
+Notice that we now have a tidy three-column tbl_df, with variables `document`, `term`, and `count`. This tidying operation is similar is similar to the `melt` function from the reshape2 package [@reshaping] for non-sparse matrices.
+
+As we've seen in chapters 2-4, this form is convenient for analysis with the dplyr and tidytext packages. For example, you can perform sentiment analysis on these newspaper articles.
 
 ```{r ap_sentiments, dependson = "ap_td"}
 bing <- sentiments %>%
@@ -41,22 +61,9 @@ ap_sentiments <- ap_td %>%
 ap_sentiments
 ```
 
-We can find the most negative documents:
+This could, for example, let us visualize which words from these AP articles most often contributed to positive or negative sentiment:
 
-```{r most_negative_docs, dependson = "ap_sentiments"}
-library(tidyr)
-
-ap_sentiments %>%
-  count(document, sentiment, wt = count) %>%
-  ungroup() %>%
-  spread(sentiment, n, fill = 0) %>%
-  mutate(sentiment = positive - negative) %>%
-  arrange(sentiment)
-```
-
-Or visualize which words contributed to positive and negative sentiment:
-
-```{r dependson = "ap_sentiments", fig.width = 7, fig.height = 5}
+```{r dependson = "ap_sentiments"}
 library(ggplot2)
 
 ap_sentiments %>%
@@ -156,6 +163,8 @@ inaug_words
 We could then, for example, see how the appearance of a word changes over time:
 
 ```{r inaug_freq, dependson = "inaug_words"}
+library(tidyr)
+
 inaug_freq <- inaug_words %>%
   count(Year, word) %>%
   ungroup() %>%
