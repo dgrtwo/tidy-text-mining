@@ -25,7 +25,7 @@
 
 <meta name="author" content="Julia Silge and David Robinson">
 
-<meta name="date" content="2016-07-06">
+<meta name="date" content="2016-07-07">
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
@@ -237,18 +237,18 @@ word_counts &lt;-<span class="st"> </span>by_chapter_word %&gt;%
 
 word_counts</code></pre></div>
 <pre><code>## # A tibble: 104,721 x 3
-##           title_chapter   word     n
-##                   &lt;chr&gt;  &lt;chr&gt; &lt;int&gt;
-## 1  Great Expectations_1    sir    13
-## 2  Great Expectations_1 church     7
-## 3  Great Expectations_1 looked     7
-## 4  Great Expectations_1    pip     7
-## 5  Great Expectations_1  river     6
-## 6  Great Expectations_1 tilted     6
-## 7  Great Expectations_1  black     5
-## 8  Great Expectations_1   head     5
-## 9  Great Expectations_1   live     5
-## 10 Great Expectations_1 mother     5
+##               title_chapter    word     n
+##                       &lt;chr&gt;   &lt;chr&gt; &lt;int&gt;
+## 1     Great Expectations_57     joe    88
+## 2      Great Expectations_7     joe    70
+## 3     Great Expectations_17   biddy    63
+## 4     Great Expectations_27     joe    58
+## 5     Great Expectations_38 estella    58
+## 6      Great Expectations_2     joe    56
+## 7     Great Expectations_23  pocket    53
+## 8     Great Expectations_15     joe    50
+## 9     Great Expectations_18     joe    50
+## 10 The War of the Worlds_16 brother    50
 ## # ... with 104,711 more rows</code></pre>
 </div>
 <div id="latent-dirichlet-allocation-with-the-topicmodels-package" class="section level2">
@@ -273,18 +273,18 @@ chapters_lda</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chapters_lda_td &lt;-<span class="st"> </span><span class="kw">tidy</span>(chapters_lda)
 chapters_lda_td</code></pre></div>
 <pre><code>## # A tibble: 72,860 x 3
-##    topic   term         beta
-##    &lt;int&gt;  &lt;chr&gt;        &lt;dbl&gt;
-## 1      1    sir 2.084216e-03
-## 2      2    sir 4.985743e-03
-## 3      3    sir 2.483177e-03
-## 4      4    sir 2.935244e-04
-## 5      1 church 2.936533e-04
-## 6      2 church 7.641174e-05
-## 7      3 church 7.494668e-04
-## 8      4 church 7.008334e-04
-## 9      1 looked 1.950223e-03
-## 10     2 looked 1.533431e-03
+##    topic    term         beta
+##    &lt;int&gt;   &lt;chr&gt;        &lt;dbl&gt;
+## 1      1     joe 5.830326e-17
+## 2      2     joe 3.194447e-57
+## 3      3     joe 4.162676e-24
+## 4      4     joe 1.445030e-02
+## 5      1   biddy 7.846976e-27
+## 6      2   biddy 4.672244e-69
+## 7      3   biddy 2.259711e-46
+## 8      4   biddy 4.767972e-03
+## 9      1 estella 3.827272e-06
+## 10     2 estella 5.316964e-65
 ## # ... with 72,850 more rows</code></pre>
 <p>Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination the model has <span class="math inline">\(\beta\)</span>, the probability of that term being generated from that topic.</p>
 <p>We could use dplyr’s <code>top_n</code> to find the top 5 terms within each topic:</p>
@@ -298,26 +298,26 @@ top_terms</code></pre></div>
 <pre><code>## # A tibble: 20 x 3
 ##    topic      term        beta
 ##    &lt;int&gt;     &lt;chr&gt;       &lt;dbl&gt;
-## 1      1 elizabeth 0.014806162
-## 2      1     darcy 0.009250751
-## 3      1      miss 0.007560066
-## 4      1    bennet 0.007291477
-## 5      1      jane 0.006845060
-## 6      2   captain 0.015526574
-## 7      2  nautilus 0.013176023
-## 8      2       sea 0.009007086
-## 9      2      nemo 0.008792461
-## 10     2       ned 0.008108322
-## 11     3       joe 0.013866397
-## 12     3      miss 0.007262017
-## 13     3      time 0.006709286
-## 14     3       pip 0.006541889
-## 15     3    looked 0.006262112
-## 16     4    people 0.006584429
-## 17     4  martians 0.006419187
-## 18     4      time 0.005508969
-## 19     4     black 0.005051646
-## 20     4     night 0.004629963</code></pre>
+## 1      1 elizabeth 0.014107538
+## 2      1     darcy 0.008814258
+## 3      1      miss 0.008706741
+## 4      1    bennet 0.006947431
+## 5      1      jane 0.006497512
+## 6      2   captain 0.015507696
+## 7      2  nautilus 0.013050048
+## 8      2       sea 0.008850073
+## 9      2      nemo 0.008708397
+## 10     2       ned 0.008030799
+## 11     3    people 0.006797400
+## 12     3  martians 0.006512569
+## 13     3      time 0.005347115
+## 14     3     black 0.005278302
+## 15     3     night 0.004483143
+## 16     4       joe 0.014450300
+## 17     4      time 0.006847574
+## 18     4       pip 0.006817363
+## 19     4    looked 0.006365257
+## 20     4      miss 0.006228387</code></pre>
 <p>This model lends itself to a visualization:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
 <span class="kw">theme_set</span>(<span class="kw">theme_bw</span>())
@@ -337,36 +337,36 @@ top_terms %&gt;%
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chapters_lda_gamma &lt;-<span class="st"> </span><span class="kw">tidy</span>(chapters_lda, <span class="dt">matrix =</span> <span class="st">&quot;gamma&quot;</span>)
 chapters_lda_gamma</code></pre></div>
 <pre><code>## # A tibble: 772 x 3
-##                 document topic        gamma
-##                    &lt;chr&gt; &lt;int&gt;        &lt;dbl&gt;
-## 1   Great Expectations_1     1 3.012893e-05
-## 2  Great Expectations_10     1 2.145733e-05
-## 3  Great Expectations_11     1 1.064330e-05
-## 4  Great Expectations_12     1 2.477705e-05
-## 5  Great Expectations_13     1 1.954208e-05
-## 6  Great Expectations_14     1 7.234765e-05
-## 7  Great Expectations_15     1 1.327335e-05
-## 8  Great Expectations_16     1 2.951203e-05
-## 9  Great Expectations_17     1 1.954208e-05
-## 10 Great Expectations_18     1 1.174153e-05
+##                    document topic        gamma
+##                       &lt;chr&gt; &lt;int&gt;        &lt;dbl&gt;
+## 1     Great Expectations_57     1 1.351886e-05
+## 2      Great Expectations_7     1 1.470726e-05
+## 3     Great Expectations_17     1 2.117127e-05
+## 4     Great Expectations_27     1 1.919746e-05
+## 5     Great Expectations_38     1 3.544403e-01
+## 6      Great Expectations_2     1 1.723723e-05
+## 7     Great Expectations_23     1 5.507241e-01
+## 8     Great Expectations_15     1 1.682503e-02
+## 9     Great Expectations_18     1 1.272044e-05
+## 10 The War of the Worlds_16     1 1.084337e-05
 ## # ... with 762 more rows</code></pre>
 <p>Setting <code>matrix = &quot;gamma&quot;</code> returns a tidied version with one-document-per-topic-per-row. Now that we have these document classifiations, we can see how well our unsupervised learning did at distinguishing the four books. First we re-separate the document name into title and chapter:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chapters_lda_gamma &lt;-<span class="st"> </span>chapters_lda_gamma %&gt;%
 <span class="st">  </span><span class="kw">separate</span>(document, <span class="kw">c</span>(<span class="st">&quot;title&quot;</span>, <span class="st">&quot;chapter&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>, <span class="dt">convert =</span> <span class="ot">TRUE</span>)
 chapters_lda_gamma</code></pre></div>
 <pre><code>## # A tibble: 772 x 4
-##                 title chapter topic        gamma
-## *               &lt;chr&gt;   &lt;int&gt; &lt;int&gt;        &lt;dbl&gt;
-## 1  Great Expectations       1     1 3.012893e-05
-## 2  Great Expectations      10     1 2.145733e-05
-## 3  Great Expectations      11     1 1.064330e-05
-## 4  Great Expectations      12     1 2.477705e-05
-## 5  Great Expectations      13     1 1.954208e-05
-## 6  Great Expectations      14     1 7.234765e-05
-## 7  Great Expectations      15     1 1.327335e-05
-## 8  Great Expectations      16     1 2.951203e-05
-## 9  Great Expectations      17     1 1.954208e-05
-## 10 Great Expectations      18     1 1.174153e-05
+##                    title chapter topic        gamma
+## *                  &lt;chr&gt;   &lt;int&gt; &lt;int&gt;        &lt;dbl&gt;
+## 1     Great Expectations      57     1 1.351886e-05
+## 2     Great Expectations       7     1 1.470726e-05
+## 3     Great Expectations      17     1 2.117127e-05
+## 4     Great Expectations      27     1 1.919746e-05
+## 5     Great Expectations      38     1 3.544403e-01
+## 6     Great Expectations       2     1 1.723723e-05
+## 7     Great Expectations      23     1 5.507241e-01
+## 8     Great Expectations      15     1 1.682503e-02
+## 9     Great Expectations      18     1 1.272044e-05
+## 10 The War of the Worlds      16     1 1.084337e-05
 ## # ... with 762 more rows</code></pre>
 <p>Then we examine what fraction of chapters we got right for each:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(chapters_lda_gamma, <span class="kw">aes</span>(gamma, <span class="dt">fill =</span> <span class="kw">factor</span>(topic))) +
@@ -384,16 +384,16 @@ chapter_classifications</code></pre></div>
 <pre><code>## # A tibble: 193 x 4
 ##                 title chapter topic     gamma
 ##                 &lt;chr&gt;   &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;
-## 1  Great Expectations      23     3 0.5187562
-## 2  Great Expectations      54     4 0.5522191
-## 3  Great Expectations      56     3 0.5523846
-## 4  Great Expectations      37     3 0.5724660
-## 5  Great Expectations      55     3 0.5813702
-## 6  Great Expectations      46     3 0.6067932
-## 7  Great Expectations      25     3 0.6405668
-## 8  Great Expectations      21     3 0.6443639
-## 9  Great Expectations      20     3 0.6457449
-## 10 Great Expectations      53     3 0.6636836
+## 1  Great Expectations      54     3 0.4803234
+## 2  Great Expectations      22     4 0.5356506
+## 3  Great Expectations      31     4 0.5464851
+## 4  Great Expectations      23     1 0.5507241
+## 5  Great Expectations      33     4 0.5700737
+## 6  Great Expectations      47     4 0.5802089
+## 7  Great Expectations      56     4 0.5984806
+## 8  Great Expectations      38     4 0.6455341
+## 9  Great Expectations      11     4 0.6689600
+## 10 Great Expectations      44     4 0.6777974
 ## # ... with 183 more rows</code></pre>
 <p>We can determine this by finding the consensus book for each, which we note is correct based on our earlier visualization:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">book_topics &lt;-<span class="st"> </span>chapter_classifications %&gt;%
@@ -406,24 +406,25 @@ book_topics</code></pre></div>
 <pre><code>## # A tibble: 4 x 2
 ##                               consensus topic
 ##                                   &lt;chr&gt; &lt;int&gt;
-## 1                    Great Expectations     3
+## 1                    Great Expectations     4
 ## 2                   Pride and Prejudice     1
-## 3                 The War of the Worlds     4
+## 3                 The War of the Worlds     3
 ## 4 Twenty Thousand Leagues under the Sea     2</code></pre>
 <p>Then we see which chapters were misidentified:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">chapter_classifications %&gt;%
 <span class="st">  </span><span class="kw">inner_join</span>(book_topics, <span class="dt">by =</span> <span class="st">&quot;topic&quot;</span>) %&gt;%
 <span class="st">  </span><span class="kw">count</span>(title, consensus)</code></pre></div>
-<pre><code>## Source: local data frame [5 x 3]
+<pre><code>## Source: local data frame [6 x 3]
 ## Groups: title [?]
 ## 
 ##                                   title                             consensus     n
-##                                   (chr)                                 (chr) (int)
-## 1                    Great Expectations                    Great Expectations    58
-## 2                    Great Expectations                 The War of the Worlds     1
-## 3                   Pride and Prejudice                   Pride and Prejudice    61
-## 4                 The War of the Worlds                 The War of the Worlds    27
-## 5 Twenty Thousand Leagues under the Sea Twenty Thousand Leagues under the Sea    46</code></pre>
+##                                   &lt;chr&gt;                                 &lt;chr&gt; &lt;int&gt;
+## 1                    Great Expectations                    Great Expectations    57
+## 2                    Great Expectations                   Pride and Prejudice     1
+## 3                    Great Expectations                 The War of the Worlds     1
+## 4                   Pride and Prejudice                   Pride and Prejudice    61
+## 5                 The War of the Worlds                 The War of the Worlds    27
+## 6 Twenty Thousand Leagues under the Sea Twenty Thousand Leagues under the Sea    46</code></pre>
 <p>We see that only a few chapters from <em>Great Expectations</em> were misclassified. Not bad for unsupervised clustering!</p>
 <div id="by-word-assignments-augment" class="section level3">
 <h3><span class="header-section-number">6.4.1</span> By word assignments: <code>augment</code></h3>
@@ -439,16 +440,16 @@ assignments</code></pre></div>
 <pre><code>## # A tibble: 104,721 x 6
 ##                 title chapter  term count .topic          consensus
 ##                 &lt;chr&gt;   &lt;int&gt; &lt;chr&gt; &lt;dbl&gt;  &lt;dbl&gt;              &lt;chr&gt;
-## 1  Great Expectations       1   sir    13      3 Great Expectations
-## 2  Great Expectations      10   sir     1      3 Great Expectations
-## 3  Great Expectations      11   sir     2      3 Great Expectations
-## 4  Great Expectations      18   sir     3      3 Great Expectations
-## 5  Great Expectations      19   sir    10      3 Great Expectations
-## 6  Great Expectations      20   sir     7      3 Great Expectations
-## 7  Great Expectations      23   sir     1      3 Great Expectations
-## 8  Great Expectations      25   sir     6      3 Great Expectations
-## 9  Great Expectations      26   sir     2      3 Great Expectations
-## 10 Great Expectations      27   sir    18      3 Great Expectations
+## 1  Great Expectations      57   joe    88      4 Great Expectations
+## 2  Great Expectations       7   joe    70      4 Great Expectations
+## 3  Great Expectations      17   joe     5      4 Great Expectations
+## 4  Great Expectations      27   joe    58      4 Great Expectations
+## 5  Great Expectations       2   joe    56      4 Great Expectations
+## 6  Great Expectations      23   joe     1      4 Great Expectations
+## 7  Great Expectations      15   joe    50      4 Great Expectations
+## 8  Great Expectations      18   joe    50      4 Great Expectations
+## 9  Great Expectations       9   joe    44      4 Great Expectations
+## 10 Great Expectations      13   joe    40      4 Great Expectations
 ## # ... with 104,711 more rows</code></pre>
 <p>We can, for example, create a “confusion matrix” using dplyr’s <code>count</code> and tidyr’s <code>spread</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">assignments %&gt;%
@@ -458,55 +459,67 @@ assignments</code></pre></div>
 ## Groups: title [4]
 ## 
 ##                                   title Great Expectations Pride and Prejudice
-##                                   (chr)              (dbl)               (dbl)
-## 1                    Great Expectations              51043                2146
-## 2                   Pride and Prejudice                  0               37241
+## *                                 &lt;chr&gt;              &lt;dbl&gt;               &lt;dbl&gt;
+## 1                    Great Expectations              49770                3876
+## 2                   Pride and Prejudice                  1               37229
 ## 3                 The War of the Worlds                  0                   0
-## 4 Twenty Thousand Leagues under the Sea                  3                  31
+## 4 Twenty Thousand Leagues under the Sea                  0                   5
 ##   The War of the Worlds Twenty Thousand Leagues under the Sea
-##                   (dbl)                                 (dbl)
-## 1                  2341                                    38
-## 2                     1                                     0
-## 3                 22492                                    76
-## 4                   303                                 39297</code></pre>
+## *                 &lt;dbl&gt;                                 &lt;dbl&gt;
+## 1                  1845                                    77
+## 2                     7                                     5
+## 3                 22561                                     7
+## 4                     0                                 39629</code></pre>
 <p>We notice that almost all the words for <em>Pride and Prejudice</em>, <em>Twenty Thousand Leagues Under the Sea</em>, and <em>War of the Worlds</em> were correctly assigned, while <em>Great Expectations</em> had a fair amount of misassignment.</p>
 <p>What were the most commonly mistaken words?</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">wrong_words &lt;-<span class="st"> </span>assignments %&gt;%
 <span class="st">  </span><span class="kw">filter</span>(title !=<span class="st"> </span>consensus)
 
 wrong_words</code></pre></div>
-<pre><code>## # A tibble: 3,701 x 6
-##                                    title chapter   term count .topic             consensus
-##                                    &lt;chr&gt;   &lt;int&gt;  &lt;chr&gt; &lt;dbl&gt;  &lt;dbl&gt;                 &lt;chr&gt;
-## 1                     Great Expectations      46  river     5      4 The War of the Worlds
-## 2                     Great Expectations      54  river    12      4 The War of the Worlds
-## 3                     Great Expectations      20  black     3      4 The War of the Worlds
-## 4                     Great Expectations      46  black     2      4 The War of the Worlds
-## 5                     Great Expectations      53  black     1      4 The War of the Worlds
-## 6                     Great Expectations      54  black     2      4 The War of the Worlds
-## 7  Twenty Thousand Leagues under the Sea      18  black     1      4 The War of the Worlds
-## 8                     Great Expectations      23   live     1      1   Pride and Prejudice
-## 9                     Great Expectations      54   live     1      4 The War of the Worlds
-## 10                    Great Expectations      25 mother     2      1   Pride and Prejudice
-## # ... with 3,691 more rows</code></pre>
+<pre><code>## # A tibble: 4,535 x 6
+##                                    title chapter     term count .topic
+##                                    &lt;chr&gt;   &lt;int&gt;    &lt;chr&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1                     Great Expectations      38  brother     2      1
+## 2                     Great Expectations      22  brother     4      1
+## 3                     Great Expectations      23     miss     2      1
+## 4                     Great Expectations      22     miss    23      1
+## 5  Twenty Thousand Leagues under the Sea       8     miss     1      1
+## 6                     Great Expectations      31     miss     1      1
+## 7                     Great Expectations       5 sergeant    37      1
+## 8                     Great Expectations      46  captain     1      2
+## 9                     Great Expectations      32  captain     1      2
+## 10                 The War of the Worlds      17  captain     5      2
+##                                consensus
+##                                    &lt;chr&gt;
+## 1                    Pride and Prejudice
+## 2                    Pride and Prejudice
+## 3                    Pride and Prejudice
+## 4                    Pride and Prejudice
+## 5                    Pride and Prejudice
+## 6                    Pride and Prejudice
+## 7                    Pride and Prejudice
+## 8  Twenty Thousand Leagues under the Sea
+## 9  Twenty Thousand Leagues under the Sea
+## 10 Twenty Thousand Leagues under the Sea
+## # ... with 4,525 more rows</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">wrong_words %&gt;%
 <span class="st">  </span><span class="kw">count</span>(title, consensus, term, <span class="dt">wt =</span> count) %&gt;%
 <span class="st">  </span><span class="kw">ungroup</span>() %&gt;%
 <span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n))</code></pre></div>
-<pre><code>## # A tibble: 3,027 x 4
+<pre><code>## # A tibble: 3,500 x 4
 ##                 title             consensus     term     n
 ##                 &lt;chr&gt;                 &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt;
-## 1  Great Expectations The War of the Worlds     boat    30
-## 2  Great Expectations   Pride and Prejudice skiffins    25
-## 3  Great Expectations The War of the Worlds     tide    25
-## 4  Great Expectations The War of the Worlds      lay    19
-## 5  Great Expectations The War of the Worlds     jack    18
-## 6  Great Expectations The War of the Worlds    water    18
-## 7  Great Expectations   Pride and Prejudice     lady    17
-## 8  Great Expectations The War of the Worlds    river    17
-## 9  Great Expectations The War of the Worlds   barley    16
-## 10 Great Expectations The War of the Worlds   galley    16
-## # ... with 3,017 more rows</code></pre>
+## 1  Great Expectations   Pride and Prejudice     love    44
+## 2  Great Expectations   Pride and Prejudice sergeant    37
+## 3  Great Expectations   Pride and Prejudice     lady    32
+## 4  Great Expectations   Pride and Prejudice     miss    26
+## 5  Great Expectations The War of the Worlds     boat    25
+## 6  Great Expectations   Pride and Prejudice   father    19
+## 7  Great Expectations The War of the Worlds    water    19
+## 8  Great Expectations   Pride and Prejudice     baby    18
+## 9  Great Expectations   Pride and Prejudice  flopson    18
+## 10 Great Expectations   Pride and Prejudice   family    16
+## # ... with 3,490 more rows</code></pre>
 <p>Notice the word “flopson” here; these wrong words do not necessarily appear in the novels they were misassigned to. Indeed, we can confirm “flopson” appears only in <em>Great Expectations</em>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">word_counts %&gt;%
 <span class="st">  </span><span class="kw">filter</span>(word ==<span class="st"> &quot;flopson&quot;</span>)</code></pre></div>
