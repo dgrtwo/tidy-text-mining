@@ -1,16 +1,28 @@
 # Sentiment Analysis with Tidy Data {#sentiment}
 
-## The sentiments dataset
+## The `sentiments` dataset
 
-Three sentiment lexicons are in the tidytext package in the `sentiment` dataset. 
+There are a variety of methods and dictionaries that exist for evaluating the opinion or emotion in text. The tidytext package contains three sentiment lexicons in the `sentiments` dataset. 
 
 ```{r}
 sentiments
 ```
 
+The three lexicons are
+
+* `AFINN` from [Finn Årup Nielsen](http://www2.imm.dtu.dk/pubdb/views/publication_details.php?id=6010),
+* `bing` from [Bing Liu and collaborators](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html), and
+* `nrc` from [Saif Mohammad and Peter Turney](http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm).
+
+All three of these lexicons are based on unigrams (or single words). These lexicons contain many English words and the words are assigned scores for positive/negative sentiment, and also possibly emotions like joy, anger, sadness, and so forth. The `nrc` lexicon categorizes words in a binary fashion ("yes"/"no") into categories of positive, negative, anger, anticipation, disgust, fear, joy, sadness, surprise, and trust. The `bing` lexicon categorizes words in a binary fashion into positive and negative categories. The `AFINN` lexicon assigns words with a score that runs between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment. All of this information is tabulated in the `sentiments` dataset.
+
+These dictionary-based methods work by calculating the total sentiment of a piece of text by adding up the individual sentiment scores for each word in the text. Not every English word is in the lexicons because many English words are pretty neutral. It is important to keep in mind that these methods do not take into account qualifiers like "no good" or "not true"; a lexicon-based method like this is based on unigrams only. For many kinds of text (like the narrative examples below), there are not sustained sections of sarcasm or negated text, so this is not an important effect. 
+
+One last caveat is that the size of the chunk of text that we add up sentiment scores for can have an important effect for our analysis. A paragraph-sized text can often have positive and negative sentiment averaged out to about zero, while sentence-sized text often works better.
+
 ## Sentiment analysis with inner join
 
-Sentiment analysis can be done as an inner join. Let's look at the words with a joy score from the NRC lexicon. What are the most common joy words in *Emma*?
+With data in a tidy format, sentiment analysis can be done as an inner join. Let's look at the words with a joy score from the NRC lexicon. What are the most common joy words in *Emma*?
 
 ```{r dependson = "tidy_books"}
 nrcjoy <- sentiments %>%
@@ -58,6 +70,8 @@ ggplot(janeaustensentiment, aes(index, sentiment, fill = book)) +
 ```
 
 We can see here how the plot of each novel changes toward more positive or negative sentiment over the trajectory of the story.
+
+TODO: The three different methods of calculating sentiment give results that are different in an absolute sense but have similar relative trajectories through the novel.
 
 ### Most common positive and negative words
 
