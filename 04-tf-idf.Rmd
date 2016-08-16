@@ -30,7 +30,7 @@ book_words
 
 The usual suspects are here, "the", "and", "to", and so forth. Let's look at the distribution of `n/total` for each novel, the number of times a word appears in a novel divided by the total number of terms (words) in that novel. This is exactly what term frequency is.
 
-```{r, fig.height=9, fig.width=9}
+```{r, fig.height=9, fig.width=9, eval=FALSE}
 library(ggplot2)
 library(viridis)
 ggplot(book_words, aes(n/total, fill = book)) +
@@ -67,7 +67,7 @@ book_words %>%
 
 Here we see all proper nouns, names that are in fact important in these novels. None of them occur in all of novels, and they are important, characteristic words for each text. Some of the values for idf are the same for different terms because there are 6 documents in this corpus and we are seeing the numerical value for $\ln(6/1)$, $\ln(6/2)$, etc. Let's look at a visualization for these high tf-idf words.
 
-```{r, fig.height=6, fig.width=8}
+```{r, fig.height=6, fig.width=8, eval=FALSE}
 library(ggstance)
 library(ggthemes)
 plot_austen <- book_words %>%
@@ -87,7 +87,7 @@ ggplot(plot_austen[1:20,], aes(tf_idf, word, fill = book, alpha = tf_idf)) +
 
 Let's look at the novels individually.
 
-```{r, fig.height=10, fig.width=8}
+```{r, fig.height=10, fig.width=8, eval=FALSE}
 plot_austen <- plot_austen %>% group_by(book) %>% top_n(15) %>% ungroup
 ggplot(plot_austen, aes(tf_idf, word, fill = book, alpha = tf_idf)) +
         geom_barh(stat = "identity", show.legend = FALSE) +
@@ -125,7 +125,7 @@ physics_words
 
 Here we see just the raw counts, and of course these documents are all very different lengths. Let's go ahead and calculate tf-idf.
 
-```{r, fig.width=8, fig.height=6}
+```{r, fig.width=8, fig.height=6, eval=FALSE}
 physics_words <- physics_words %>%
         bind_tf_idf(word, author, n) 
 plot_physics <- physics_words %>%
@@ -151,7 +151,7 @@ ggplot(plot_physics[1:20,], aes(tf_idf, word, fill = author, alpha = tf_idf)) +
 
 Nice! Let's look at each text individually.
 
-```{r, fig.height=7, fig.width=8}
+```{r, fig.height=7, fig.width=8, eval=FALSE}
 plot_physics <- plot_physics %>% group_by(author) %>% 
         top_n(15, tf_idf) %>% 
         mutate(word = reorder(word, tf_idf))
@@ -187,7 +187,7 @@ grep("AK", physics$text, value = TRUE)[1]
 
 Let's remove some of these less meaningful words to make a better, more meaningful plot.
 
-```{r, fig.height=7, fig.width=8}
+```{r, fig.height=7, fig.width=8, eval=FALSE}
 mystopwords <- data_frame(word = c("gif", "eq", "co", "rc", "ac", "ak", "bn", 
                                    "fig", "file", "cg", "cb"))
 physics_words <- anti_join(physics_words, mystopwords, by = "word")
