@@ -8,18 +8,20 @@ Another approach is to look at a term's *inverse document frequency* (idf), whic
 
 $$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$
 
-We can use tidy data principles, as described in [the main vignette](tidytext.html), to approach tf-idf analysis and use consistent, effective tools to quantify how important various terms are in a document that is part of a collection.
+We can use tidy data principles, as described in Chapter #tidytext, to approach tf-idf analysis and use consistent, effective tools to quantify how important various terms are in a document that is part of a collection.
 
-Let's look at the published novels of Jane Austen and examine first term frequency, then tf-idf. We can start just by using dplyr verbs such as `group_by` and `join`. What are the most commonly used words in Jane Austen's novels? (Let's also calculate the total words in each novel here, for later use.)
+## Term frequency in Jane Austen's novels
+
+Let's start by looking at the published novels of Jane Austen and examine first term frequency, then tf-idf. We can start just by using dplyr verbs such as `group_by` and `join`. What are the most commonly used words in Jane Austen's novels? (Let's also calculate the total words in each novel here, for later use.)
 
 ```{r}
 library(dplyr)
 library(janeaustenr)
 library(tidytext)
 book_words <- austen_books() %>%
-  unnest_tokens(word, text) %>%
-  count(book, word, sort = TRUE) %>%
-  ungroup()
+        unnest_tokens(word, text) %>%
+        count(book, word, sort = TRUE) %>%
+        ungroup()
 
 total_words <- book_words %>% group_by(book) %>% summarize(total = sum(n))
 book_words <- left_join(book_words, total_words)
@@ -28,17 +30,24 @@ book_words
 
 The usual suspects are here, "the", "and", "to", and so forth. Let's look at the distribution of `n/total` for each novel, the number of times a word appears in a novel divided by the total number of terms (words) in that novel. This is exactly what term frequency is.
 
-```{r, fig.height=7, fig.width=7}
+```{r, fig.height=9, fig.width=9}
 library(ggplot2)
+library(viridis)
 ggplot(book_words, aes(n/total, fill = book)) +
-  geom_histogram(show.legend = FALSE) +
-  xlim(NA, 0.0009) +
-  facet_wrap(~book, ncol = 2, scales = "free_y")
+        geom_histogram(alpha = 0.8, show.legend = FALSE) +
+        xlim(NA, 0.0009) +
+        labs(title = "Term Frequency Distribution in Jane Austen's Novels",
+             y = "Count") +
+        facet_wrap(~book, ncol = 2, scales = "free_y") +
+        theme_minimal(base_size = 13) +
+        scale_fill_viridis(end = 0.85, discrete=TRUE) +
+        theme(strip.text=element_text(hjust=0)) +
+        theme(strip.text = element_text(face = "italic"))
 ```
 
 There are very long tails to the right for these novels (those extremely common words!) that we have not shown in these plots. These plots exhibit similar distributions for all the novels, with many words that occur rarely and fewer words that occur frequently.
 
-## The bind_tf_idf function
+## The `bind_tf_idf` function
 
 The idea of tf-idf is to find the important words for the content of each document by decreasing the weight for commonly used words and increasing the weight for words that are not used very much in a collection or corpus of documents, in this case, the group of Jane Austen's novels as a whole. Calculating tf-idf attempts to find the words that are important (i.e., common) in a text, but not *too* common. Let's do that now.
 
@@ -56,13 +65,153 @@ book_words %>%
   arrange(desc(tf_idf))
 ```
 
-Here we see all proper nouns, names that are in fact important in these novels. None of them occur in all of novels, and they are important, characteristic words for each text. Some of the values for idf are the same for different terms because there are 6 documents in this corpus and we are seeing the numerical value for $\ln(6/1)$, $\ln(6/2)$, etc. Let's look specifically at *Pride and Prejudice*.
+Here we see all proper nouns, names that are in fact important in these novels. None of them occur in all of novels, and they are important, characteristic words for each text. Some of the values for idf are the same for different terms because there are 6 documents in this corpus and we are seeing the numerical value for $\ln(6/1)$, $\ln(6/2)$, etc. Let's look at a visualization for these high tf-idf words.
 
-```{r}
-book_words %>%
-  filter(book == "Pride & Prejudice") %>%
-  select(-total) %>%
-  arrange(desc(tf_idf))
+```{r, fig.height=6, fig.width=8}
+library(ggstance)
+library(ggthemes)
+plot_austen <- book_words %>%
+        arrange(desc(tf_idf)) %>%
+        mutate(word = factor(word, levels = rev(unique(word))))
+ggplot(plot_austen[1:20,], aes(tf_idf, word, fill = book, alpha = tf_idf)) +
+        geom_barh(stat = "identity") +
+        labs(title = "Highest tf-idf words in Jane Austen's Novels",
+             y = NULL, x = "tf-idf") +
+        theme_tufte(base_family = "Arial", base_size = 13, ticks = FALSE) +
+        scale_alpha_continuous(range = c(0.6, 1), guide = FALSE) +
+        scale_x_continuous(expand=c(0,0)) +
+        scale_fill_viridis(end = 0.85, discrete=TRUE) +
+        theme(legend.title=element_blank()) +
+        theme(legend.justification=c(1,0), legend.position=c(1,0))
 ```
 
-These words are, as measured by tf-idf, the most important to *Pride and Prejudice* and most readers would likely agree.
+Let's look at the novels individually.
+
+```{r, fig.height=10, fig.width=8}
+plot_austen <- plot_austen %>% group_by(book) %>% top_n(15) %>% ungroup
+ggplot(plot_austen, aes(tf_idf, word, fill = book, alpha = tf_idf)) +
+        geom_barh(stat = "identity", show.legend = FALSE) +
+        labs(title = "Highest tf-idf words in Jane Austen's Novels",
+             y = NULL, x = "tf-idf") +
+        facet_wrap(~book, ncol = 2, scales = "free") +
+        theme_tufte(base_family = "Arial", base_size = 13, ticks = FALSE) +
+        scale_alpha_continuous(range = c(0.6, 1)) +
+        scale_x_continuous(expand=c(0,0)) +
+        scale_fill_viridis(end = 0.85, discrete=TRUE) +
+        theme(strip.text=element_text(hjust=0)) +
+        theme(strip.text = element_text(face = "italic"))
+```
+
+Still all proper nouns! These words are, as measured by tf-idf, the most important to each novel and most readers would likely agree.
+
+<iframe src="http://giphy.com/embed/y5dASMYqZwS2s" width="480" height="204" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="http://giphy.com/gifs/vintage-pale-colin-firth-y5dASMYqZwS2s">via GIPHY</a></p>
+
+## A corpus of physics texts
+
+Let's work with another corpus of documents, to see what terms are important in a different set of works. In fact, let's leave the world of fiction and narrative entirely. Let's download some classic physics texts from Project Gutenberg and see what terms are important in these works, as measured by tf-idf. Let's download [*Discourse on Floating Bodies* by Galileo Galilei](http://www.gutenberg.org/ebooks/37729), [*Treatise on Light* by Christiaan Huygens](http://www.gutenberg.org/ebooks/14725), [*Experiments with Alternate Currents of High Potential and High Frequency* by Nikola Tesla](http://www.gutenberg.org/ebooks/13476), and [*Relativity: The Special and General Theory* by Albert Einstein](http://www.gutenberg.org/ebooks/5001).
+
+This is a pretty diverse bunch. They may all be physics classics, but they were written across a 300-year timespan, and some of them were first written in other languages and then translated to English. Perfectly homogeneous these are not, but that doesn't stop this from being an interesting exercise!
+
+```{r}
+library(gutenbergr)
+physics <- gutenberg_download(c(37729, 14725, 13476, 5001), 
+                              meta_fields = "author")
+physics_words <- physics %>%
+        unnest_tokens(word, text) %>%
+        count(author, word, sort = TRUE) %>%
+        ungroup()
+physics_words
+```
+
+Here we see just the raw counts, and of course these documents are all very different lengths. Let's go ahead and calculate tf-idf.
+
+```{r, fig.width=8, fig.height=6}
+physics_words <- physics_words %>%
+        bind_tf_idf(word, author, n) 
+plot_physics <- physics_words %>%
+        arrange(desc(tf_idf)) %>%
+        mutate(word = factor(word, levels = rev(unique(word)))) %>%
+        mutate(author = factor(author, levels = c("Galilei, Galileo",
+                                                  "Huygens, Christiaan",
+                                                  "Tesla, Nikola",
+                                                  "Einstein, Albert")))
+
+ggplot(plot_physics[1:20,], aes(tf_idf, word, fill = author, alpha = tf_idf)) +
+        geom_barh(stat = "identity") +
+        labs(title = "Highest tf-idf words in Classic Physics Texts",
+             y = NULL, x = "tf-idf") +
+        theme_tufte(base_family = "Arial", base_size = 13, ticks = FALSE) +
+        scale_alpha_continuous(range = c(0.6, 1), guide = FALSE) +
+        scale_x_continuous(expand=c(0,0)) +
+        scale_fill_viridis(end = 0.6, discrete=TRUE) +
+        theme(legend.title=element_blank()) +
+        theme(legend.justification=c(1,0), legend.position=c(1,0))
+
+```
+
+Nice! Let's look at each text individually.
+
+```{r, fig.height=7, fig.width=8}
+plot_physics <- plot_physics %>% group_by(author) %>% 
+        top_n(15, tf_idf) %>% 
+        mutate(word = reorder(word, tf_idf))
+ggplot(plot_physics, aes(tf_idf, word, fill = author, alpha = tf_idf)) +
+        geom_barh(stat = "identity", show.legend = FALSE) +
+        labs(title = "Highest tf-idf words in Classic Physics Texts",
+             y = NULL, x = "tf-idf") +
+        facet_wrap(~author, ncol = 2, scales = "free") +
+        theme_tufte(base_family = "Arial", base_size = 13, ticks = FALSE) +
+        scale_alpha_continuous(range = c(0.6, 1)) +
+        scale_x_continuous(expand=c(0,0)) +
+        scale_fill_viridis(end = 0.6, discrete=TRUE) +
+        theme(strip.text=element_text(hjust=0))
+```
+
+Very interesting indeed. One thing we see here is "gif" in the Einstein text?!
+
+```{r}
+grep("gif", physics$text, value = TRUE)[1:10]
+```
+
+Some cleaning up of the text might be in order. The same thing is true for "eq", obviously here. "K1" is the name of a coordinate system for Einstein:
+
+```{r}
+grep("K1", physics$text, value = TRUE)[1]
+```
+
+Also notice that in this line we have "co-ordinate", which explains why there are separate "co" and "ordinate" items in the high tf-idf words for the Einstein text. "AB", "RC", and so forth are names of rays, circles, angles, and so forth for Huygens.
+
+```{r}
+grep("AK", physics$text, value = TRUE)[1]
+```
+
+Let's remove some of these less meaningful words to make a better, more meaningful plot.
+
+```{r, fig.height=7, fig.width=8}
+mystopwords <- data_frame(word = c("gif", "eq", "co", "rc", "ac", "ak", "bn", 
+                                   "fig", "file", "cg", "cb"))
+physics_words <- anti_join(physics_words, mystopwords, by = "word")
+plot_physics <- physics_words %>%
+        arrange(desc(tf_idf)) %>%
+        mutate(word = factor(word, levels = rev(unique(word)))) %>%
+        group_by(author) %>% 
+        top_n(15, tf_idf) %>%
+        ungroup %>%
+        mutate(author = factor(author, levels = c("Galilei, Galileo",
+                                                  "Huygens, Christiaan",
+                                                  "Tesla, Nikola",
+                                                  "Einstein, Albert")))
+
+ggplot(plot_physics, aes(tf_idf, word, fill = author, alpha = tf_idf)) +
+        geom_barh(stat = "identity", show.legend = FALSE) +
+        labs(title = "Highest tf-idf words in Classic Physics Texts",
+             y = NULL, x = "tf-idf") +
+        facet_wrap(~author, ncol = 2, scales = "free") +
+        theme_tufte(base_family = "Arial", base_size = 13, ticks = FALSE) +
+        scale_alpha_continuous(range = c(0.6, 1)) +
+        scale_x_continuous(expand=c(0,0)) +
+        scale_fill_viridis(end = 0.6, discrete=TRUE) +
+        theme(strip.text=element_text(hjust=0))
+```
+
+We don't hear enough about ramparts or things being ethereal in physics today.
