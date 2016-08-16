@@ -2,7 +2,7 @@
 
 ## The sentiments dataset
 
-The 
+Three sentiment lexicons are in the tidytext package in the `sentiment` dataset. 
 
 ```{r}
 sentiments
@@ -10,7 +10,7 @@ sentiments
 
 ## Sentiment analysis with inner join
 
-Sentiment analysis can be done as an inner join. Three sentiment lexicons are in the tidytext package in the `sentiment` dataset. Let's look at the words with a joy score from the NRC lexicon. What are the most common joy words in *Emma*?
+Sentiment analysis can be done as an inner join. Let's look at the words with a joy score from the NRC lexicon. What are the most common joy words in *Emma*?
 
 ```{r dependson = "tidy_books"}
 nrcjoy <- sentiments %>%
@@ -39,13 +39,25 @@ janeaustensentiment <- tidy_books %>%
 
 Now we can plot these sentiment scores across the plot trajectory of each novel.
 
-```{r, fig.width=7, fig.height=7, warning=FALSE}
+```{r, fig.width=10, fig.height=10}
 library(ggplot2)
-
+library(viridis)
 ggplot(janeaustensentiment, aes(index, sentiment, fill = book)) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
-  facet_wrap(~book, ncol = 2, scales = "free_x")
+        geom_bar(stat = "identity", show.legend = FALSE) +
+        facet_wrap(~book, ncol = 2, scales = "free_x") +
+        theme_minimal(base_size = 13) +
+        labs(title = "Sentiment in Jane Austen's Novels",
+             y = "Sentiment") +
+        scale_fill_viridis(end = 0.75, discrete=TRUE, direction = -1) +
+        scale_x_discrete(expand=c(0.02,0)) +
+        theme(strip.text=element_text(hjust=0)) +
+        theme(strip.text = element_text(face = "italic")) +
+        theme(axis.title.x=element_blank()) +
+        theme(axis.ticks.x=element_blank()) +
+        theme(axis.text.x=element_blank())
 ```
+
+We can see here how the plot of each novel changes toward more positive or negative sentiment over the trajectory of the story.
 
 ### Most common positive and negative words
 
@@ -60,7 +72,7 @@ bing_word_counts <- tidy_books %>%
 bing_word_counts
 ```
 
-This can be shown visually, and we can pipe straight into ggplot2 because of the way we are consistently using tools built for handling tidy data frames.
+This can be shown visually, and we can pipe straight into ggplot2, if we like, because of the way we are consistently using tools built for handling tidy data frames.
 
 ```{r, fig.width=7, fig.height=6}
 bing_word_counts %>%
@@ -156,3 +168,5 @@ tidy_books %>%
 ```
 
 These are the chapters with the most negative words in each book, normalized for number of words in the chapter. What is happening in these chapters? In Chapter 29 of *Sense and Sensibility* Marianne finds out what an awful person Willoughby is by letter, and in Chapter 34 of *Pride and Prejudice* Mr. Darcy proposes for the first time (so badly!). Chapter 45 of *Mansfield Park* is almost the end, when Tom is sick with consumption and Mary is revealed as mercenary and uncaring, Chapter 15 of *Emma* is when horrifying Mr. Elton proposes, and Chapter 27 of *Northanger Abbey* is a short chapter where Catherine gets a terrible letter from her inconstant friend Isabella. Chapter 21 of *Persuasion* is when Anne’s friend tells her all about Mr. Elliott’s immoral past.
+
+Interestingly, many of those chapters are very close to the ends of the novels; things tend to get really bad for Jane Austen's characters before their happy endings, it seems. Also, these chapters largely involve terrible revelations about characters through letters or conversations about past events, rather than some action happening directly in the plot. All that, just with dplyr verbs, because the data is tidy.
