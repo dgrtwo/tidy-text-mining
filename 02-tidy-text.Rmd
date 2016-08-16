@@ -103,6 +103,92 @@ tidy_books %>%
   count(word, sort = TRUE)
 ```
 
-### The gutenbergr package
+## The gutenbergr package
 
 TODO: Now that we've introduced the janeaustenr package, also include a brief intro to the gutenberg package.
+
+## Word Frequencies
+
+A common task in text mining is to look at word frequencies and to compare frequencies across different texts. We can do this intuitively and smoothly using tidy data principles. We already have Jane Austen's works; let's get two more sets of texts to compare to. First, let's look at some science fiction and fantasy novels by H.G. Wells, who lived in the late 19th and early 20th centuries. Let's get [*The Time Machine*](https://www.gutenberg.org/ebooks/35), [*The War of the Worlds*](https://www.gutenberg.org/ebooks/36), [*The Invisible Man*](https://www.gutenberg.org/ebooks/5230), and [*The Island of Doctor Moreau*](https://www.gutenberg.org/ebooks/159).
+
+```{r}
+library(gutenbergr)
+hgwells <- gutenberg_download(c(35, 36, 5230, 159))
+tidy_hgwells <- hgwells %>%
+        unnest_tokens(word, text) %>%
+        anti_join(stop_words)
+```
+
+Just for kicks, what are the most common words in these novels of H.G. Wells?
+
+```{r}
+tidy_hgwells %>%
+        count(word, sort = TRUE)
+```
+
+Now let's get some well-known works of the Brontë sisters, whose lives overlapped with Jane Austen's somewhat but who wrote in a bit of a different style. Let's get [*Jane Eyre*](https://www.gutenberg.org/ebooks/1260), [*Wuthering Heights*](https://www.gutenberg.org/ebooks/768), [*The Tenant of Wildfell Hall*](https://www.gutenberg.org/ebooks/969), [*Villette*](https://www.gutenberg.org/ebooks/9182), and [*Agnes Grey*](https://www.gutenberg.org/ebooks/767).
+
+```{r}
+bronte <- gutenberg_download(c(1260, 768, 969, 9182, 766))
+tidy_bronte <- bronte %>%
+        unnest_tokens(word, text) %>%
+        anti_join(stop_words)
+```
+
+What are the most common words in these novels of the Brontë sisters?
+
+```{r}
+tidy_bronte %>%
+        count(word, sort = TRUE)
+```
+
+Well, Jane Austen is not going around talking about people's *hearts* this much; I can tell you that right now. Those Brontë sisters, SO DRAMATIC. Interesting that "time" and "door" are in the top 10 for both H.G. Wells and the Brontë sisters. "Door"?!
+
+Anyway, let's calculate the frequency for each word for the works of Jane Austen, the Brontë sisters, and H.G. Wells.
+
+```{r}
+tidy_both <- bind_rows(
+        mutate(tidy_bronte, author = "Brontë Sisters"),
+        mutate(tidy_hgwells, author = "H.G. Wells"))
+frequency <- tidy_both %>%
+        mutate(word = str_extract(word, "[a-z]+")) %>%
+        count(author, word) %>%
+        rename(other = n) %>%
+        inner_join(count(tidy_books, word)) %>%
+        rename(Austen = n) %>%
+        mutate(other = other / sum(other),
+               Austen = Austen / sum(Austen)) %>%
+        ungroup()
+```
+
+I'm using `str_extract` here because the UTF-8 encoded texts from Project Gutenberg have some examples of words with underscores around them to indicate emphasis (like italics). The tokenizer treated these as words but we don't want to count "\_any\_" separately from "any". Now let's plot.
+
+```{r, fig.width=10, fig.height=5.5}
+library(scales)
+ggplot(frequency, aes(x = other, y = Austen, color = abs(Austen - other))) +
+        geom_abline(color = "gray40") +
+        geom_jitter(alpha = 0.1, size = 2.5, width = 0.4, height = 0.4) +
+        geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
+        scale_x_log10(labels = percent_format()) +
+        scale_y_log10(labels = percent_format()) +
+        scale_color_gradient(limits = c(0, 0.001), low = "darkslategray4", high = "gray75") +
+        facet_wrap(~author, ncol = 2) +
+        theme_minimal(base_size = 14) +
+        theme(legend.position="none") +
+        labs(title = "Comparing Word Frequencies",
+             subtitle = "Word frequencies in Jane Austen's texts are closer to the Brontë sisters' than to H.G. Wells'",
+             y = "Jane Austen", x = NULL)
+```
+
+Words that are close to the line in these plots have similar frequencies in both sets of texts, for example, in both Austen and Brontë texts ("miss", "time", "lady", "day" at the upper frequency end) or in both Austen and Wells texts ("time", "day", "mind", "brother" at the high frequency end). Words that are far from the line are words that are found more in one set of texts than another. For example, in the Austen-Brontë plot, words like "elizabeth", "emma", "captain", and "bath" (all proper nouns) are found in Austen's texts but not much in the Brontë texts, while words like "arthur", "dark", "dog", and "doctor" are found in the Brontë texts but not the Austen texts. In comparing H.G. Wells with Jane Austen, Wells uses words like "beast", "guns", "brute", and "animal" that Austen does not, while Austen uses words like "family", "friend", "letter", and "agreeable" that Wells does not.
+
+Overall, notice that the words in the Austen-Brontë plot are closer to the zero-slope line than in the Austen-Wells plot and also extend to lower frequencies; Austen and the Brontë sisters use more similar words than Austen and H.G. Wells. Also, we might notice the percent frequencies for individual words are different in one plot when compared to another because of the inner join; not all the words are found in all three sets of texts so the percent frequency is a different quantity.
+
+Let's quantify how similar and different these sets of word frequencies are using a correlation test. How correlated are the word frequencies between Austen and the Brontë sisters, and between Austen and Wells?
+
+```{r}
+cor.test(data = frequency[frequency$author == "Brontë Sisters",], ~ other + Austen)
+cor.test(data = frequency[frequency$author == "H.G. Wells",], ~ other + Austen)
+```
+
+The relationship between the word frequencies is different between these sets of texts, as it appears in the plots.
