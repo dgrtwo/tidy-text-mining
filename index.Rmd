@@ -1,5 +1,5 @@
 --- 
-title: "Tidy Text Mining"
+title: "Tidy Text Mining in R"
 author: "Julia Silge and David Robinson"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
