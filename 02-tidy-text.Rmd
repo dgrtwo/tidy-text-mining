@@ -47,7 +47,7 @@ We've now split each row so that there's one token (word) in each row of the new
 
 Having the text data in this format lets us manipulate, process, and visualize the text using the standard set of tidy tools; namely dplyr, tidyr, ggplot2, and broom.
 
-## Example: the works of Jane Austen
+## Tidying the works of Jane Austen
 
 Let's use the text of Jane Austen's 6 completed, published novels from the [janeaustenr](https://cran.r-project.org/package=janeaustenr) package, and transform them into a tidy format. janeaustenr provides them as a one-row-per-line format:
 
@@ -107,7 +107,7 @@ tidy_books %>%
 
 TODO: Now that we've introduced the janeaustenr package, also include a brief intro to the gutenberg package.
 
-## Word Frequencies
+## Word frequencies
 
 A common task in text mining is to look at word frequencies and to compare frequencies across different texts. We can do this intuitively and smoothly using tidy data principles. We already have Jane Austen's works; let's get two more sets of texts to compare to. First, let's look at some science fiction and fantasy novels by H.G. Wells, who lived in the late 19th and early 20th centuries. Let's get [*The Time Machine*](https://www.gutenberg.org/ebooks/35), [*The War of the Worlds*](https://www.gutenberg.org/ebooks/36), [*The Invisible Man*](https://www.gutenberg.org/ebooks/5230), and [*The Island of Doctor Moreau*](https://www.gutenberg.org/ebooks/159).
 

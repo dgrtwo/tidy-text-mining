@@ -73,7 +73,7 @@ We can see here how the plot of each novel changes toward more positive or negat
 
 TODO: The three different methods of calculating sentiment give results that are different in an absolute sense but have similar relative trajectories through the novel.
 
-### Most common positive and negative words
+## Most common positive and negative words
 
 One advantage of having the data frame with both sentiment and word is that we can analyze word counts that contribute to each sentiment.
 
@@ -101,7 +101,7 @@ bing_word_counts %>%
 
 This lets us spot an anomaly in the sentiment analysis; the word "miss" is coded as negative but it is used as a title for young, unmarried women in Jane Austen's works. If it were appropriate for our purposes, we could easily add "miss" to a custom stop-words list using `bind_rows`.
 
-### Wordclouds
+## Wordclouds
 
 We've seen that this tidy text mining approach works well with ggplot2, but having our data in a tidy format is useful for other plots as well.
 
@@ -128,7 +128,7 @@ tidy_books %>%
                    max.words = 100)
 ```
 
-### Looking at units beyond just words
+## Looking at units beyond just words
 
 Lots of useful work can be done by tokenizing at the word level, but sometimes it is useful or necessary to look at different units of text. For example, some sentiment analysis algorithms look beyond only unigrams (i.e. single words) to try to understand the sentiment of a sentence as a whole. These algorithms try to understand that
 
