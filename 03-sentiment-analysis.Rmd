@@ -1,5 +1,12 @@
 # Sentiment Analysis with Tidy Data {#sentiment}
 
+```{r echo = FALSE}
+library(knitr)
+opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
+
+options(width = 100, dplyr.width = 100)
+```
+
 ## The `sentiments` dataset
 
 There are a variety of methods and dictionaries that exist for evaluating the opinion or emotion in text. The tidytext package contains three sentiment lexicons in the `sentiments` dataset. 

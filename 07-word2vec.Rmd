@@ -1,3 +1,0 @@
-# Tidying word2vec Models from the glove Package {#word2vec}
-
-TODO: still a lot of work to be done on the methods as well as the chapter, may or may not make it in
