@@ -31,7 +31,7 @@ This book is focused on practical software examples and data explorations. There
 
 We don't assume any previous knowledge of text mining, and professional linguists and text analysts will likely find our examples elementary, though we are confident they can build on the framework for their own analyses.
 
-We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `%>%` "pipe" operator in R, and is interested in applying these tools to text data. We're confident that even a user early in their career can pick up these  For users who don't have this background, we recommend books such R for Data Science [TODO]. We believe that with a basic background and interest in tidy data, even a user early in their R career can understand and apply our examples.
+We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `%>%` "pipe" operator in R, and is interested in applying these tools to text data. For users who don't have this background, we recommend books such R for Data Science [TODO]. We believe that with a basic background and interest in tidy data, even a user early in their R career can understand and apply our examples.
 
 ## Outline
 
@@ -55,12 +55,10 @@ We conclude with several tidy text analyses that bring together multiple text mi
 
 ## Topics this book does not cover
 
-This book serves as an introduction to a framework along with a collection of examples, but it is far from a complete.
+This book serves as an introduction to a framework along with a collection of examples, but it is far from a complete exploration of natural language processing. The [CRAN Task View on Natural Language Processing](https://cran.r-project.org/web/views/NaturalLanguageProcessing.html) provides details on more ways to use R for computational linguistics. There are several areas that ...
 
-Most notably CRAN Task View on Natural Language Processing
-
-* **Supervised classification and prediction.** Machine learning on text is a vast topic that could easily fill its own volume. We introduce one method of unsupervised clustering (topic modeling through Latent Dirichlet Allocation) in Chapter 6
-* **More complex tokenization.** We hand tokenization off to the tokenizers package [cite], which itself wraps a variety of tokenizers with a consistent interface, but many others exist for specific applications.
-* **More here**
+* **Supervised classification and prediction.** Machine learning on text is a vast topic that could easily fill its own volume. We introduce one method of unsupervised clustering (topic modeling through Latent Dirichlet Allocation) in Chapter 7
+* **More complex tokenization.** We hand tokenization off to the tokenizers package [@R-tokenizers], which itself wraps a variety of tokenizers with a consistent interface, but many others exist for specific applications.
+* **More here** TODO
 
 We feel that the tools . We also believe strongly that the tidy data philosophy is well suited to extensions
