@@ -7,11 +7,14 @@ opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 150)
 ```
 
+## Topic modeling
+
 Topic modeling is a method for unsupervised classification of documents, by modeling each document as a mixture of topics and each topic as a mixture of words. [Latent Dirichlet allocation](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) is a particularly popular method for fitting a topic model.
 
-We can use tidy text principles, as described in [the main vignette](tidytext.html), to approach topic modeling using consistent and effective tools. In particular, we'll be using tidying functions for LDA objects from the [topicmodels package](https://cran.r-project.org/package=topicmodels).
+We can use tidy text principles, as described in Chapter 2, to approach topic modeling using consistent and effective tools. In particular, we'll be using tidying functions for LDA objects from the [topicmodels package](https://cran.r-project.org/package=topicmodels).
+u789
 
-## Can we tell the difference between Dickens, Wells, Verne, and Austen?
+## Setup
 
 Suppose a vandal has broken into your study and torn apart four of your books:
 
@@ -20,11 +23,9 @@ Suppose a vandal has broken into your study and torn apart four of your books:
 * *Twenty Thousand Leagues Under the Sea* by Jules Verne
 * *Pride and Prejudice* by Jane Austen
 
-This vandal has torn the books into individual chapters, and left them in one large pile. How can we restore these disorganized chapters to their original books?
+This vandal has torn the books into individual chapters, and left them in one large pile. How can we restore these disorganized chapters to their original books? We'll use topic modeling to discover how chapters are distinguished into distinct topics.
 
-## Setup
-
-We'll retrieve four books using the gutenbergr package:
+We'll retrieve these four books using the gutenbergr package:
 
 ```{r topic_books}
 library(dplyr)

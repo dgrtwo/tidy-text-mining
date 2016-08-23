@@ -335,7 +335,7 @@ austen_section_words <- austen_books() %>%
 
 ![The philosophy behind the widyr package, which can operations such as counting and correlating on pairs of values in a tidy dataset.](images/widyr.jpg)
 
-We can count common pairs of words that appear together.
+One example of the widyr pattern is the `pairwise_count` function. The prefix "pairwise" means it will result in one row for each pair of words in the `word` variable. This lets us count common pairs of words co-appearing within the same section:
 
 ```{r count_pairs_words, dependson = "austen_section_words"}
 library(widyr)

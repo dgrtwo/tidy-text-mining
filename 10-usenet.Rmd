@@ -7,7 +7,9 @@ opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 150)
 ```
 
-Here we'll use what we've learned in the book to perform a start-to-finish analysis of the 
+Here we'll use what we've learned in the book to perform a start-to-finish analysis of the Usenet 
+
+## Setup
 
 We'll start by reading in all the messages. (Note that this step takes several minutes).
 
