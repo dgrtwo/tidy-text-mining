@@ -5,4 +5,15 @@ Authors@R: c(person("David", "Robinson", email = "admiral.david@gmail.com", role
              person("Julia", "Silge", email = "julia.silge@gmail.com", role = c("aut")))
 Depends: R (>= 3.3.0)
 Imports:
-  bookdown
+  bookdown,
+  ggplot2,
+  tidytext,
+  dplyr,
+  tidyr,
+  reshape2
+  gutenbergr,
+  jsonlite,
+  igraph
+Remotes:
+  dgrtwo/widyr,
+  thomasp85/ggraph
