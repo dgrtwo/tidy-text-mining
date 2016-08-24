@@ -1,2 +1,18 @@
 book_filename: "tidy-text-mining"
 chapter_name: "Chapter "
+
+rmd_files: [
+  "index.Rmd",
+
+  "01-intro.Rmd",
+  "02-tidy-text.Rmd",
+  "03-sentiment-analysis.Rmd",
+
+  "04-tf-idf.Rmd",
+  "05-word-combinations.Rmd",
+  "06-document-term-matrices.Rmd",
+  "07-topic-models.Rmd",
+
+  "10-usenet.Rmd",
+  "11-references.Rmd",
+]
