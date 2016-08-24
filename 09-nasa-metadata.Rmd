@@ -121,10 +121,9 @@ titlewords %>%
         ggraph(layout = "fr") +
         geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
         geom_node_point(color = "darkslategray4", size = 5) +
-        geom_node_text(aes(label = name), vjust = 1.8, 
-                       family = "RobotoCondensed-Regular") +
+        geom_node_text(aes(label = name), vjust = 1.8) +
         ggtitle("Word Network in NASA Dataset Titles") +
-        theme_void(base_family = "RobotoCondensed-Regular")
+        theme_void()
 ```
 
 This is a good start, although it looks like there may still a bit more cleaning to be done.
@@ -139,10 +138,9 @@ descwords %>%
         ggraph(layout = "fr") +
         geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
         geom_node_point(color = "indianred4", size = 5) +
-        geom_node_text(aes(label = name), vjust = 1.8, 
-                       family = "RobotoCondensed-Regular") +
+        geom_node_text(aes(label = name), vjust = 1.8) +
         ggtitle("Word Network in NASA Dataset Descriptions") +
-        theme_void(base_family = "RobotoCondensed-Regular")
+        theme_void()
 
 ```
 
@@ -163,10 +161,9 @@ descwords %>%
         ggraph(layout = "fr") +
         geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
         geom_node_point(color = "indianred4", size = 5) +
-        geom_node_text(aes(label = name), vjust = 1.8, 
-                       family = "RobotoCondensed-Regular") +
+        geom_node_text(aes(label = name), vjust = 1.8) +
         ggtitle("Word Network in NASA Dataset Descriptions") +
-        theme_void(base_family = "RobotoCondensed-Regular")
+        theme_void()
 
 ```
 
