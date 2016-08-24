@@ -31,15 +31,15 @@ This book is focused on practical software examples and data explorations. There
 
 We don't assume any previous knowledge of text mining, and professional linguists and text analysts will likely find our examples elementary, though we are confident they can build on the framework for their own analyses.
 
-We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `%>%` "pipe" operator in R, and is interested in applying these tools to text data. For users who don't have this background, we recommend books such R for Data Science [TODO]. We believe that with a basic background and interest in tidy data, even a user early in their R career can understand and apply our examples.
+We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `%>%` "pipe" operator in R, and is interested in applying these tools to text data. For users who don't have this background, we recommend books such [R for Data Science](http://r4ds.had.co.nz/). We believe that with a basic background and interest in tidy data, even a user early in their R career can understand and apply our examples.
 
 ## Outline
 
 We start by introducing the tidy text format, and some of the ways dplyr, tidyr, and tidytext allow informative analyses of this structure.
 
 * **Chapter 2** outlines the tidy text format and the `unnest_tokens` function. It also introduces the gutenbergr and janeaustenr packages, which provide useful literary text datasets that we'll use throughout this book.
-* **Chapter 3** shows how to perform sentiment analysis on a tidy text dataset, using the `sentiments` dataset from tidytext and `inner_join` from dplyr
-* **Chapter 4** describes the method of TF-IDF (term frequency times inverse document frequency), for identifying terms that are especially important to a particular document. (Other document stuff in this chapter perhaps?)
+* **Chapter 3** shows how to perform sentiment analysis on a tidy text dataset, using the `sentiments` dataset from tidytext and `inner_join` from dplyr.
+* **Chapter 4** describes the statistic of tf-idf (term frequency times inverse document frequency), a quantity used for identifying terms that are especially important to a particular document. (Other document stuff in this chapter perhaps?)
 * **Chapter 5** introduces n-grams and how to analyze word networks in text using the widyr package.
 
 Text won't be tidy at all stages of an analysis, and it is important to be able to convert back and forth from a tidy format.
@@ -55,10 +55,10 @@ We conclude with several tidy text analyses that bring together multiple text mi
 
 ## Topics this book does not cover
 
-This book serves as an introduction to a framework along with a collection of examples, but it is far from a complete exploration of natural language processing. The [CRAN Task View on Natural Language Processing](https://cran.r-project.org/web/views/NaturalLanguageProcessing.html) provides details on more ways to use R for computational linguistics. There are several areas that ...
+This book serves as an introduction to a framework along with a collection of examples, but it is far from a complete exploration of natural language processing. The [CRAN Task View on Natural Language Processing](https://cran.r-project.org/web/views/NaturalLanguageProcessing.html) provides details on more ways to use R for computational linguistics. There are several areas that you may want to explore in more detail according to your needs.
 
-* **Supervised classification and prediction.** Machine learning on text is a vast topic that could easily fill its own volume. We introduce one method of unsupervised clustering (topic modeling through Latent Dirichlet Allocation) in Chapter 7
-* **More complex tokenization.** We hand tokenization off to the tokenizers package [@R-tokenizers], which itself wraps a variety of tokenizers with a consistent interface, but many others exist for specific applications.
-* **More here** TODO
+* **Supervised classification and prediction:** Machine learning on text is a vast topic that could easily fill its own volume. We introduce one method of unsupervised clustering (topic modeling through latent Dirichlet allocation) in [Chapter 7](topicmodeling.html) but many more machine learning algorithms are used in dealing with text.
+* **More complex tokenization:** We hand tokenization off to the tokenizers package [@R-tokenizers], which itself wraps a variety of tokenizers with a consistent interface, but many others exist for specific applications.
+* **More here:** TODO
 
-We feel that the tools . We also believe strongly that the tidy data philosophy is well suited to extensions
+We feel that the tools ... We also believe strongly that the tidy data philosophy is well suited to extensions
