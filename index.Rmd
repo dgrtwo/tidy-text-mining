@@ -9,7 +9,6 @@ documentclass: book
 bibliography: [book.bib, packages.bib]
 biblio-style: apalike
 link-citations: yes
-url: "http://tidytextmining.com/"
 github-repo: dgrtwo/tidy-text-mining
 description: "A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools"
 ---
