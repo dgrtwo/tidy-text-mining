@@ -15,6 +15,8 @@ before_script:
 script:
 - ./_build.sh
 after_success:
+- echo $TRAVIS_PULL_REQUEST
+- echo $TRAVIS_BRANCH
 - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash
   _deploy.sh
 env:
