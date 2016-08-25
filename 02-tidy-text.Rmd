@@ -111,9 +111,16 @@ TODO: Now that we've introduced the janeaustenr package, also include a brief in
 
 A common task in text mining is to look at word frequencies and to compare frequencies across different texts. We can do this intuitively and smoothly using tidy data principles. We already have Jane Austen's works; let's get two more sets of texts to compare to. First, let's look at some science fiction and fantasy novels by H.G. Wells, who lived in the late 19th and early 20th centuries. Let's get [*The Time Machine*](https://www.gutenberg.org/ebooks/35), [*The War of the Worlds*](https://www.gutenberg.org/ebooks/36), [*The Invisible Man*](https://www.gutenberg.org/ebooks/5230), and [*The Island of Doctor Moreau*](https://www.gutenberg.org/ebooks/159).
 
-```{r}
+```{r eval = FALSE}
 library(gutenbergr)
 hgwells <- gutenberg_download(c(35, 36, 5230, 159))
+```
+
+```{r hgwells, echo = FALSE}
+load("data/hgwells.rda")
+```
+
+```{r tidy_hgwells, dependson = "hgwells"}
 tidy_hgwells <- hgwells %>%
         unnest_tokens(word, text) %>%
         anti_join(stop_words)
@@ -121,15 +128,22 @@ tidy_hgwells <- hgwells %>%
 
 Just for kicks, what are the most common words in these novels of H.G. Wells?
 
-```{r}
+```{r dependson = "tidy_hgwells"}
 tidy_hgwells %>%
         count(word, sort = TRUE)
 ```
 
 Now let's get some well-known works of the Brontë sisters, whose lives overlapped with Jane Austen's somewhat but who wrote in a bit of a different style. Let's get [*Jane Eyre*](https://www.gutenberg.org/ebooks/1260), [*Wuthering Heights*](https://www.gutenberg.org/ebooks/768), [*The Tenant of Wildfell Hall*](https://www.gutenberg.org/ebooks/969), [*Villette*](https://www.gutenberg.org/ebooks/9182), and [*Agnes Grey*](https://www.gutenberg.org/ebooks/767).
 
-```{r}
+```{r eval = FALSE}
 bronte <- gutenberg_download(c(1260, 768, 969, 9182, 766))
+```
+
+```{r echo = FALSE}
+load("data/bronte.rda")
+```
+
+```{r dependson = "bronte"}
 tidy_bronte <- bronte %>%
         unnest_tokens(word, text) %>%
         anti_join(stop_words)

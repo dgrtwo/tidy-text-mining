@@ -112,10 +112,17 @@ Let's work with another corpus of documents, to see what terms are important in 
 
 This is a pretty diverse bunch. They may all be physics classics, but they were written across a 300-year timespan, and some of them were first written in other languages and then translated to English. Perfectly homogeneous these are not, but that doesn't stop this from being an interesting exercise!
 
-```{r}
+```{r eval = FALSE}
 library(gutenbergr)
 physics <- gutenberg_download(c(37729, 14725, 13476, 5001), 
                               meta_fields = "author")
+```
+
+```{r physics, echo = FALSE}
+load("data/physics.rda")
+```
+
+```{r dependson = "physics"}
 physics_words <- physics %>%
         unnest_tokens(word, text) %>%
         count(author, word, sort = TRUE) %>%

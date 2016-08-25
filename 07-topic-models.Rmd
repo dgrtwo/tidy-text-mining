@@ -29,20 +29,25 @@ We'll retrieve these four books using the gutenbergr package:
 
 ```{r topic_books}
 library(dplyr)
-library(gutenbergr)
 
 titles <- c("Twenty Thousand Leagues under the Sea", "The War of the Worlds",
             "Pride and Prejudice", "Great Expectations")
+```
+
+```{r eval = FALSE}
+library(gutenbergr)
 
 books <- gutenberg_works(title %in% titles) %>%
   gutenberg_download(meta_fields = "title")
+```
 
-books
+```{r topic_books, echo = FALSE}
+load("data/books.rda")
 ```
 
 As pre-processing, we divide these into chapters, use tidytext's `unnest_tokens` to separate them into words, then remove `stop_words`. We're treating every chapter as a separate "document", each with a name like `Great Expectations_1` or `Pride and Prejudice_11`.
 
-```{r word_counts}
+```{r word_counts, dependson = "topic_books"}
 library(tidytext)
 library(stringr)
 library(tidyr)

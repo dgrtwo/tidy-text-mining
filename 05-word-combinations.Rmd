@@ -300,12 +300,13 @@ We could visualize pairs in the King James Bible:
 
 At that point, we could visualize digrams in other works, such as the King James Version of the Bible:
 
-```{r kjv}
+```{r eval = FALSE}
 library(gutenbergr)
-
 kjv <- gutenberg_download(10)
+```
 
-kjv
+```{r kjv, echo = FALSE}
+load("data/kjv.rda")
 ```
 
 ```{r kjv_digrams, dependson = "kjv"}
