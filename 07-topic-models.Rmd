@@ -196,7 +196,7 @@ One important step in the topic modeling expectation-maximization algorithm is a
 We may want to take the original document-word pairs and find which words in each document were assigned to which topic. This is the job of the `augment` verb.
 
 ```{r assignments}
-assignments <- augment(chapters_lda, data = chapters_dtm)
+assignments <- tidytext:::augment.LDA(chapters_lda, data = chapters_dtm)
 ```
 
 We can combine this with the consensus book titles to find which words were incorrectly classified.
