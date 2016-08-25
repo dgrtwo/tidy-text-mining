@@ -20,7 +20,7 @@ knitr::write_bib(c(
 ), 'packages.bib')
 ```
 
-# Welcome to Tidy Text Mining in R
+# Welcome to Tidy Text Mining in R {-}
 
 Welcome to the [website](http://tidytextmining.com/) for *Tidy Text Mining in R*! Visit the [GitHub repository for this site](https://github.com/dgrtwo/tidy-text-mining).
 
