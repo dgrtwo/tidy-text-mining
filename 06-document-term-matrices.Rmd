@@ -84,6 +84,8 @@ ap_sentiments %>%
 A tidier is also available for the `dfm` (document-feature matrix) class from the quanteda package [@R-quanteda]. Consider the corpus of presidential inauguration speeches that comes with the quanteda package:
 
 ```{r quanteda_corpus}
+library(methods)
+
 data("inaugCorpus", package = "quanteda")
 d <- quanteda::dfm(inaugCorpus)
 
