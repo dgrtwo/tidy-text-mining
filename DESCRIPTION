@@ -22,7 +22,8 @@ Imports:
   quanteda,
   wordcloud,
   viridis,
-  ggthemes
+  ggthemes,
+  lubridate
 Remotes:
   dgrtwo/widyr,
   thomasp85/ggforce,
