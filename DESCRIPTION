@@ -17,9 +17,9 @@ Imports:
   readr,
   wordcloud,
   viridis,
-  ggstance,
   ggthemes
 Remotes:
   dgrtwo/widyr,
   thomasp85/ggforce,
-  thomasp85/ggraph
+  thomasp85/ggraph,
+  lionel-/ggstance
