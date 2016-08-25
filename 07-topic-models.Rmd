@@ -27,7 +27,7 @@ This vandal has torn the books into individual chapters, and left them in one la
 
 We'll retrieve these four books using the gutenbergr package:
 
-```{r topic_books}
+```{r titles}
 library(dplyr)
 
 titles <- c("Twenty Thousand Leagues under the Sea", "The War of the Worlds",
