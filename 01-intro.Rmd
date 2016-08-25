@@ -61,4 +61,4 @@ This book serves as an introduction to a framework along with a collection of ex
 * **More complex tokenization:** We hand tokenization off to the tokenizers package [@R-tokenizers], which itself wraps a variety of tokenizers with a consistent interface, but many others exist for specific applications.
 * **More here:** TODO
 
-We feel that the tools ... We also believe strongly that the tidy data philosophy is well suited to extensions
+We feel that the tools ... We also believe strongly that the tidy data philosophy is well suited to extensions beyond these examples.
