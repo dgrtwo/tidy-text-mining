@@ -1,5 +1,3 @@
-echo "deploying"
-
 # Set git config information
 git config --global user.name "David Robinson"
 git config --global user.email "admiral.david@gmail.com"
