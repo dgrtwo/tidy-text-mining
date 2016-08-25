@@ -10,7 +10,7 @@ Imports:
   tidytext,
   dplyr,
   tidyr,
-  reshape2
+  reshape2,
   gutenbergr,
   jsonlite,
   igraph
