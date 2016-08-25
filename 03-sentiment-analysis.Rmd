@@ -12,6 +12,8 @@ options(width = 100, dplyr.width = 100)
 There are a variety of methods and dictionaries that exist for evaluating the opinion or emotion in text. The tidytext package contains three sentiment lexicons in the `sentiments` dataset. 
 
 ```{r}
+library(tidytext)
+
 sentiments
 ```
 
