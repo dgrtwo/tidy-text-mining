@@ -33,7 +33,39 @@ One last caveat is that the size of the chunk of text that we add up unigram sen
 
 With data in a tidy format, sentiment analysis can be done as an inner join. Let's look at the words with a joy score from the NRC lexicon. What are the most common joy words in *Emma*?
 
-```{r dependson = "tidy_books"}
+
+```{r original_books}
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+
+original_books <- austen_books() %>%
+  group_by(book) %>%
+  mutate(linenumber = row_number(),
+         chapter = cumsum(str_detect(text, regex("^chapter [\\divxlc]",
+                                                 ignore_case = TRUE)))) %>%
+  ungroup()
+
+original_books
+```
+
+To work with this as a tidy dataset, we need to restructure it as **one-token-per-row** format. The `unnest_tokens` function is a way to convert a dataframe with a text column to be one-token-per-row:
+
+```{r original_books}
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+library(tidytext)
+
+tidy_books <- austen_books() %>%
+  group_by(book) %>%
+  mutate(linenumber = row_number(),
+         chapter = cumsum(str_detect(text, regex("^chapter [\\divxlc]", ignore_case = TRUE)))) %>%
+  ungroup() %>%
+  unnest_tokens(word, text)
+```
+
+```{r}
 nrcjoy <- sentiments %>%
   filter(lexicon == "nrc", sentiment == "joy")
 
