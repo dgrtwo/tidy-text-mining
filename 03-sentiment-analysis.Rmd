@@ -1,4 +1,4 @@
-# Sentiment Analysis with Tidy Data {#sentiment}
+# Sentiment analysis with tidy data {#sentiment}
 
 ```{r echo = FALSE}
 library(knitr)
@@ -59,7 +59,7 @@ tidy_books %>%
 
 Or instead we could examine how sentiment changes during each novel. Let's find a sentiment score for each word using the Bing lexicon, then count the number of positive and negative words in defined sections of each novel.
 
-```{r}
+```{r janeaustensentiment, dependson = "tidy_books"}
 library(tidyr)
 bing <- sentiments %>%
   filter(lexicon == "bing") %>%
@@ -74,22 +74,12 @@ janeaustensentiment <- tidy_books %>%
 
 Now we can plot these sentiment scores across the plot trajectory of each novel.
 
-```{r, fig.width=10, fig.height=10}
+```{r sentimentplot, dependson = "janeaustensentiment", fig.width=10, fig.height=10}
 library(ggplot2)
-library(viridis)
+
 ggplot(janeaustensentiment, aes(index, sentiment, fill = book)) +
         geom_bar(stat = "identity", show.legend = FALSE) +
-        facet_wrap(~book, ncol = 2, scales = "free_x") +
-        theme_minimal(base_size = 13) +
-        labs(title = "Sentiment in Jane Austen's Novels",
-             y = "Sentiment") +
-        scale_fill_viridis(end = 0.75, discrete=TRUE, direction = -1) +
-        scale_x_discrete(expand=c(0.02,0)) +
-        theme(strip.text=element_text(hjust=0)) +
-        theme(strip.text = element_text(face = "italic")) +
-        theme(axis.title.x=element_blank()) +
-        theme(axis.ticks.x=element_blank()) +
-        theme(axis.text.x=element_blank())
+        facet_wrap(~book, ncol = 2, scales = "free_x")
 ```
 
 We can see here how the plot of each novel changes toward more positive or negative sentiment over the trajectory of the story.
@@ -100,7 +90,7 @@ TODO: The three different methods of calculating sentiment give results that are
 
 One advantage of having the data frame with both sentiment and word is that we can analyze word counts that contribute to each sentiment.
 
-```{r}
+```{r wordcounts, dependson = "tidy_books"}
 bing_word_counts <- tidy_books %>%
   inner_join(bing) %>%
   count(word, sentiment, sort = TRUE) %>%
@@ -111,7 +101,7 @@ bing_word_counts
 
 This can be shown visually, and we can pipe straight into ggplot2, if we like, because of the way we are consistently using tools built for handling tidy data frames.
 
-```{r, fig.width=7, fig.height=6}
+```{r pipetoplot, dependson = "wordcounts", fig.width=7, fig.height=6}
 bing_word_counts %>%
   filter(n > 150) %>%
   mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
@@ -130,7 +120,7 @@ We've seen that this tidy text mining approach works well with ggplot2, but havi
 
 For example, consider the wordcloud package. Let's look at the most common words in Jane Austen's works as a whole again.
 
-```{r, fig.height=6, fig.width=6}
+```{r firstwordcloud, dependson = "tidy_books", fig.height=6, fig.width=6}
 library(wordcloud)
 
 tidy_books %>%
@@ -140,7 +130,7 @@ tidy_books %>%
 
 In other functions, such as `comparison.cloud`, you may need to turn it into a matrix with reshape2's `acast`. Let's do the sentiment analysis to tag positive and negative words using an inner join, then find the most common positive and negative words. Until the step where we need to send the data to `comparison.cloud`, this can all be done with joins, piping, and dplyr because our data is in tidy format.
 
-```{r wordcloud, fig.height=5, fig.width=5}
+```{r wordcloud, dependson = "tidy_books", fig.height=5, fig.width=5}
 library(reshape2)
 
 tidy_books %>%
@@ -174,7 +164,7 @@ The sentence tokenizing does seem to have a bit of trouble with UTF-8 encoded te
 
 Another option in `unnest_tokens` is to split into tokens using a regex pattern. We could use this, for example, to split the text of Jane Austen's novels into a data frame by chapter.
 
-```{r}
+```{r, dependson = "tidy_books"}
 austen_chapters <- austen_books() %>%
   group_by(book) %>%
   unnest_tokens(chapter, text, token = "regex", pattern = "Chapter|CHAPTER [\\dIVXLC]") %>%
@@ -186,7 +176,7 @@ We have recovered the correct number of chapters in each novel (plus an "extra" 
 
 Near the beginning of this vignette, we used a similar regex to find where all the chapters were in Austen's novels for a tidy data frame organized by one-word-per-row. We can use tidy text analysis to ask questions such as what are the most negative chapters in each of Jane Austen's novels? First, let's get the list of negative words from the Bing lexicon. Second, let's make a dataframe of how many words are in each chapter so we can normalize for the length of chapters. Then, let's find the number of negative words in each chapter and divide by the total words in each chapter. Which chapter has the highest proportion of negative words?
 
-```{r}
+```{r chapters, dependson = "tidy_books"}
 bingnegative <- sentiments %>%
   filter(lexicon == "bing", sentiment == "negative")
 
