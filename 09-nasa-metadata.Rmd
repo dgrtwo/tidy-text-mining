@@ -1,10 +1,10 @@
-# Case Study: Mining NASA Metadata {#nasa}
+# Case study: mining NASA metadata {#nasa}
 
 There are 32,000+ datasets at [NASA](https://www.nasa.gov/), and we can use the metadata for these datasets to understand the connections between them. What is metadata? Metadata is data that gives information about other data, in this case, data about what is in these numerous NASA datasets. It includes information like the title of the dataset, description fields, what organization(s) with NASA is responsible for the dataset, and so forth. NASA places a high priority on making its data accessible, even requiring all NASA-funded research to be [openly accessible online](https://www.nasa.gov/press-release/nasa-unveils-new-public-web-portal-for-research-results), and the metadata for all its datasets is [publicly available online in JSON format](https://data.nasa.gov/data.json). Let's take a look at this metadata and see what is there.
 
-## Getting the Metadata
+## Getting the metadata
 
-```{r}
+```{r download}
 library(jsonlite)
 metadata <- fromJSON("https://data.nasa.gov/data.json")
 names(metadata$dataset)
@@ -24,22 +24,22 @@ class(metadata$dataset$description)
 class(metadata$dataset$keyword)
 ```
 
-## Wrangling and Tidying the Data
+## Wrangling and tidying the data
 
 Let's set up dataframes for title, description, and keyword and keep the dataset ids.
 
-```{r, message=FALSE}
+```{r title, dependson = "download", message=FALSE}
 library(dplyr)
 nasatitle <- data_frame(id = metadata$dataset$`_id`$`$oid`, title = metadata$dataset$title)
 nasatitle
 ```
 
-```{r, dplyr.width = 150}
+```{r desc, dependson = "download", dplyr.width = 150}
 nasadesc <- data_frame(id = metadata$dataset$`_id`$`$oid`, desc = metadata$dataset$description)
 nasadesc
 ```
 
-```{r}
+```{r keyword, dependson = "download"}
 library(tidyr)
 nasakeyword <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
                           keyword = metadata$dataset$keyword) %>%
@@ -49,13 +49,13 @@ nasakeyword
 
 Now let's do some unnesting/tidying of the title and description fields so we can do some NLP and text analysis. Let's also remove common English words.
 
-```{r}
+```{r unnest, dependson = c("title","desc")}
 library(tidytext)
 nasatitle <- nasatitle %>% unnest_tokens(word, title) %>% anti_join(stop_words)
 nasadesc <- nasadesc %>% unnest_tokens(word, desc) %>% anti_join(stop_words)
 ```
 
-## Some Initial Simple Exploration
+## Some initial simple exploration
 
 What are the most common words in the NASA dataset titles?
 
@@ -91,7 +91,7 @@ Looks like "Project completed" may not be useful keywords to keep around for som
 nasakeyword <- nasakeyword %>% mutate(keyword = toupper(keyword))
 ```
 
-## Word Co-ocurrences
+## Word co-ocurrences
 
 Let's examine which words commonly occur together in the titles and descriptions of NASA datasets. We can then examine a word network in titles/descriptions and this may help us decide, for example, how many topics to look at in topic modeling.
 
@@ -168,3 +168,5 @@ descwords %>%
 ```
 
 We still are not seeing clusters the way we did with the titles (the descriptions appear to use very similar words compared to each other), so using tf-idf may be a better way to go when approaching the description fields.
+
+TODO: tf-idf and topic modeling
