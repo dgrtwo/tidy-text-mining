@@ -94,7 +94,9 @@ chapters_lda
 Now tidytext gives us the option of *returning* to a tidy analysis, using the `tidy` and `augment` verbs borrowed from the [broom package](https://github.com/dgrtwo/broom). In particular, we start with the `tidy` verb.
 
 ```{r chapters_lda_td}
-chapters_lda_td <- tidy(chapters_lda)
+library(tidytext)
+
+chapters_lda_td <- tidytext:::tidy.LDA(chapters_lda)
 chapters_lda_td
 ```
 
@@ -133,7 +135,7 @@ These topics are pretty clearly associated with the four books! There's no quest
 Each chapter was a "document" in this analysis. Thus, we may want to know which topics are associated with each document. Can we put the chapters back together in the correct books?
 
 ```{r chapters_lda_gamma_raw}
-chapters_lda_gamma <- tidy(chapters_lda, matrix = "gamma")
+chapters_lda_gamma <- tidytext:::tidy.LDA(chapters_lda, matrix = "gamma")
 chapters_lda_gamma
 ```
 
