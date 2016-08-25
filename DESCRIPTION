@@ -23,7 +23,8 @@ Imports:
   wordcloud,
   viridis,
   ggthemes,
-  lubridate
+  lubridate,
+  scales
 Remotes:
   dgrtwo/widyr,
   thomasp85/ggforce,
