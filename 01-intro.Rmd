@@ -1,9 +1,10 @@
 # Introduction {#intro}
 
-* There is lots of unstructured data proliferating, including text. Analysts are often trained on numeric data, but not in even simple interpretation of natural language.
-* The authors developed the tidytext package because we were familiar with many methods for data wrangling and visualization, but couldn't easily apply these same methods to text.
-* We found that the tidy data philosophy. By treating text as data frames of words, we can manipulate, summarize, and visualize it easily
-* The tools provided by the tidytext package are relatively simple; what is important is the possible applications. Thus, this book provides compelling examples of real text mining problems.
+If you work in analytics or data science, like we do, you are familiar with the fact that data is being generated all the time at ever faster rates. (You may even be a little weary of people pontificating about this fact.) Analysts are often trained to handle tabular or rectangular data that is mostly numeric, but much of the data proliferating today is unstructured and typically text-heavy. Many of us who work in analytic fields are not trained in even simple interpretation of natural language.
+
+We developed a new R package, tidytext [@R-tidytext], because we were familiar with many methods for data wrangling and visualiation, but couldn't easily apply these same methods to text. We found that using tidy data principles can make many text mining tasks easier, more effective, and consistent with tools already in wide use. By treating text as data frames of words, we can manipulate, summarize, and visualize the characteristics of text easily and integrate natural language processing into effective workflows we were already using.
+
+The tools provided by the tidytext package are relatively simple; what is important is the possible applications. Thus, this book provides compelling examples of real text mining problems.
 
 ## What is tidy text?
 
@@ -31,7 +32,7 @@ This book is focused on practical software examples and data explorations. There
 
 We don't assume any previous knowledge of text mining, and professional linguists and text analysts will likely find our examples elementary, though we are confident they can build on the framework for their own analyses.
 
-We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `%>%` "pipe" operator in R, and is interested in applying these tools to text data. For users who don't have this background, we recommend books such [R for Data Science](http://r4ds.had.co.nz/). We believe that with a basic background and interest in tidy data, even a user early in their R career can understand and apply our examples.
+We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `%>%` "pipe" operator in R, and is interested in applying these tools to text data. For users who don't have this background, we recommend books such as [R for Data Science](http://r4ds.had.co.nz/). We believe that with a basic background and interest in tidy data, even a user early in their R career can understand and apply our examples.
 
 ## Outline
 
@@ -39,7 +40,7 @@ We start by introducing the tidy text format, and some of the ways dplyr, tidyr,
 
 * **Chapter 2** outlines the tidy text format and the `unnest_tokens` function. It also introduces the gutenbergr and janeaustenr packages, which provide useful literary text datasets that we'll use throughout this book.
 * **Chapter 3** shows how to perform sentiment analysis on a tidy text dataset, using the `sentiments` dataset from tidytext and `inner_join` from dplyr.
-* **Chapter 4** describes the statistic of tf-idf (term frequency times inverse document frequency), a quantity used for identifying terms that are especially important to a particular document. (Other document stuff in this chapter perhaps?)
+* **Chapter 4** describes the tf-idf statistic (term frequency times inverse document frequency), a quantity used for identifying terms that are especially important to a particular document. (Other document stuff in this chapter perhaps?)
 * **Chapter 5** introduces n-grams and how to analyze word networks in text using the widyr package.
 
 Text won't be tidy at all stages of an analysis, and it is important to be able to convert back and forth from a tidy format.
@@ -59,6 +60,7 @@ This book serves as an introduction to a framework along with a collection of ex
 
 * **Supervised classification and prediction:** Machine learning on text is a vast topic that could easily fill its own volume. We introduce one method of unsupervised clustering (topic modeling through latent Dirichlet allocation) in [Chapter 7](topicmodeling.html) but many more machine learning algorithms are used in dealing with text.
 * **More complex tokenization:** We hand tokenization off to the tokenizers package [@R-tokenizers], which itself wraps a variety of tokenizers with a consistent interface, but many others exist for specific applications.
-* **More here:** TODO
+* **Languages other than English:** Some of our users have had success applying tidytext to their text mining needs for languages other than English but we are not covering those issues in this book.
+* **More here?** TODO
 
-We feel that the tools ... We also believe strongly that the tidy data philosophy is well suited to extensions beyond these examples.
+We feel that the tidy data philosphy is a powerful tool to make handling data easier and more effective, and this is no less true when it comes to handling text. We also believe that the tools provided by tidy data principles and specifically tidy text mining are well suited to extensions beyond the examples we provide here.
