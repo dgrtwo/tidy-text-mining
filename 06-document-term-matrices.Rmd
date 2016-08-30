@@ -1,4 +1,4 @@
-# Tidying and casting document-term matrices
+# Tidying and casting document-term matrices {#dtm}
 
 ```{r echo = FALSE}
 library(knitr)
