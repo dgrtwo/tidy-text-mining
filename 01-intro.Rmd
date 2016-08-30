@@ -14,17 +14,11 @@ As described by Hadley Wickham [@tidydata], tidy data has a specific structure:
 * each observation is a row
 * each type of observational unit is a table
 
-We thus define the tidy text format as being **a table with one-term-per-row.** This is worth contrasting with the ways text is often stored in current analyses (TODO: move this to chapter 2?)
+We thus define the tidy text format as being **a table with one-term-per-row.** This is in contrast to the ways text is often stored in current analyses, as raw strings or perhaps a specialized format like a document-term matrix. For tidy text mining, the **term** that is stored in each row can be, mostly commonly, a single word, or perhaps an n-gram, a sentence, or another unit of text of interest for a certain analysis. In the tidytext package, we provide functionality to tokenize by commonly used units of text like these and convert to a one-term-per-row format.
 
-* **Raw strings**
-* **Corpus** These types of objects typically annotate the raw string content with additional metadata and details
-* **Document-term matrix** This is a sparse matrix with one row for each document and one column for each term
+Tidy data sets allow manipulation with a standard set of "tidy" tools, including popular packages such as dplyr [@R-dplyr], tidyr [@R-tidyr], ggplot2 [@R-ggplot2], and broom [@R-broom]. By keeping the input and output in tidy tables, users can transition fluidly between these tools. We've found these tidy tools extend naturally to many analyses and explorations. 
 
-Tidy data sets allow manipulation with a standard set of "tidy" tools, including popular packages such as dplyr [@R-dplyr], tidyr [@R-tidyr], ggplot2 [@R-ggplot2], and broom [@R-broom]. By keeping the input and output in tidy tables, users can transition fluidly between these tools. We've found these tidy tools extend naturally to many analyses and explorations.
-
-In the tidytext package provide functionality to tokenize by commonly used units of text including words, n-grams, and sentences. This lets someone convert efficiently from a data frame containing documents into a one-term-per-row format. At the same time, the tidytext package doesn't expect a user to keep text data in a tidy form at all times during an analysis. The package includes functions to `tidy` objects (see the broom package [@R-broom]) from popular text mining R packages such as tm [@tm] and quanteda [@R-quanteda].
-
-This allows, for example, a workflow with easy reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications. The models can then be re-converted into a tidy form for interpretation and visualization with ggplot2.
+At the same time, the tidytext package doesn't expect a user to keep text data in a tidy form at all times during an analysis. The package includes functions to `tidy` objects (see the broom package [@R-broom]) from popular text mining R packages such as tm [@tm] and quanteda [@R-quanteda]. This allows, for example, a workflow with easy reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications. The models can then be re-converted into a tidy form for interpretation and visualization with ggplot2.
 
 ## About this book
 
@@ -58,7 +52,7 @@ We conclude with several tidy text analyses that bring together multiple text mi
 
 This book serves as an introduction to a framework along with a collection of examples, but it is far from a complete exploration of natural language processing. The [CRAN Task View on Natural Language Processing](https://cran.r-project.org/web/views/NaturalLanguageProcessing.html) provides details on more ways to use R for computational linguistics. There are several areas that you may want to explore in more detail according to your needs.
 
-* **Supervised classification and prediction:** Machine learning on text is a vast topic that could easily fill its own volume. We introduce one method of unsupervised clustering (topic modeling through latent Dirichlet allocation) in [Chapter 7](topicmodeling.html) but many more machine learning algorithms are used in dealing with text.
+* **Supervised classification and prediction:** Machine learning on text is a vast topic that could easily fill its own volume. We introduce one method of unsupervised clustering (topic modeling through latent Dirichlet allocation) in [Chapter 7](#topicmodeling) but many more machine learning algorithms are used in dealing with text.
 * **More complex tokenization:** We hand tokenization off to the tokenizers package [@R-tokenizers], which itself wraps a variety of tokenizers with a consistent interface, but many others exist for specific applications.
 * **Languages other than English:** Some of our users have had success applying tidytext to their text mining needs for languages other than English but we are not covering those issues in this book.
 * **More here?** TODO
