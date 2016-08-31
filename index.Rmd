@@ -22,7 +22,7 @@ knitr::write_bib(c(
 
 # Welcome to Tidy Text Mining with R {-}
 
-<img src="images/tidycover.png" width="470" height="750" alt="Cover image" />
+<img src="images/tidycover.png" width="350" height="560" alt="Cover image" />
 
 
 This is the [website](http://tidytextmining.com/) for *Tidy Text Mining with R*! Visit the [GitHub repository for this site](https://github.com/dgrtwo/tidy-text-mining).
