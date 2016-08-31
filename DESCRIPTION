@@ -23,7 +23,8 @@ Imports:
   viridis,
   ggthemes,
   lubridate,
-  scales
+  scales,
+  stringr
 Remotes:
   hadley/ggplot2,
   dgrtwo/widyr,
