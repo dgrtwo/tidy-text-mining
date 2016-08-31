@@ -21,6 +21,7 @@ library(dplyr)
 
 tweets_julia <- read.csv("data/tweets_julia.csv", stringsAsFactors = FALSE)
 tweets_dave <- read.csv("data/tweets_dave.csv", stringsAsFactors = FALSE)
+# take out the timezone thing if we don't do anything with times of day
 tweets_julia$timestamp <- with_tz(ymd_hms(tweets_julia$timestamp), 
                                   "America/Denver")
 tweets_dave$timestamp <- with_tz(ymd_hms(tweets_dave$timestamp), 
@@ -35,7 +36,7 @@ David and Julia tweet at about the same rate currently and joined Twitter about 
 
 ## Word frequencies
 
-Let's use `unnest_tokens` to make a tidy dataframe of all the words in our tweets, and remove the common English stop words. There are certain conventions in how people use text on Twitter, so we will do a bit more work with our text here than, for example, we did with the narrative text from Project Gutenberg. The first `mutate` line below removes links and cleans out some characters that we don't want. In the call to `unnest_tokens`, we unnest using a regex pattern, instead of just looking for single unigrams (words). This regex pattern is very useful for dealing with Twitter text; it retains hashtags and mentions of usernames with the `\@` symbol. Because we have kept these types of symbols in the text, we can't use a simple `anti_join` to remove stop words. Instead, we can take the approach shown in the `filter` line that uses `str_detect` from the stringr library.
+Let's use `unnest_tokens` to make a tidy dataframe of all the words in our tweets, and remove the common English stop words. There are certain conventions in how people use text on Twitter, so we will do a bit more work with our text here than, for example, we did with the narrative text from Project Gutenberg. The first `mutate` line below removes links and cleans out some characters that we don't want. In the call to `unnest_tokens`, we unnest using a regex pattern, instead of just looking for single unigrams (words). This regex pattern is very useful for dealing with Twitter text; it retains hashtags and mentions of usernames with the `@` symbol. Because we have kept these types of symbols in the text, we can't use a simple `anti_join` to remove stop words. Instead, we can take the approach shown in the `filter` line that uses `str_detect` from the stringr library.
 
 ```{r tidytweets, dependson = "setup"}
 library(tidytext)
