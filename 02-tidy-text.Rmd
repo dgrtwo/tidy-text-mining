@@ -5,7 +5,7 @@ library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 100)
 library(ggplot2)
-theme_set(theme_bw())
+theme_set(theme_minimal())
 ```
 
 We define the tidy text format as being a table with **one-term-per-row.** Structuring text data in this way means that it is conforms to tidy data principles and can be manipulated with a set of consistent tools. This is worth contrasting with the ways text is often stored in text mining approaches.

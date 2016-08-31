@@ -5,7 +5,7 @@ library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 100)
 library(ggplot2)
-theme_set(theme_bw())
+theme_set(theme_minimal())
 ```
 
 ## The `sentiments` dataset
@@ -14,6 +14,7 @@ There are a variety of methods and dictionaries that exist for evaluating the op
 
 ```{r}
 library(tidytext)
+
 sentiments
 ```
 
