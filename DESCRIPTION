@@ -1,5 +1,5 @@
 Package: tidy-text-mining
-Title: Tidy Text Mining in R
+Title: Tidy Text Mining with R
 Version: 0.0.0.9000
 Authors@R: c(person("David", "Robinson", email = "admiral.david@gmail.com", role = c("aut", "cre")),
              person("Julia", "Silge", email = "julia.silge@gmail.com", role = c("aut")))
