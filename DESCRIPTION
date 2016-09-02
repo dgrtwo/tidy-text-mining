@@ -20,7 +20,6 @@ Imports:
   topicmodels,
   quanteda,
   wordcloud,
-  viridis,
   ggthemes,
   lubridate,
   scales,
