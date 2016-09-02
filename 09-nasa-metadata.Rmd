@@ -213,11 +213,11 @@ We still are not seeing clusters the way we did with the titles (the description
 
 Let's make a network of the keywords to see which keywords commonly occur together in the same datasets.
 
-```{r plot_keyword, dependson = "toupper", fig.height=6, fig.width=9}
-set.seed(4321)
+```{r plot_counts, dependson = "toupper", fig.height=6, fig.width=9}
 keyword_counts <- nasa_keyword %>% 
   pairwise_count(keyword, id, sort = TRUE)
 
+set.seed(4321)
 keyword_counts %>%
   filter(n >= 700) %>%
   graph_from_data_frame() %>%
@@ -225,7 +225,7 @@ keyword_counts %>%
   geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
   geom_node_point(color = "royalblue3", size = 5) +
   geom_node_text(aes(label = name), vjust = 1.8) +
-  ggtitle("Network in NASA Keywords") +
+  ggtitle("Co-occurrence Network in NASA Keywords") +
   theme_void()
 ```
 
