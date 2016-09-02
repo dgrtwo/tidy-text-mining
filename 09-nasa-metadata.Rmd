@@ -3,29 +3,33 @@
 ```{r echo = FALSE}
 library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
-
 options(width = 100, dplyr.width = 100)
+library(ggplot2)
+theme_set(theme_minimal())
 ```
 
-There are 32,000+ datasets at [NASA](https://www.nasa.gov/), and we can use the metadata for these datasets to understand the connections between them. What is metadata? Metadata is data that gives information about other data, in this case, data about what is in these numerous NASA datasets. It includes information like the title of the dataset, description fields, what organization(s) with NASA is responsible for the dataset, and so forth. NASA places a high priority on making its data accessible, even requiring all NASA-funded research to be [openly accessible online](https://www.nasa.gov/press-release/nasa-unveils-new-public-web-portal-for-research-results), and the metadata for all its datasets is [publicly available online in JSON format](https://data.nasa.gov/data.json). Let's take a look at this metadata and see what is there.
+There are 32,000+ datasets at [NASA](https://www.nasa.gov/), and we can use the metadata for these datasets to understand the connections between them. What is metadata? Metadata is data that gives information about other data, in this case, data about what is in these numerous NASA datasets (but not the datasets themselves). It includes information like the title of the dataset, description fields, what organization(s) within NASA is responsible for the dataset, and so forth. NASA places a high priority on making its data accessible, even requiring all NASA-funded research to be [openly accessible online](https://www.nasa.gov/press-release/nasa-unveils-new-public-web-portal-for-research-results), and the metadata for all its datasets is [publicly available online in JSON format](https://data.nasa.gov/data.json). Let's take a look at this metadata and see what is there.
 
 ## Getting the metadata
 
+First, let's download the JSON file and take a look at the names.
+
 ```{r download}
 library(jsonlite)
+
 metadata <- fromJSON("https://data.nasa.gov/data.json")
 names(metadata$dataset)
 ```
 
 What kind of data is available here?
 
-```{r}
+```{r sapply, dependson = "download"}
 sapply(metadata$dataset, class)
 ```
 
-It has been suggested that the title, description, and keywords for each dataset will probably be most fruitful for drawing connections between datasets. Let's check them out.
+It seems likely that the title, description, and keywords for each dataset may be most fruitful for drawing connections between datasets. It's a place to start anyway. Let's check them out.
 
-```{r}
+```{r class, dependson = "download"}
 class(metadata$dataset$title)
 class(metadata$dataset$description)
 class(metadata$dataset$keyword)
@@ -33,147 +37,198 @@ class(metadata$dataset$keyword)
 
 ## Wrangling and tidying the data
 
-Let's set up dataframes for title, description, and keyword and keep the dataset ids.
+Let's set up tidy data frames for title, description, and keyword and keep the dataset ids.
 
 ```{r title, dependson = "download", message=FALSE}
 library(dplyr)
-nasatitle <- data_frame(id = metadata$dataset$`_id`$`$oid`, title = metadata$dataset$title)
-nasatitle
+
+nasa_title <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
+                        title = metadata$dataset$title)
+nasa_title
 ```
 
 ```{r desc, dependson = "download", dplyr.width = 150}
-nasadesc <- data_frame(id = metadata$dataset$`_id`$`$oid`, desc = metadata$dataset$description)
-nasadesc
+nasa_desc <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
+                       desc = metadata$dataset$description)
+nasa_desc
 ```
+
+These are having a hard time printing out; let’s print out part of a few.
+
+```{r dependson = "desc"}
+nasa_desc %>% 
+  select(desc) %>% 
+  sample_n(5)
+```
+
+Now we can do the keywords, which must be unnested since they are in a list-column.
 
 ```{r keyword, dependson = "download"}
 library(tidyr)
-nasakeyword <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
+
+nasa_keyword <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
                           keyword = metadata$dataset$keyword) %>%
-        unnest(keyword)
-nasakeyword
+  unnest(keyword)
+nasa_keyword
 ```
 
-Now let's do some unnesting/tidying of the title and description fields so we can do some NLP and text analysis. Let's also remove common English words.
+Now let's do some use tidytext's `unnest_tokens` for the title and description fields so we can do the text analysis. Let's also remove common English words.
 
 ```{r unnest, dependson = c("title","desc")}
 library(tidytext)
-nasatitle <- nasatitle %>% unnest_tokens(word, title) %>% anti_join(stop_words)
-nasadesc <- nasadesc %>% unnest_tokens(word, desc) %>% anti_join(stop_words)
+
+nasa_title <- nasa_title %>% 
+  unnest_tokens(word, title) %>% 
+  anti_join(stop_words)
+nasa_desc <- nasa_desc %>% 
+  unnest_tokens(word, desc) %>% 
+  anti_join(stop_words)
 ```
 
 ## Some initial simple exploration
 
 What are the most common words in the NASA dataset titles?
 
-```{r}
-nasatitle %>% count(word, sort = TRUE)
+```{r dependson = "unnest"}
+nasa_title %>% 
+  count(word, sort = TRUE)
 ```
 
 What about the descriptions?
 
-```{r}
-nasadesc %>% count(word, sort = TRUE)
+```{r dependson = "unnest"}
+nasa_desc %>% 
+  count(word, sort = TRUE)
 ```
 
 It looks like we might want to remove digits and some "words" like "v1" from these dataframes before approaching something like topic modeling.
 
-```{r}
+```{r mystopwords, dependson = "unnest"}
 mystopwords <- data_frame(word = c(as.character(1:10), 
                                    "v1", "v03", "l2", "l3", "v5.2.0", 
                                    "v003", "v004", "v005", "v006"))
-nasatitle <- nasatitle %>% anti_join(mystopwords)
-nasadesc <- nasadesc %>% anti_join(mystopwords)
+nasa_title <- nasa_title %>% 
+  anti_join(mystopwords)
+nasa_desc <- nasa_desc %>% 
+  anti_join(mystopwords)
 ```
 
 What are the most common keywords?
 
-```{r}
-nasakeyword %>% group_by(keyword) %>% count(sort = TRUE)
+```{r dependson = "keyword"}
+nasa_keyword %>% 
+  group_by(keyword) %>% 
+  count(sort = TRUE)
 ```
 
-Looks like "Project completed" may not be useful keywords to keep around for some purposes, and we may want to change all of these to lower or upper case to get rid of duplicates like "OCEANS" and "Oceans". Let's do that, actually.
+It is possible that "Project completed" may not be a useful set of keywords to keep around for some purposes, and we may want to change all of these to lower or upper case to get rid of duplicates like "OCEANS" and "Oceans". Let's do that, actually.
 
-```{r}
-nasakeyword <- nasakeyword %>% mutate(keyword = toupper(keyword))
+```{r toupper, dependson = "keyword"}
+nasa_keyword <- nasa_keyword %>% 
+  mutate(keyword = toupper(keyword))
 ```
 
 ## Word co-ocurrences
 
-Let's examine which words commonly occur together in the titles and descriptions of NASA datasets. We can then examine a word network in titles/descriptions and this may help us decide, for example, how many topics to look at in topic modeling.
+Let's examine which words commonly occur together in the titles and descriptions of NASA datasets. We can then examine a word network in titles/descriptions; this may help us decide, for example, how many topics to look at in topic modeling.
 
-```{r}
+```{r title_words, dependson = "mystopwords"}
 library(widyr)
-titlewords <- nasatitle %>% pairwise_count(word, id, sort = TRUE)
-titlewords
+
+title_words <- nasa_title %>% 
+  pairwise_count(word, id, sort = TRUE)
+title_words
 ```
 
-```{r}
-descwords <- nasadesc %>% pairwise_count(word, id, sort = TRUE)
-descwords
+```{r desc_words, dependson = "mystopwords"}
+desc_words <- nasa_desc %>% 
+  pairwise_count(word, id, sort = TRUE)
+desc_words
 ```
 
 Let's plot networks of these co-occurring words.
 
-```{r, message = FALSE, fig.height=6, fig.width=9}
+```{r plot_title, dependson = "title_words", fig.height=6, fig.width=9}
 library(ggplot2)
 library(igraph)
 library(ggraph)
 library(ggplot2)
 
 set.seed(1234)
-titlewords %>%
-        filter(n >= 250) %>%
-        graph_from_data_frame() %>%
-        ggraph(layout = "fr") +
-        geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
-        geom_node_point(color = "darkslategray4", size = 5) +
-        geom_node_text(aes(label = name), vjust = 1.8) +
-        ggtitle("Word Network in NASA Dataset Titles") +
-        theme_void()
+title_words %>%
+  filter(n >= 250) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
+  geom_node_point(color = "darkslategray4", size = 5) +
+  geom_node_text(aes(label = name), vjust = 1.8) +
+  ggtitle("Word Network in NASA Dataset Titles") +
+  theme_void()
 ```
 
 This is a good start, although it looks like there may still a bit more cleaning to be done.
 
 Let's look at the words in descriptions.
 
-```{r, fig.height=6, fig.width=9}
+```{r plot_desc, dependson = "desc_words", fig.height=6, fig.width=9}
 set.seed(2016)
-descwords %>%
-        filter(n >= 5000) %>%
-        graph_from_data_frame() %>%
-        ggraph(layout = "fr") +
-        geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
-        geom_node_point(color = "indianred4", size = 5) +
-        geom_node_text(aes(label = name), vjust = 1.8) +
-        ggtitle("Word Network in NASA Dataset Descriptions") +
-        theme_void()
+desc_words %>%
+  filter(n >= 5000) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
+  geom_node_point(color = "indianred4", size = 5) +
+  geom_node_text(aes(label = name), vjust = 1.8) +
+  ggtitle("Word Network in NASA Dataset Descriptions") +
+  theme_void()
 
 ```
 
-Here there are such *strong* connections between the top dozen or so words (words like "data", "resolution", and "instrument") that we may do better if we exclude these very highly connected words. Also, this makes me think that tf-idf will be a good option to explore. But for now, let's add a few more stop words and look at one more word network.
+Here there are such *strong* connections between the top dozen or so words (words like "data", "resolution", and "instrument") that we may do better if we exclude these very highly connected words. Also, this may mean that tf-idf (as described in detail in [Chapter 4](#tfidf)) will be a good option to explore. But for now, let's add a few more stop words and look at one more word network for the description fields. Notice how we use `bind_rows` to add more custom stop words to the words we are already using; this approach can be used in many instances.
 
-```{r, fig.height=6, fig.width=9}
+```{r plot_desc2, dependson = "desc_words", fig.height=6, fig.width=9}
 mystopwords <- bind_rows(mystopwords,
                          data_frame(word = c("data", "global", 
                                              "instrument", "resolution",
                                              "product", "level")))
 
-nasadesc <- nasadesc %>% anti_join(mystopwords)
-descwords <- nasadesc %>% pairwise_count(word, id, sort = TRUE)
+nasa_desc <- nasa_desc %>% 
+  anti_join(mystopwords)
+desc_words <- nasa_desc %>% 
+  pairwise_count(word, id, sort = TRUE)
 set.seed(1234)
-descwords %>%
-        filter(n >= 4600) %>%
-        graph_from_data_frame() %>%
-        ggraph(layout = "fr") +
-        geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
-        geom_node_point(color = "indianred4", size = 5) +
-        geom_node_text(aes(label = name), vjust = 1.8) +
-        ggtitle("Word Network in NASA Dataset Descriptions") +
-        theme_void()
+desc_words %>%
+  filter(n >= 4600) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
+  geom_node_point(color = "indianred4", size = 5) +
+  geom_node_text(aes(label = name), vjust = 1.8) +
+  ggtitle("Word Network in NASA Dataset Descriptions") +
+  theme_void()
 
 ```
 
 We still are not seeing clusters the way we did with the titles (the descriptions appear to use very similar words compared to each other), so using tf-idf may be a better way to go when approaching the description fields.
 
-TODO: tf-idf and topic modeling
+Let's make a network of the keywords to see which keywords commonly occur together in the same datasets.
+
+```{r plot_keyword, dependson = "toupper", fig.height=6, fig.width=9}
+set.seed(4321)
+keyword_counts <- nasa_keyword %>% 
+  pairwise_count(keyword, id, sort = TRUE)
+
+keyword_counts %>%
+  filter(n >= 700) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
+  geom_node_point(color = "royalblue3", size = 5) +
+  geom_node_text(aes(label = name), vjust = 1.8) +
+  ggtitle("Network in NASA Keywords") +
+  theme_void()
+```
+
+These are the most common co-occurring words, and also just the most common keywords in general. To more meaningfully examine which keywords are likely to appear together instead of separately, we need to find to correlation among the keywords as described in [Chapter 5](#ngrams).
+
+TODO: correlation of keywords, tf-idf, and topic modeling
