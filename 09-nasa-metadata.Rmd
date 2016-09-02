@@ -213,7 +213,7 @@ We still are not seeing clusters the way we did with the titles (the description
 
 Let's make a network of the keywords to see which keywords commonly occur together in the same datasets.
 
-```{r plot_counts, dependson = "toupper", fig.height=6, fig.width=9}
+```{r plot_counts, dependson = "toupper", fig.height=7, fig.width=9}
 keyword_counts <- nasa_keyword %>% 
   pairwise_count(keyword, id, sort = TRUE)
 
@@ -225,10 +225,10 @@ keyword_counts %>%
   geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
   geom_node_point(color = "royalblue3", size = 5) +
   geom_node_text(aes(label = name), vjust = 1.8) +
-  ggtitle("Co-occurrence Network in NASA Keywords") +
+  ggtitle("Co-occurrence Network in NASA Dataset Keywords") +
   theme_void()
 ```
 
-These are the most common co-occurring words, and also just the most common keywords in general. To more meaningfully examine which keywords are likely to appear together instead of separately, we need to find to correlation among the keywords as described in [Chapter 5](#ngrams).
+These are the most commonly co-occurring words, but also just the most common keywords in general. To more meaningfully examine which keywords are likely to appear together instead of separately, we need to find the correlation among the keywords as described in [Chapter 5](#ngrams).
 
 TODO: correlation of keywords, tf-idf, and topic modeling
