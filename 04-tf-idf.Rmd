@@ -32,7 +32,9 @@ book_words <- austen_books() %>%
   count(book, word, sort = TRUE) %>%
   ungroup()
 
-total_words <- book_words %>% group_by(book) %>% summarize(total = sum(n))
+total_words <- book_words %>% 
+  group_by(book) %>% 
+  summarize(total = sum(n))
 book_words <- left_join(book_words, total_words)
 book_words
 ```
