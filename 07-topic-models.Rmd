@@ -1,20 +1,20 @@
-# Topic Modeling {#topicmodeling}
+# Topic modeling {#topicmodeling}
 
 ```{r echo = FALSE}
 library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
-
 options(width = 100, dplyr.width = 150)
+library(ggplot2)
+theme_set(theme_minimal())
 ```
 
 ## Topic modeling
 
 Topic modeling is a method for unsupervised classification of documents, by modeling each document as a mixture of topics and each topic as a mixture of words. [Latent Dirichlet allocation](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) is a particularly popular method for fitting a topic model.
 
-We can use tidy text principles, as described in Chapter 2, to approach topic modeling using consistent and effective tools. In particular, we'll be using tidying functions for LDA objects from the [topicmodels package](https://cran.r-project.org/package=topicmodels).
-u789
+We can use tidy text principles, as described in [Chapter 2](#tidytext), to approach topic modeling using consistent and effective tools. In particular, we'll be using tidying functions for LDA objects from the [topicmodels package](https://cran.r-project.org/package=topicmodels).
 
-## Setup
+## The great library heist
 
 Suppose a vandal has broken into your study and torn apart four of your books:
 
@@ -70,9 +70,9 @@ word_counts <- by_chapter_word %>%
 word_counts
 ```
 
-## Latent Dirichlet Allocation with the topicmodels package
+## Latent Dirichlet allocation with the topicmodels package
 
-Right now this data frame is in a tidy form, with one-term-per-document-per-row. However, the topicmodels package requires a `DocumentTermMatrix` (from the tm package). As described in [this vignette](tidying_casting.html), we can cast a one-token-per-row table into a `DocumentTermMatrix` with tidytext's `cast_dtm`:
+Right now this data frame is in a tidy form, with one-term-per-document-per-row. However, the topicmodels package requires a `DocumentTermMatrix` (from the tm package). As described in [Chapter 6](#dtm), we can cast a one-token-per-row table into a `DocumentTermMatrix` with tidytext's `cast_dtm`:
 
 ```{r chapters_dtm}
 chapters_dtm <- word_counts %>%
@@ -118,14 +118,13 @@ This model lends itself to a visualization:
 
 ```{r top_terms_plot, fig.height=7, fig.width=7}
 library(ggplot2)
-theme_set(theme_bw())
+library(ggstance)
 
 top_terms %>%
   mutate(term = reorder(term, beta)) %>%
-  ggplot(aes(term, beta)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~ topic, scales = "free") +
-  theme(axis.text.x = element_text(size = 15, angle = 90, hjust = 1))
+  ggplot(aes(beta, term)) +
+  geom_barh(stat = "identity") +
+  facet_wrap(~ topic, scales = "free")
 ```
 
 These topics are pretty clearly associated with the four books! There's no question that the topic of "nemo", "sea", and "nautilus" belongs to *Twenty Thousand Leagues Under the Sea*, and that "jane", "darcy", and "elizabeth" belongs to *Pride and Prejudice*. We see "pip" and "joe" from *Great Expectations* and "martians", "black", and "night" from *The War of the Worlds*.
@@ -149,7 +148,7 @@ chapters_lda_gamma
 
 Then we examine what fraction of chapters we got right for each:
 
-```{r chapters_lda_gamma_plot, fig.width=7, fig.height=6}
+```{r chapters_lda_gamma_plot, fig.width=8, fig.height=6}
 ggplot(chapters_lda_gamma, aes(gamma, fill = factor(topic))) +
   geom_histogram() +
   facet_wrap(~ title, nrow = 2)
@@ -189,7 +188,7 @@ chapter_classifications %>%
 
 We see that only a few chapters from *Great Expectations* were misclassified. Not bad for unsupervised clustering!
 
-### By word assignments: `augment`
+## By word assignments: `augment`
 
 One important step in the topic modeling expectation-maximization algorithm is assigning each word in each document to a topic. The more words in a document are assigned to that topic, generally, the more weight (`gamma`) will go on that document-topic classification.
 
@@ -201,7 +200,7 @@ assignments <- tidytext:::augment.LDA(chapters_lda, data = chapters_dtm)
 
 We can combine this with the consensus book titles to find which words were incorrectly classified.
 
-```{r}
+```{r assignments2, dependson = "assignments"}
 assignments <- assignments %>%
   separate(document, c("title", "chapter"), sep = "_", convert = TRUE) %>%
   inner_join(book_topics, by = c(".topic" = "topic"))
@@ -211,7 +210,7 @@ assignments
 
 We can, for example, create a "confusion matrix" using dplyr's `count` and tidyr's `spread`:
 
-```{r}
+```{r dependson = "assignments2"}
 assignments %>%
   count(title, consensus, wt = count) %>%
   spread(consensus, n, fill = 0)
@@ -221,7 +220,7 @@ We notice that almost all the words for *Pride and Prejudice*, *Twenty Thousand 
 
 What were the most commonly mistaken words?
 
-```{r}
+```{r wrong_words, dependson = "assignments2"}
 wrong_words <- assignments %>%
   filter(title != consensus)
 
@@ -235,7 +234,7 @@ wrong_words %>%
 
 Notice the word "flopson" here; these wrong words do not necessarily appear in the novels they were misassigned to. Indeed, we can confirm "flopson" appears only in *Great Expectations*:
 
-```{r}
+```{r dependson = "word_counts"}
 word_counts %>%
   filter(word == "flopson")
 ```
