@@ -5,7 +5,7 @@ library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 100)
 library(ggplot2)
-theme_set(theme_light())
+theme_set(theme_light(base_size = 12))
 ```
 
 A central question in text mining and natural language processing is how to quantify what a document is about. Can we do this by looking at the words that make up the document? One measure of how important a word may be is its *term frequency* (tf), how frequently a word occurs in a document; we have examined how to measure word frequency in [Chapter 2](#tidytext). There are words in a document, however, that occur many times but may not be important; in English, these are probably words like "the", "is", "of", and so forth. We might take the approach of adding words like these to a list of stop words and removing them before analysis, but it is possible that some of these words might be more important in some documents than others. A list of stop words is not a very sophisticated approach to adjusting term frequency for commonly used words.
@@ -41,7 +41,7 @@ book_words
 
 The usual suspects are here, "the", "and", "to", and so forth. Let's look at the distribution of `n/total` for each novel, the number of times a word appears in a novel divided by the total number of terms (words) in that novel. This is exactly what term frequency is.
 
-```{r plot_tf, dependson = "book_words", fig.height=10, fig.width=9}
+```{r plot_tf, dependson = "book_words", fig.height=9, fig.width=9}
 library(ggplot2)
 
 ggplot(book_words, aes(n/total, fill = book)) +
@@ -84,8 +84,7 @@ plot_austen <- book_words %>%
 ggplot(plot_austen[1:20,], aes(tf_idf, word, fill = book)) +
   geom_barh(alpha = 0.8, stat = "identity") +
   labs(title = "Highest tf-idf words in Jane Austen's Novels",
-       y = NULL, x = "tf-idf") +
-  scale_x_continuous(expand=c(0,0))
+       y = NULL, x = "tf-idf")
 ```
 
 Let's look at the novels individually.
@@ -97,8 +96,7 @@ ggplot(plot_austen, aes(tf_idf, word, fill = book)) +
   geom_barh(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   labs(title = "Highest tf-idf words in Jane Austen's Novels",
        y = NULL, x = "tf-idf") +
-  facet_wrap(~book, ncol = 2, scales = "free") +
-  scale_x_continuous(expand=c(0,0))
+  facet_wrap(~book, ncol = 2, scales = "free")
 ```
 
 Still all proper nouns! These words are, as measured by tf-idf, the most important to each novel and most readers would likely agree.
@@ -144,8 +142,7 @@ plot_physics <- physics_words %>%
 ggplot(plot_physics[1:20,], aes(tf_idf, word, fill = author)) +
   geom_barh(alpha = 0.8, stat = "identity") +
   labs(title = "Highest tf-idf words in Classic Physics Texts",
-       y = NULL, x = "tf-idf") +
-  scale_x_continuous(expand=c(0,0))
+       y = NULL, x = "tf-idf")
 ```
 
 Nice! Let's look at each text individually.
@@ -160,8 +157,7 @@ ggplot(plot_physics, aes(tf_idf, word, fill = author)) +
   geom_barh(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   labs(title = "Highest tf-idf words in Classic Physics Texts",
        y = NULL, x = "tf-idf") +
-  facet_wrap(~author, ncol = 2, scales = "free") +
-  scale_x_continuous(expand=c(0,0))
+  facet_wrap(~author, ncol = 2, scales = "free")
 ```
 
 Very interesting indeed. One thing we see here is "gif" in the Einstein text?!
@@ -203,8 +199,7 @@ ggplot(plot_physics, aes(tf_idf, word, fill = author)) +
   geom_barh(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   labs(title = "Highest tf-idf words in Classic Physics Texts",
        y = NULL, x = "tf-idf") +
-  facet_wrap(~author, ncol = 2, scales = "free") +
-  scale_x_continuous(expand=c(0,0))
+  facet_wrap(~author, ncol = 2, scales = "free")
 ```
 
 We don't hear enough about ramparts or things being ethereal in physics today.
