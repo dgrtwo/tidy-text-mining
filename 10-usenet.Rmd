@@ -210,9 +210,10 @@ top_sentiment_words %>%
   ungroup() %>%
   mutate(board = reorder(board, contribution),
          word = reorder(word, contribution)) %>%
-  ggplot(aes(contribution, word, fill = contribution > 0)) +
-  geom_barh(stat = "identity", show.legend = FALSE) +
-  facet_wrap(~ board, scales = "free")
+  ggplot(aes(word, contribution, fill = contribution > 0)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  facet_wrap(~ board, scales = "free") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 We can also see how much sentiment is confounded with topic in this particular approach. An atheism board is likely to discuss "god" in detail even in a negative context, and we can see it makes the board look more positive. Similarly, the negative contribution of the word "gun" to the "talk.politics.guns" board would occur even if the board were positive.
@@ -298,9 +299,10 @@ usenet_digram_counts %>%
   top_n(10, abs(contribution)) %>%
   ungroup() %>%
   mutate(word2 = reorder(word2, contribution)) %>%
-  ggplot(aes(contribution, word2, fill = contribution > 0)) +
-  geom_barh(stat = "identity", show.legend = FALSE) +
-  facet_wrap(~ word1, scales = "free", nrow = 2)
+  ggplot(aes(word2, contribution, fill = contribution > 0)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  facet_wrap(~ word1, scales = "free", nrow = 2) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 ```{r}
