@@ -5,7 +5,7 @@ library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 150)
 library(ggplot2)
-theme_set(theme_light())
+theme_set(theme_light(base_size = 12))
 ```
 
 ## Tokenizing by n-gram
@@ -102,10 +102,10 @@ digram_tf_idf %>%
   arrange(desc(tf_idf)) %>%
   top_n(12, tf_idf) %>%
   ungroup() %>%
-  mutate(digram = reorder(digram, -tf_idf)) %>%
+  mutate(digram = reorder(digram, tf_idf)) %>%
   ggplot(aes(tf_idf, digram)) +
   geom_barh(stat = "identity") +
-  facet_wrap(~ book, scales = "free_y")
+  facet_wrap(~ book, ncol = 2, scales = "free_y")
 ```
 
 Much as we discovered in [Chapter 4](#tfidf), the units that distinguish each Austen book are almost exclusively names.
