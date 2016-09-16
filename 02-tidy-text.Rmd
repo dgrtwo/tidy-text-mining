@@ -5,7 +5,7 @@ library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 100)
 library(ggplot2)
-theme_set(theme_minimal())
+theme_set(theme_light())
 ```
 
 We define the tidy text format as being a table with **one-term-per-row.** Structuring text data in this way means that it conforms to tidy data principles and can be manipulated with a set of consistent tools. This is worth contrasting with the ways text is often stored in text mining approaches.
@@ -105,7 +105,7 @@ tidy_books %>%
 
 For example, this allows us to visualize the commonly used words using ggplot2.
 
-```{r plot_count, dependson = "tidy_books", fig.width=8, fig.height=6}
+```{r plot_count, dependson = "tidy_books", fig.width=7, fig.height=6}
 library(ggplot2)
 library(ggstance)
 
@@ -202,7 +202,7 @@ ggplot(frequency, aes(x = other, y = Austen, color = abs(Austen - other))) +
   geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
   scale_x_log10(labels = percent_format()) +
   scale_y_log10(labels = percent_format()) +
-  scale_color_gradient(limits = c(0, 0.001), low = "gray30", high = "gray75") +
+#  scale_color_gradient(limits = c(0, 0.001), low = "gray30", high = "gray75") +
   facet_wrap(~author, ncol = 2) +
   theme(legend.position="none") +
   labs(y = "Jane Austen", x = NULL)

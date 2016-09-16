@@ -5,7 +5,7 @@ library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 100)
 library(ggplot2)
-theme_set(theme_minimal())
+theme_set(theme_light())
 ```
 
 A central question in text mining and natural language processing is how to quantify what a document is about. Can we do this by looking at the words that make up the document? One measure of how important a word may be is its *term frequency* (tf), how frequently a word occurs in a document; we have examined how to measure word frequency in [Chapter 2](#tidytext). There are words in a document, however, that occur many times but may not be important; in English, these are probably words like "the", "is", "of", and so forth. We might take the approach of adding words like these to a list of stop words and removing them before analysis, but it is possible that some of these words might be more important in some documents than others. A list of stop words is not a very sophisticated approach to adjusting term frequency for commonly used words.
@@ -41,7 +41,7 @@ book_words
 
 The usual suspects are here, "the", "and", "to", and so forth. Let's look at the distribution of `n/total` for each novel, the number of times a word appears in a novel divided by the total number of terms (words) in that novel. This is exactly what term frequency is.
 
-```{r plot_tf, dependson = "book_words", fig.height=9, fig.width=9}
+```{r plot_tf, dependson = "book_words", fig.height=10, fig.width=9}
 library(ggplot2)
 
 ggplot(book_words, aes(n/total, fill = book)) +
@@ -73,7 +73,7 @@ book_words %>%
 
 Here we see all proper nouns, names that are in fact important in these novels. None of them occur in all of novels, and they are important, characteristic words for each text. Some of the values for idf are the same for different terms because there are 6 documents in this corpus and we are seeing the numerical value for $\ln(6/1)$, $\ln(6/2)$, etc. Let's look at a visualization for these high tf-idf words.
 
-```{r plot_austen, dependson = "desc_idf", fig.height=6, fig.width=8}
+```{r plot_austen, dependson = "desc_idf", fig.height=6, fig.width=9}
 library(ggstance)
 library(ggthemes)
 
@@ -90,7 +90,7 @@ ggplot(plot_austen[1:20,], aes(tf_idf, word, fill = book)) +
 
 Let's look at the novels individually.
 
-```{r plot_separate, dependson = "plot_austen", fig.height=10, fig.width=8}
+```{r plot_separate, dependson = "plot_austen", fig.height=10, fig.width=9}
 plot_austen <- plot_austen %>% group_by(book) %>% top_n(15) %>% ungroup
 
 ggplot(plot_austen, aes(tf_idf, word, fill = book)) +
@@ -129,7 +129,7 @@ physics_words
 
 Here we see just the raw counts, and of course these documents are all very different lengths. Let's go ahead and calculate tf-idf.
 
-```{r plot_physics, dependson = "physics_words", fig.width=8, fig.height=6}
+```{r plot_physics, dependson = "physics_words", fig.width=9, fig.height=6}
 physics_words <- physics_words %>%
   bind_tf_idf(word, author, n) 
 
@@ -150,7 +150,7 @@ ggplot(plot_physics[1:20,], aes(tf_idf, word, fill = author)) +
 
 Nice! Let's look at each text individually.
 
-```{r physics_separate, dependson = "plot_physics", fig.height=7, fig.width=8}
+```{r physics_separate, dependson = "plot_physics", fig.height=7, fig.width=9}
 plot_physics <- plot_physics %>% 
   group_by(author) %>% 
   top_n(15, tf_idf) %>% 
@@ -184,7 +184,7 @@ grep("AK", physics$text, value = TRUE)[1]
 
 Let's remove some of these less meaningful words to make a better, more meaningful plot. Notice that we make a custom list of stop words and use `anti_join` to remove them.
 
-```{r mystopwords, dependson = "plot_physics", fig.height=7, fig.width=8}
+```{r mystopwords, dependson = "plot_physics", fig.height=7, fig.width=9}
 mystopwords <- data_frame(word = c("gif", "eq", "co", "rc", "ac", "ak", "bn", 
                                    "fig", "file", "cg", "cb"))
 physics_words <- anti_join(physics_words, mystopwords, by = "word")

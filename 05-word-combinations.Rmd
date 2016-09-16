@@ -3,8 +3,9 @@
 ```{r echo = FALSE}
 library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
-
 options(width = 100, dplyr.width = 150)
+library(ggplot2)
+theme_set(theme_light())
 ```
 
 ## Tokenizing by n-gram
@@ -94,26 +95,24 @@ digram_tf_idf
 
 This can be visualized within each book, just as we did for words:
 
-```{r digram_tf_idf_plot, dependson = "digram_tf_idf", echo = FALSE}
-library(ggplot2)
-theme_set(theme_bw())
+```{r digram_tf_idf_plot, dependson = "digram_tf_idf", echo = FALSE, fig.width=9, fig.height=9}
+library(ggstance)
 
 digram_tf_idf %>%
   arrange(desc(tf_idf)) %>%
   top_n(12, tf_idf) %>%
   ungroup() %>%
   mutate(digram = reorder(digram, -tf_idf)) %>%
-  ggplot(aes(digram, tf_idf)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~ book, scales = "free_x") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  ggplot(aes(tf_idf, digram)) +
+  geom_barh(stat = "identity") +
+  facet_wrap(~ book, scales = "free_y")
 ```
 
-Much as we discovered in Chapter @ref{#tfidf}, the units that distinguish each Austen book are almost exclusively names.
+Much as we discovered in [Chapter 4](#tfidf), the units that distinguish each Austen book are almost exclusively names.
 
 ### Using digrams to provide context in sentiment analysis
 
-Our sentiment analysis approch in Chapter @ref{#sentiment} simply counted the appearance of positive or negative words, according to a reference lexicon. One of the problems with this approach is that a word's context matters nearly as much as its presence. For example, the words "happy" and "like" will be positive, even in a sentence like "I'm not **happy** and I don't **like** it!"
+Our sentiment analysis approch in [Chapter 3](#sentiment) simply counted the appearance of positive or negative words, according to a reference lexicon. One of the problems with this approach is that a word's context can matter nearly as much as its presence. For example, the words "happy" and "like" will be counted as positive, even in a sentence like "I'm not **happy** and I don't **like** it!"
 
 ```{r}
 digrams_separated %>%
@@ -121,7 +120,7 @@ digrams_separated %>%
   count(word2, sort = TRUE)
 ```
 
-We can use word2 to 
+We can use `word2` to TODO
 
 Let's use the AFINN lexicon for sentiment analysis, which gives a sentiment score for each word:
 
@@ -145,7 +144,7 @@ not_words
 
 It's worth asking which words contributed the most in the "wrong" direction. To compute that, we can multiply their score by the number of times they appear (so that a word with a sentiment score of +3 occurring 10 times has as much impact as a word with a sentiment score of +1 occurring 30 times).
 
-```{r not_words_plot, dependson = "not_words"}
+```{r not_words_plot, dependson = "not_words", fig.width=9, fig.height=7}
 not_words %>%
   mutate(contribution = n * score) %>%
   arrange(desc(abs(contribution))) %>%
@@ -174,27 +173,26 @@ negated_words <- digrams_separated %>%
 negated_words
 ```
 
-```{r negated_words_plot, dependson = "negated_words"}
+```{r negated_words_plot, dependson = "negated_words", fig.width=9, fig.height=9}
 negated_words %>%
   mutate(contribution = n * score) %>%
   mutate(word2 = reorder(word2, contribution)) %>%
   group_by(word1) %>%
   top_n(10, abs(contribution)) %>%
-  ggplot(aes(word2, contribution, fill = n * score > 0)) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
+  ggplot(aes(contribution, word2, fill = n * score > 0)) +
+  geom_barh(stat = "identity", show.legend = FALSE) +
   facet_wrap(~ word1, scales = "free") +
-  xlab("Words preceded by \"not\"") +
-  ylab("Sentiment score * # of occurrences") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  ylab("Words preceded by \"not\"") +
+  xlab("Sentiment score * # of occurrences")
 ```
 
 ## Visualizing digrams as a network with the ggraph package
 
-A 
+TODO
 
 ### Creating a network with igraph
 
-Now that we have our 
+Now that we have our TODO
 
 ```{r}
 digram_counts <- digrams_filtered %>% 

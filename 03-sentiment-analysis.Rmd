@@ -5,7 +5,7 @@ library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 100)
 library(ggplot2)
-theme_set(theme_minimal())
+theme_set(theme_light())
 ```
 
 ## The `sentiments` dataset
@@ -74,7 +74,7 @@ janeaustensentiment <- tidy_books %>%
 
 Now we can plot these sentiment scores across the plot trajectory of each novel.
 
-```{r sentimentplot, dependson = "janeaustensentiment", fig.width=10, fig.height=10}
+```{r sentimentplot, dependson = "janeaustensentiment", fig.width=9, fig.height=10}
 library(ggplot2)
 
 ggplot(janeaustensentiment, aes(index, sentiment, fill = book)) +
@@ -101,7 +101,7 @@ bing_word_counts
 
 This can be shown visually, and we can pipe straight into ggplot2, if we like, because of the way we are consistently using tools built for handling tidy data frames.
 
-```{r pipetoplot, dependson = "wordcounts", fig.width=7, fig.height=6}
+```{r pipetoplot, dependson = "wordcounts", fig.width=6, fig.height=6}
 library(ggstance)
 bing_word_counts %>%
   filter(n > 150) %>%
