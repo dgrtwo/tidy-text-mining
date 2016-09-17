@@ -120,7 +120,7 @@ tf_idf %>%
   filter(str_detect(board, "^sci\\.")) %>%
   group_by(board) %>%
   top_n(12, tf_idf) %>%
-  mutate(word = reorder(word, -tf_idf)) %>%
+  mutate(word = reorder(word, tf_idf)) %>%
   ggplot(aes(tf_idf, word)) +
   geom_barh(stat = "identity") +
   facet_wrap(~ board, scales = "free_y") +
@@ -129,7 +129,7 @@ tf_idf %>%
 
 We could use almost the same code (not shown) to compare the "rec." (recreation) or "talk." boards:
 
-```{r echo = FALSE}
+```{r echo = FALSE, fig.width=9, fig.height=9}
 plot_tf_idf <- function(d) {
   d %>%
     group_by(board) %>%
@@ -137,7 +137,7 @@ plot_tf_idf <- function(d) {
     mutate(word = reorder(word, tf_idf)) %>%
     ggplot(aes(tf_idf, word)) +
     geom_barh(stat = "identity") +
-    facet_wrap(~ board, scales = "free_x") +
+    facet_wrap(~ board, scales = "free_y") +
     xlab("tf-idf")
 }
 
