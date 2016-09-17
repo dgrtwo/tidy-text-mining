@@ -112,7 +112,7 @@ tf_idf
 
 We can visualize this for a few select boards. For example, let's look at all the `sci.` boards:
 
-```{r, fig.width=9, fig.width=9}
+```{r, fig.width=9, fig.height=8}
 library(ggplot2)
 library(ggstance)
 
@@ -129,7 +129,7 @@ tf_idf %>%
 
 We could use almost the same code (not shown) to compare the "rec." (recreation) or "talk." boards:
 
-```{r echo = FALSE, fig.width=9, fig.height=9}
+```{r echo = FALSE, fig.width=9, fig.height=8}
 plot_tf_idf <- function(d) {
   d %>%
     group_by(board) %>%
@@ -304,6 +304,8 @@ usenet_digram_counts %>%
   facet_wrap(~ word1, scales = "free", nrow = 2) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
+
+TODO: Something is wrong with that plot? Shouldn't each panel have 10 words? Missing a `group_by`?
 
 ```{r}
 ```
