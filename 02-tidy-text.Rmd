@@ -198,7 +198,7 @@ We use `str_extract` here because the UTF-8 encoded texts from Project Gutenberg
 library(scales)
 ggplot(frequency, aes(x = other, y = Austen)) +
   geom_abline(color = "red") +
-  geom_jitter(alpha = 0.1, size = 2.5, color = "#00BFC4",
+  geom_jitter(alpha = 0.1, size = 2.5, color = "gray50",
               width = 0.4, height = 0.4) +
   geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
   scale_x_log10(labels = percent_format()) +
