@@ -9,6 +9,7 @@ Imports:
   tidytext,
   dplyr,
   tidyr,
+  ggplot2
   reshape2,
   gutenbergr,
   jsonlite,
@@ -25,7 +26,6 @@ Imports:
   scales,
   stringr
 Remotes:
-  hadley/ggplot2,
   dgrtwo/widyr,
   thomasp85/ggforce,
   thomasp85/ggraph,
