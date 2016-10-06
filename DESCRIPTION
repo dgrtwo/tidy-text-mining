@@ -9,7 +9,7 @@ Imports:
   tidytext,
   dplyr,
   tidyr,
-  ggplot2
+  ggplot2,
   reshape2,
   gutenbergr,
   jsonlite,
