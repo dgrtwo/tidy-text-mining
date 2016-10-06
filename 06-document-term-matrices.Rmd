@@ -3,9 +3,9 @@
 ```{r echo = FALSE}
 library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
-
-options(width = 100, dplyr.width = 150,
-        fig.height = 5, fig.width = 5)
+options(width = 100, dplyr.width = 150)
+library(ggplot2)
+theme_set(theme_light())
 ```
 
 So far, we've been analyzing data in a tidy text structure: a data frame with one-token-per-document-per-row. This lets us use the popular tidy suite of tools such as dplyr, tidyr, and ggplot2. We've demonstrated that many text analyses can be performed within these.

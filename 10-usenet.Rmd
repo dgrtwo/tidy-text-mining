@@ -5,7 +5,7 @@ library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 150)
 library(ggplot2)
-theme_set(theme_light(base_size = 12))
+theme_set(theme_light())
 ```
 
 Here we'll use what we've learned in the book to perform a start-to-finish analysis of a set of 20,000 messages sent to 20 Usenet bulletin boards in 1993. The Usenet bulletin boards in this data set include boards for topics like politics, autos, "for sale", atheism, etc. This data set is [publicly available](http://qwone.com/~jason/20Newsgroups/) and has become popular for testing and exercises in text analysis and machine learning.
