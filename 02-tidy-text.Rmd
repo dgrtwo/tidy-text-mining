@@ -107,15 +107,15 @@ For example, this allows us to visualize the commonly used words using ggplot2.
 
 ```{r plot_count, dependson = "tidy_books", fig.width=6, fig.height=5}
 library(ggplot2)
-library(ggstance)
 
 tidy_books %>%
   count(word, sort = TRUE) %>%
   filter(n > 600) %>%
   mutate(word = reorder(word, n)) %>%
-  ggplot(aes(n, word)) +
-  geom_barh(stat = "identity") +
-  ylab(NULL)
+  ggplot(aes(word, n)) +
+  geom_bar(stat = "identity") +
+  xlab(NULL) +
+  coord_flip()
 ```
 
 We could pipe this straight into ggplot2 because of our consistent use of tidy tools.
