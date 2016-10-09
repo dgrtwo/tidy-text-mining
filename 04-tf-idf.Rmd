@@ -74,16 +74,15 @@ book_words %>%
 Here we see all proper nouns, names that are in fact important in these novels. None of them occur in all of novels, and they are important, characteristic words for each text. Some of the values for idf are the same for different terms because there are 6 documents in this corpus and we are seeing the numerical value for $\ln(6/1)$, $\ln(6/2)$, etc. Let's look at a visualization for these high tf-idf words.
 
 ```{r plot_austen, dependson = "desc_idf", fig.height=6, fig.width=9}
-library(ggstance)
-
 plot_austen <- book_words %>%
   arrange(desc(tf_idf)) %>%
   mutate(word = factor(word, levels = rev(unique(word))))
 
-ggplot(plot_austen[1:20,], aes(tf_idf, word, fill = book)) +
-  geom_barh(alpha = 0.8, stat = "identity") +
+ggplot(plot_austen[1:20,], aes(word, tf_idf, fill = book)) +
+  geom_bar(alpha = 0.8, stat = "identity") +
   labs(title = "Highest tf-idf words in Jane Austen's Novels",
-       y = NULL, x = "tf-idf")
+       x = NULL, y = "tf-idf") +
+  coord_flip()
 ```
 
 Let's look at the novels individually.
@@ -94,11 +93,12 @@ plot_austen <- plot_austen %>%
   top_n(15) %>% 
   ungroup
 
-ggplot(plot_austen, aes(tf_idf, word, fill = book)) +
-  geom_barh(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+ggplot(plot_austen, aes(word, tf_idf, fill = book)) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   labs(title = "Highest tf-idf words in Jane Austen's Novels",
-       y = NULL, x = "tf-idf") +
-  facet_wrap(~book, ncol = 2, scales = "free")
+       x = NULL, y = "tf-idf") +
+  facet_wrap(~book, ncol = 2, scales = "free") +
+  coord_flip()
 ```
 
 Still all proper nouns! These words are, as measured by tf-idf, the most important to each novel and most readers would likely agree.
@@ -142,10 +142,11 @@ plot_physics <- physics_words %>%
                                             "Tesla, Nikola",
                                             "Einstein, Albert")))
 
-ggplot(plot_physics[1:20,], aes(tf_idf, word, fill = author)) +
-  geom_barh(alpha = 0.8, stat = "identity") +
+ggplot(plot_physics[1:20,], aes(word, tf_idf, fill = author)) +
+  geom_bar(alpha = 0.8, stat = "identity") +
   labs(title = "Highest tf-idf words in Classic Physics Texts",
-       y = NULL, x = "tf-idf")
+       x = NULL, y = "tf-idf") +
+  coord_flip()
 ```
 
 Nice! Let's look at each text individually.
@@ -156,11 +157,12 @@ plot_physics <- plot_physics %>%
   top_n(15, tf_idf) %>% 
   mutate(word = reorder(word, tf_idf))
 
-ggplot(plot_physics, aes(tf_idf, word, fill = author)) +
-  geom_barh(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+ggplot(plot_physics, aes(word, tf_idf, fill = author)) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   labs(title = "Highest tf-idf words in Classic Physics Texts",
-       y = NULL, x = "tf-idf") +
-  facet_wrap(~author, ncol = 2, scales = "free")
+       x = NULL, y = "tf-idf") +
+  facet_wrap(~author, ncol = 2, scales = "free") +
+  coord_flip()
 ```
 
 Very interesting indeed. One thing we see here is "gif" in the Einstein text?!
@@ -198,11 +200,12 @@ plot_physics <- physics_words %>%
                                             "Tesla, Nikola",
                                             "Einstein, Albert")))
 
-ggplot(plot_physics, aes(tf_idf, word, fill = author)) +
-  geom_barh(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+ggplot(plot_physics, aes(word, tf_idf, fill = author)) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   labs(title = "Highest tf-idf words in Classic Physics Texts",
-       y = NULL, x = "tf-idf") +
-  facet_wrap(~author, ncol = 2, scales = "free")
+       x = NULL, y = "tf-idf") +
+  facet_wrap(~author, ncol = 2, scales = "free") +
+  coord_flip()
 ```
 
 We don't hear enough about ramparts or things being ethereal in physics today.
