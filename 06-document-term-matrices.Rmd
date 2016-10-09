@@ -8,11 +8,11 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-So far, we've been analyzing data in a tidy text structure: a data frame with one-token-per-document-per-row. This lets us use the popular tidy suite of tools such as dplyr, tidyr, and ggplot2. We've demonstrated that many text analyses can be performed within these.
+So far, we've been analyzing data in a tidy text structure: a data frame with one-token-per-document-per-row. This lets us use the popular suite of tidy tools such as dplyr, tidyr, and ggplot2. We've demonstrated that many text analyses can be performed using these principles.
 
 But many of the existing tools for natural language processing don't work with this kind of structure. The [CRAN Task View for Natural Language Processing](https://cran.r-project.org/web/views/NaturalLanguageProcessing.html) lists a large selection of packages that take other inputs. One of the most common is the [document-term matrix](https://en.wikipedia.org/wiki/Document-term_matrix), a sparse matrix of counts with one row for each document and one column for each term. MORE HERE
 
-The tidytext package lets us can integrate these packages into an analysis while still relying on our tidy tools. The two key verbs are:
+The tidytext package can integrate these packages into an analysis while still relying on our tidy tools. The two key verbs are:
 
 * `tidy()`: 
 * `cast_`: Turn a tidy one-term-per-row data frame into a document-term matrix. This includes `cast_sparse()` (sparse Matrix), `cast_dtm()` (`DocumentTermMatrix` objects from tm), and `cast_dfm()` (`dfm` objects from quanteda).
@@ -39,7 +39,7 @@ AssociatedPress
 
 We see that this dataset contains `r nrow(AssociatedPress)` documents (each of them an AP article) and `r ncol(AssociatedPress)` terms (words).
 
-If we want to analyze this with tidy tools, we need to turn it into a one-token-per-document-per-row data frame first. The broom package [@R-broom] introduced the `tidy` verb, which takes a non-tidy object and turns it into a data frame. The `tidytext` package implements that method for `DocumentTermClass` objects:
+If we want to analyze this with tidy tools, we need to turn it into a one-token-per-document-per-row data frame first. The broom package [@R-broom] introduced the `tidy` verb, which takes a non-tidy object and turns it into a data frame. The tidytext package implements that method for `DocumentTermClass` objects:
 
 ```{r ap_td, dependson = "AssociatedPress"}
 library(dplyr)
@@ -49,7 +49,7 @@ ap_td <- tidy(AssociatedPress)
 ap_td
 ```
 
-Notice that we now have a tidy three-column tbl_df, with variables `document`, `term`, and `count`. This tidying operation is similar is similar to the `melt` function from the reshape2 package [@R-reshape2] for non-sparse matrices.
+Notice that we now have a tidy three-column `tbl_df`, with variables `document`, `term`, and `count`. This tidying operation is similar to the `melt` function from the reshape2 package [@R-reshape2] for non-sparse matrices.
 
 As we've seen in chapters 2-5, this form is convenient for analysis with the dplyr and tidytext packages. For example, you can perform sentiment analysis on these newspaper articles.
 
@@ -66,7 +66,7 @@ ap_sentiments
 
 This could, for example, let us visualize which words from these AP articles most often contributed to positive or negative sentiment:
 
-```{r dependson = "ap_sentiments", fig.height = 6, fig.width = 6}
+```{r dependson = "ap_sentiments", fig.height = 6, fig.width = 7}
 library(ggplot2)
 
 ap_sentiments %>%
@@ -96,7 +96,7 @@ tidy(d)
 
 We could find the words most specific to several inaugural speeches using `bind_tf_idf` from chapter 4:
 
-```{r}
+```{r presidents, fig.width=8, fig.height=8}
 speeches <- c("1861-Lincoln", "1945-Roosevelt",
               "1961-Kennedy", "2009-Obama")
 
@@ -112,10 +112,10 @@ inaug_tf_idf %>%
   top_n(6, tf_idf) %>%
   ungroup() %>%
   mutate(term = reorder(term, tf_idf)) %>%
-  ggplot(aes(term, tf_idf)) +
-  geom_bar(stat = "identity") +
+  ggplot(aes(tf_idf, term, fill = document)) +
+  geom_bar(stat = "identity", alpha = 0.8) +
   facet_wrap(~ document, scales = "free") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  coord_flip()
 ```
 
 ## Casting tidy text data into a DocumentTermMatrix
@@ -156,7 +156,7 @@ class(m)
 dim(m)
 ```
 
-This allows for easy reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications.
+This casting process allows for easy reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications.
 
 ## Tidying corpus objects with metadata
 
@@ -220,14 +220,14 @@ inaug_freq %>%
 
 For instance, we could display the top 6 terms that have changed in frequency over time.
 
-```{r dependson = "models"}
+```{r dependson = "models", fig.width=8, fig.height=6}
 library(scales)
 
 inaug_freq %>%
   filter(word %in% c("americans", "century", "foreign", "god",
                      "union", "constitution")) %>%
   ggplot(aes(Year, percent)) +
-  geom_point() +
+  geom_point(alpha = 0.8) +
   geom_smooth() +
   facet_wrap(~ word, scales = "free_y") +
   scale_y_continuous(labels = percent_format()) +
