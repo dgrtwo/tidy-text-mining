@@ -27,7 +27,7 @@ What kind of data is available here?
 sapply(metadata$dataset, class)
 ```
 
-It seems likely that the title, description, and keywords for each dataset may be most fruitful for drawing connections between datasets. It's a place to start anyway. Let's check them out.
+It seems likely that the title, description, and keywords for each dataset may be most fruitful for drawing connections between datasets. It's a place to start anyway! Let's check them out.
 
 ```{r class, dependson = "download"}
 class(metadata$dataset$title)
@@ -72,7 +72,7 @@ nasa_keyword <- data_frame(id = metadata$dataset$`_id`$`$oid`,
 nasa_keyword
 ```
 
-Now let's do some use tidytext's `unnest_tokens` for the title and description fields so we can do the text analysis. Let's also remove common English words.
+Now let's use tidytext's `unnest_tokens` for the title and description fields so we can do the text analysis. Let's also remove common English words.
 
 ```{r unnest, dependson = c("title","desc")}
 library(tidytext)
@@ -101,7 +101,7 @@ nasa_desc %>%
   count(word, sort = TRUE)
 ```
 
-It looks like we might want to remove digits and some "words" like "v1" from these dataframes before approaching something like topic modeling.
+It looks like we might want to remove digits and some "words" like "v1" from these dataframes before approaching something more meaningful like topic modeling.
 
 ```{r mystopwords, dependson = "unnest"}
 mystopwords <- data_frame(word = c(as.character(1:10), 
@@ -137,12 +137,14 @@ library(widyr)
 
 title_words <- nasa_title %>% 
   pairwise_count(word, id, sort = TRUE)
+
 title_words
 ```
 
 ```{r desc_words, dependson = "mystopwords"}
 desc_words <- nasa_desc %>% 
   pairwise_count(word, id, sort = TRUE)
+
 desc_words
 ```
 
@@ -152,7 +154,6 @@ Let's plot networks of these co-occurring words.
 library(ggplot2)
 library(igraph)
 library(ggraph)
-library(ggplot2)
 
 set.seed(1234)
 title_words %>%
@@ -217,7 +218,7 @@ Let's make a network of the keywords to see which keywords commonly occur togeth
 keyword_counts <- nasa_keyword %>% 
   pairwise_count(keyword, id, sort = TRUE)
 
-set.seed(4321)
+set.seed(1234)
 keyword_counts %>%
   filter(n >= 700) %>%
   graph_from_data_frame() %>%
