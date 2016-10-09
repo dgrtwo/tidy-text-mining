@@ -18,21 +18,21 @@ library(tidytext)
 library(janeaustenr)
 
 # Set n = 2 to divide into pairs of words
-austen_digrams <- austen_books() %>%
-  unnest_tokens(digram, text, token = "ngrams", n = 2)
+austen_bigrams <- austen_books() %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)
 
-austen_digrams
+austen_bigrams
 ```
 
-This is still tidy: it's one-row-per-token, but now each token represents a digram. Notice that these digrams are overlapping: "sense and" is one token, "and sensibility" is another.
+This is still tidy: it's one-row-per-token, but now each token represents a bigram. Notice that these bigrams are overlapping: "sense and" is one token, "and sensibility" is another.
 
 ### Counting and filtering n-grams
 
-We can examine the most common digrams using `count`:
+We can examine the most common bigrams using `count`:
 
 ```{r}
-austen_digrams %>%
-  count(digram, sort = TRUE)
+austen_bigrams %>%
+  count(bigram, sort = TRUE)
 ```
 
 As expected, a lot of them are pairs of common (relatively uninteresting) words. This is a useful time to use tidyr's `separate()`, which splits a column into multiple based on a delimiter. This lets us separate it into two columns, "word1" and "word2", which we can remove stop-words from individually:
@@ -40,20 +40,20 @@ As expected, a lot of them are pairs of common (relatively uninteresting) words.
 ```{r}
 library(tidyr)
 
-digrams_separated <- austen_digrams %>%
-  separate(digram, c("word1", "word2"), sep = " ")
+bigrams_separated <- austen_bigrams %>%
+  separate(bigram, c("word1", "word2"), sep = " ")
 
-digrams_filtered <- digrams_separated %>%
+bigrams_filtered <- bigrams_separated %>%
   filter(!word1 %in% stop_words$word) %>%
   filter(!word2 %in% stop_words$word)
 
-digrams_filtered
+bigrams_filtered
 ```
 
 We can now count the most common pairs of words:
 
 ```{r}
-digrams_filtered %>% 
+bigrams_filtered %>% 
   count(word1, word2, sort = TRUE)
 ```
 
@@ -61,11 +61,11 @@ We can see that names (whether first and last or with a salutation) are the most
 
 We may want to work with the recombined words. tidyr's `unite()` is the opposite of `separate()`, and lets us recombine the columns into one.
 
-```{r digrams_united, dependson = "digrams_filtered"}
-digrams_united <- digrams_filtered %>%
-  unite(digram, word1, word2, sep = " ")
+```{r bigrams_united, dependson = "bigrams_filtered"}
+bigrams_united <- bigrams_filtered %>%
+  unite(bigram, word1, word2, sep = " ")
 
-digrams_united
+bigrams_united
 ```
 
 You could also easily work with trigrams (sequences of 3 words) by setting `n = 3`:
@@ -80,42 +80,41 @@ austen_books() %>%
   count(word1, word2, word3, sort = TRUE)
 ```
 
-### Analyzing digrams
+### Analyzing bigrams
 
-A digram can be treated like a term just as we treated a word. For example, we can look at TF-IDF of digrams:
+A bigram can be considered a term, just in the same way that we dealt with single words. For example, we can look at tf-idf of bigrams:
 
-```{r digram_tf_idf, dependson = "digram_counts"}
-digram_tf_idf <- digrams_united %>%
-  count(book, digram) %>%
-  bind_tf_idf(digram, book, n) %>%
+```{r bigram_tf_idf, dependson = "bigram_counts"}
+bigram_tf_idf <- bigrams_united %>%
+  count(book, bigram) %>%
+  bind_tf_idf(bigram, book, n) %>%
   arrange(desc(tf_idf))
 
-digram_tf_idf
+bigram_tf_idf
 ```
 
 This can be visualized within each book, just as we did for words:
 
-```{r digram_tf_idf_plot, dependson = "digram_tf_idf", echo = FALSE, fig.width=9, fig.height=9}
-library(ggstance)
-
-digram_tf_idf %>%
+```{r bigram_tf_idf_plot, dependson = "bigram_tf_idf", echo = FALSE, fig.width=9, fig.height=9}
+bigram_tf_idf %>%
   arrange(desc(tf_idf)) %>%
   top_n(12, tf_idf) %>%
   ungroup() %>%
-  mutate(digram = reorder(digram, tf_idf)) %>%
-  ggplot(aes(tf_idf, digram)) +
-  geom_barh(stat = "identity") +
-  facet_wrap(~ book, ncol = 2, scales = "free_y")
+  mutate(bigram = reorder(bigram, tf_idf)) %>%
+  ggplot(aes(bigram, tf_idf, fill = book)) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  facet_wrap(~ book, ncol = 2, scales = "free_x") +
+  coord_flip()
 ```
 
 Much as we discovered in [Chapter 4](#tfidf), the units that distinguish each Austen book are almost exclusively names.
 
-### Using digrams to provide context in sentiment analysis
+### Using bigrams to provide context in sentiment analysis
 
 Our sentiment analysis approch in [Chapter 3](#sentiment) simply counted the appearance of positive or negative words, according to a reference lexicon. One of the problems with this approach is that a word's context can matter nearly as much as its presence. For example, the words "happy" and "like" will be counted as positive, even in a sentence like "I'm not **happy** and I don't **like** it!"
 
 ```{r}
-digrams_separated %>%
+bigrams_separated %>%
   filter(word1 == "not") %>%
   count(word2, sort = TRUE)
 ```
@@ -132,8 +131,8 @@ AFINN <- sentiments %>%
 AFINN
 ```
 
-```{r not_words, dependson = c("austen_digrams", "AFINN_ngrams")}
-not_words <- digrams_separated %>%
+```{r not_words, dependson = c("austen_bigrams", "AFINN_ngrams")}
+not_words <- bigrams_separated %>%
   filter(word1 == "not") %>%
   inner_join(AFINN, by = c(word2 = "word")) %>%
   count(word2, score, sort = TRUE) %>%
@@ -144,7 +143,7 @@ not_words
 
 It's worth asking which words contributed the most in the "wrong" direction. To compute that, we can multiply their score by the number of times they appear (so that a word with a sentiment score of +3 occurring 10 times has as much impact as a word with a sentiment score of +1 occurring 30 times).
 
-```{r not_words_plot, dependson = "not_words", fig.width=9, fig.height=7}
+```{r not_words_plot, dependson = "not_words", fig.width=8, fig.height=6}
 not_words %>%
   mutate(contribution = n * score) %>%
   arrange(desc(abs(contribution))) %>%
@@ -152,19 +151,19 @@ not_words %>%
   mutate(word2 = reorder(word2, contribution)) %>%
   ggplot(aes(word2, n * score, fill = n * score > 0)) +
   geom_bar(stat = "identity", show.legend = FALSE) +
-  xlab("Words preceded by \"not\"") +
-  ylab("Sentiment score * # of occurrences") +
+  ylab("Words preceded by \"not\"") +
+  xlab("Sentiment score * # of occurrences") +
   coord_flip()
 ```
 
-The digrams "not like" and "not help" were overwhelmingly the largest causes of misidentification, making the text seem much more positive than it is. But we can see phrases like "not afraid" and "not fail" sometimes suggest text is more negative than it is.
+The bigrams "not like" and "not help" were overwhelmingly the largest causes of misidentification, making the text seem much more positive than it is. But we can see phrases like "not afraid" and "not fail" sometimes suggest text is more negative than it is.
 
-"Not" isn't the only word that provides context. We could make a vector of words that we suspect , and use the same joining and counting approach to examine all of them:
+"Not" isn't the only word that provides context. We could make a vector of words that we suspect are used in negation, and use the same joining and counting approach to examine all of them at once.
 
-```{r negated_words, dependson = "digrams_separated"}
+```{r negated_words, dependson = "bigrams_separated"}
 negation_words <- c("not", "no", "never", "without")
 
-negated_words <- digrams_separated %>%
+negated_words <- bigrams_separated %>%
   filter(word1 %in% negation_words) %>%
   inner_join(AFINN, by = c(word2 = "word")) %>%
   count(word1, word2, score, sort = TRUE) %>%
@@ -179,14 +178,15 @@ negated_words %>%
   mutate(word2 = reorder(word2, contribution)) %>%
   group_by(word1) %>%
   top_n(10, abs(contribution)) %>%
-  ggplot(aes(contribution, word2, fill = n * score > 0)) +
-  geom_barh(stat = "identity", show.legend = FALSE) +
+  ggplot(aes(word2, contribution, fill = n * score > 0)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
   facet_wrap(~ word1, scales = "free") +
-  ylab("Words preceded by \"not\"") +
-  xlab("Sentiment score * # of occurrences")
+  xlab("Words preceded by negation") +
+  ylab("Sentiment score * # of occurrences") +
+  coord_flip()
 ```
 
-## Visualizing digrams as a network with the ggraph package
+## Visualizing bigrams as a network with the ggraph package
 
 TODO
 
@@ -195,10 +195,10 @@ TODO
 Now that we have our TODO
 
 ```{r}
-digram_counts <- digrams_filtered %>% 
+bigram_counts <- bigrams_filtered %>% 
   count(word1, word2, sort = TRUE)
 
-digram_counts
+bigram_counts
 ```
 
 Here we'll be referring to a "graph" not in the sense of a visualization, but as a . A graph can be created from a tidy object because a graph has three variables:
@@ -207,14 +207,14 @@ Here we'll be referring to a "graph" not in the sense of a visualization, but as
 * **to**: the node an edge is going towards
 * **weight** A numeric value associated with each edge
 
-```{r digram_graph, dependson = "digram_counts"}
+```{r bigram_graph, dependson = "bigram_counts"}
 library(igraph)
 
-digram_graph <- digram_counts %>%
+bigram_graph <- bigram_counts %>%
   filter(n > 20) %>%
   graph_from_data_frame()
 
-digram_graph
+bigram_graph
 ```
 
 The igraph package has many powerful functions for manipulating and analyzing networks.
@@ -225,22 +225,22 @@ TODO: examples of igraph package
 
 igraph has plotting functions built in, but they're not what the package is designed to do. Many others have developed visualization methods for graphs. But we like the ggraph package, because it implements it in terms of the grammar of graphics.
 
-```{r dependson = "digram_graph", }
+```{r dependson = "bigram_graph", }
 library(ggraph)
 
 set.seed(2016)
 
-ggraph(digram_graph, layout = "fr") +
+ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point()
 ```
 
 This gives an idea by adding the three ...
 
-```{r dependson = "digram_graph"}
+```{r dependson = "bigram_graph"}
 set.seed(2016)
 
-ggraph(digram_graph, layout = "fr") +
+ggraph(bigram_graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point() +
   geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
@@ -249,16 +249,16 @@ ggraph(digram_graph, layout = "fr") +
 
 We can see the graph start to take shape.
 
-* We add the `edge_alpha` aesthetic to the link layer to make links transparent based on how common or rare the digram is
+* We add the `edge_alpha` aesthetic to the link layer to make links transparent based on how common or rare the bigram is
 * We add directionality with an arrow
 * We tinker with the options to the node layer to make the points more attractive (larger, and blue)
 
-```{r dependson = "digram_graph"}
+```{r dependson = "bigram_graph"}
 set.seed(2016)
 
 a <- grid::arrow(type = "closed", length = unit(.1, "inches"))
 
-ggraph(digram_graph, layout = "fr") +
+ggraph(bigram_graph, layout = "fr") +
   geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
   geom_node_point(color = "lightblue", size = 5) +
   geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
@@ -267,24 +267,24 @@ ggraph(digram_graph, layout = "fr") +
 
 It may take a little more experimentation with your plots to get these graphs to work, but in the end we can visualize a lot this way.
 
-### Visualizing digrams in other texts
+### Visualizing bigrams in other texts
 
 We went to a good amount of work setting up this 
 
 ```{r}
-count_digrams <- function(dataset) {
+count_bigrams <- function(dataset) {
   dataset %>%
-    unnest_tokens(digram, text, token = "ngrams", n = 2) %>%
-    separate(digram, c("word1", "word2"), sep = " ") %>%
+    unnest_tokens(bigram, text, token = "ngrams", n = 2) %>%
+    separate(bigram, c("word1", "word2"), sep = " ") %>%
     filter(!word1 %in% stop_words$word) %>%
     filter(!word2 %in% stop_words$word) %>%
     count(word1, word2, sort = TRUE)
 }
 
-visualize_digrams <- function(digrams) {
+visualize_bigrams <- function(bigrams) {
   set.seed(2016)
   
-  digrams %>%
+  bigrams %>%
     graph_from_data_frame() %>%
     ggraph(layout = "fr") +
     geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
@@ -296,7 +296,7 @@ visualize_digrams <- function(digrams) {
 
 We could visualize pairs in the King James Bible:
 
-At that point, we could visualize digrams in other works, such as the King James Version of the Bible:
+At that point, we could visualize bigrams in other works, such as the King James Version of the Bible:
 
 ```{r eval = FALSE}
 library(gutenbergr)
@@ -307,17 +307,17 @@ kjv <- gutenberg_download(10)
 load("data/kjv.rda")
 ```
 
-```{r kjv_digrams, dependson = "kjv"}
-kjv_digrams <- kjv %>%
-  count_digrams()
+```{r kjv_bigrams, dependson = "kjv"}
+kjv_bigrams <- kjv %>%
+  count_bigrams()
 
-kjv_digrams
+kjv_bigrams
 ```
 
-```{r dependson = "kjv_digrams"}
-kjv_digrams %>%
+```{r dependson = "kjv_bigrams"}
+kjv_bigrams %>%
   filter(n > 40) %>%
-  visualize_digrams()
+  visualize_bigrams()
 ```
 
 ## Counting and correlating pairs of words with the widyr package
@@ -381,7 +381,7 @@ word_cors %>%
 
 ### Visualizing word correlations
 
-Just as we used ggraph to visualize digrams, we can use it to visualize correlations and clusters among words that we've found through the widyr package.
+Just as we used ggraph to visualize bigrams, we can use it to visualize correlations and clusters among words that we've found through the widyr package.
 
 This graph is an early placeholder, needs to be adjusted:
 
@@ -396,6 +396,6 @@ word_cors %>%
   theme_void()
 ```
 
-Note that unlike the digram analysis, the relationship here aren't directional.
+Note that unlike the bigram analysis, the relationship here aren't directional.
 
 This kind of correlation network is a very useful and flexible visualization, and we'll examine it further in later chapters.
