@@ -271,27 +271,27 @@ print_message(53907)
 We can also 
 
 ```{r usenet_2grams}
-usenet_digrams <- cleaned_text %>%
-  unnest_tokens(digram, text, token = "ngrams", n = 2)
+usenet_bigrams <- cleaned_text %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)
 ```
 
 ```{r dependson = "usenet_2grams"}
-usenet_digram_counts <- usenet_digrams %>%
-  count(board, digram)
+usenet_bigram_counts <- usenet_bigrams %>%
+  count(board, bigram)
 ```
 
-```{r usenet_digram_counts}
-digram_tf_idf <- usenet_digram_counts %>%
-  bind_tf_idf(digram, board, n)
+```{r usenet_bigram_counts}
+bigram_tf_idf <- usenet_bigram_counts %>%
+  bind_tf_idf(bigram, board, n)
 ```
 
-```{r dependson = "usenet_digram_counts"}
+```{r dependson = "usenet_bigram_counts"}
 negate_words <- c("not", "without", "no", "isn't", "can't", "don't",
                   "won't", "couldn't")
 
-usenet_digram_counts %>%
+usenet_bigram_counts %>%
   ungroup() %>%
-  separate(digram, c("word1", "word2"), sep = " ") %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
   filter(word1 %in% negate_words) %>%
   count(word1, word2, wt = n, sort = TRUE) %>%
   inner_join(AFINN, by = c(word2 = "word")) %>%
