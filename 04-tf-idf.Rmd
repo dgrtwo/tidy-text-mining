@@ -90,7 +90,10 @@ ggplot(plot_austen[1:20,], aes(tf_idf, word, fill = book)) +
 Let's look at the novels individually.
 
 ```{r plot_separate, dependson = "plot_austen", fig.height=10, fig.width=9}
-plot_austen <- plot_austen %>% group_by(book) %>% top_n(15) %>% ungroup
+plot_austen <- plot_austen %>% 
+  group_by(book) %>% 
+  top_n(15) %>% 
+  ungroup
 
 ggplot(plot_austen, aes(tf_idf, word, fill = book)) +
   geom_barh(alpha = 0.8, stat = "identity", show.legend = FALSE) +
@@ -122,10 +125,11 @@ physics_words <- physics %>%
   unnest_tokens(word, text) %>%
   count(author, word, sort = TRUE) %>%
   ungroup()
+
 physics_words
 ```
 
-Here we see just the raw counts, and of course these documents are all very different lengths. Let's go ahead and calculate tf-idf.
+Here we see just the raw counts, and of course these documents are all different lengths. Let's go ahead and calculate tf-idf.
 
 ```{r plot_physics, dependson = "physics_words", fig.width=9, fig.height=6}
 physics_words <- physics_words %>%
@@ -147,7 +151,7 @@ ggplot(plot_physics[1:20,], aes(tf_idf, word, fill = author)) +
 
 Nice! Let's look at each text individually.
 
-```{r physics_separate, dependson = "plot_physics", fig.height=7, fig.width=9}
+```{r physics_separate, dependson = "plot_physics", fig.height=7, fig.width=8}
 plot_physics <- plot_physics %>% 
   group_by(author) %>% 
   top_n(15, tf_idf) %>% 
@@ -180,7 +184,7 @@ grep("AK", physics$text, value = TRUE)[1]
 
 Let's remove some of these less meaningful words to make a better, more meaningful plot. Notice that we make a custom list of stop words and use `anti_join` to remove them.
 
-```{r mystopwords, dependson = "plot_physics", fig.height=7, fig.width=9}
+```{r mystopwords, dependson = "plot_physics", fig.height=7, fig.width=8}
 mystopwords <- data_frame(word = c("gif", "eq", "co", "rc", "ac", "ak", "bn", 
                                    "fig", "file", "cg", "cb"))
 physics_words <- anti_join(physics_words, mystopwords, by = "word")
