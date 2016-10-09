@@ -112,8 +112,8 @@ inaug_tf_idf %>%
   top_n(6, tf_idf) %>%
   ungroup() %>%
   mutate(term = reorder(term, tf_idf)) %>%
-  ggplot(aes(tf_idf, term, fill = document)) +
-  geom_bar(stat = "identity", alpha = 0.8) +
+  ggplot(aes(term, tf_idf, fill = document)) +
+  geom_bar(stat = "identity", alpha = 0.8,show.legend = FALSE) +
   facet_wrap(~ document, scales = "free") +
   coord_flip()
 ```
