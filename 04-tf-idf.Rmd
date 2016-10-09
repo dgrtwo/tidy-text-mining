@@ -75,7 +75,6 @@ Here we see all proper nouns, names that are in fact important in these novels. 
 
 ```{r plot_austen, dependson = "desc_idf", fig.height=6, fig.width=9}
 library(ggstance)
-library(ggthemes)
 
 plot_austen <- book_words %>%
   arrange(desc(tf_idf)) %>%
