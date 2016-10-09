@@ -8,11 +8,11 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-One type of text that has certainly received its share of attention in recent years is text shared online via Twitter. In fact, several of the sentiment lexicons used in this book (and commonly used in general) were designed for use with and validated on tweets. Both of the authors of this book are on Twitter and are fairly regular users of it so in this case study, let's compare the entire Twitter archives of [Julia](https://twitter.com/juliasilge) and [David](https://twitter.com/drob).
+One type of text that has received its share of attention in recent years is text shared online via Twitter. In fact, several of the sentiment lexicons used in this book (and commonly used in general) were designed for use with and validated on tweets. Both of the authors of this book are on Twitter and are fairly regular users of it so in this case study, let's compare the entire Twitter archives of [Julia](https://twitter.com/juliasilge) and [David](https://twitter.com/drob).
 
 ## Getting the data and distribution of tweets
 
-An individual can download their own Twitter archive by following [directions available here](https://support.twitter.com/articles/20170160). We each downloaded ours and will now open them up. Let's use lubridate to convert the string timestamps to date-time objects and just take a look at our tweeting patterns overall.
+An individual can download their own Twitter archive by following [directions available here](https://support.twitter.com/articles/20170160). We each downloaded ours and will now open them up. Let's use the lubridate package to convert the string timestamps to date-time objects and initially take a look at our tweeting patterns overall.
 
 ```{r setup, fig.width=8, fig.height=6}
 library(lubridate)
@@ -26,8 +26,11 @@ tweets_julia$timestamp <- with_tz(ymd_hms(tweets_julia$timestamp),
                                   "America/Denver")
 tweets_dave$timestamp <- with_tz(ymd_hms(tweets_dave$timestamp), 
                                  "America/New_York")
-tweets <- bind_rows(tweets_julia %>% mutate(person = "Julia"),
-                    tweets_dave %>% mutate(person = "David"))
+tweets <- bind_rows(tweets_julia %>% 
+                      mutate(person = "Julia"),
+                    tweets_dave %>% 
+                      mutate(person = "David"))
+
 ggplot(tweets, aes(x = timestamp, fill = person)) +
   geom_histogram(alpha = 0.5, position = "identity")
 ```
@@ -42,7 +45,7 @@ Let's use `unnest_tokens` to make a tidy dataframe of all the words in our tweet
 library(tidytext)
 library(stringr)
 
-reg <- "([^A-Za-z\\d#@']|'(?![A-Za-z\\d#@]))"
+reg <- "([^A-Za-z_\\d#@']|'(?![A-Za-z_\\d#@]))"
 tidy_tweets <- tweets %>% 
   mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT", "")) %>%
   unnest_tokens(word, text, token = "regex", pattern = reg) %>%
@@ -53,24 +56,33 @@ tidy_tweets <- tweets %>%
 Now we can calculate word frequencies for each person
 
 ```{r frequency, dependson = "tidytweets"}
-frequency <- tidy_tweets %>% group_by(person) %>% 
+frequency <- tidy_tweets %>% 
+  group_by(person) %>% 
   count(word, sort = TRUE) %>% 
-  left_join(tidy_tweets %>% group_by(person) %>% summarise(total = n())) %>%
+  left_join(tidy_tweets %>% 
+              group_by(person) %>% 
+              summarise(total = n())) %>%
   mutate(freq = n/total)
+
 frequency
 ```
 
 This is a lovely, tidy data frame but we would actually like to plot those frequencies on the x- and y-axes of a plot, so we will need to use an `inner_join` and make a different dataframe.
 
 ```{r spread, dependson = "frequency", fig.height=7, fig.width=7}
-frequency <- inner_join(frequency %>% filter(person == "Julia") %>% rename(Julia = freq),
-                        frequency %>% filter(person == "David") %>% rename(David = freq),
+frequency <- inner_join(frequency %>% 
+                          filter(person == "Julia") %>% 
+                          rename(Julia = freq),
+                        frequency %>% 
+                          filter(person == "David") %>% 
+                          rename(David = freq),
                         by = "word") %>% 
-  ungroup() %>% select(word, Julia, David)
+  ungroup() %>% 
+  select(word, Julia, David)
+
 frequency
 
 library(scales)
-
 ggplot(frequency, aes(Julia, David)) +
   geom_jitter(alpha = 0.1, size = 2.5, width = 0.4, height = 0.4) +
   geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
@@ -82,7 +94,7 @@ ggplot(frequency, aes(Julia, David)) +
 ```
 
 
-This may not even need to be pointed out, but David and Julia have used their Twitter accounts rather differently over the course of the past several years. David has used his Twitter account almost exclusively for professional purposes since he became more active, while Julia used it for entirely personal purposes until late 2015. We see these differences immediately in this plot exploring word frequencies, and they will continue to be obvious. Words near the red line in this plot are used with about equal frequencies by David and Julia, while words far away from the line are used much more by one person compared to the other. Because of the inner join we did above, words, hashtags, and usernames that appear in this plot are ones that we have both used at least once.
+This may not even need to be pointed out, but David and Julia have used their Twitter accounts rather differently over the course of the past several years. David has used his Twitter account almost exclusively for professional purposes since he became more active, while Julia used it for entirely personal purposes until late 2015. We see these differences immediately in this plot exploring word frequencies, and they will continue to be obvious in the rest of this chapter. Words near the red line in this plot are used with about equal frequencies by David and Julia, while words far away from the line are used much more by one person compared to the other. Because of the inner join we did above, words, hashtags, and usernames that appear in this plot are ones that we have both used at least once.
 
 
 TODO: lots
