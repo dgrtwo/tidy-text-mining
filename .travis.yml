@@ -1,3 +1,4 @@
+os: osx
 language: r
 cache:
   packages: yes
