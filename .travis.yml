@@ -20,3 +20,10 @@ after_success:
 env:
   global:
   - secure: NcVkDxYsQWUtCiZDHsAHzSTjxDRxmlgOu86xU0XmwWw5Ubd/kJKf2bSRZ+G39o2W5ntSRll7HNeAoDXxg8oCQnHaVcHukqFlpjVGfhEFCMjDxubxtRgkauMUuj2uFxf19utYtNntBTq9jC3938ihDY+TfI+qS/D+ipxA80vtokmISY/qIiA3W1lIo8fAEyY89p65nGUKlJ8UAsSDWRUSmmrcMHiHSxalN7y6NBUPKtRa8KCXkeIMT5i8GiNWOTUFbAu0CdKjMhE6cr5XsvDm13Vffol2WGuFSsmrF1w2xhRqysVtPNG4lcOAsQsPvWtFxV2VLkxunXi4OXSxhn4ZKNmYG2aLBJBbR/2AojYiGxUYx17nMn3s8e4kOQwoZ/Y6liJT2a0C12ksf4auMsySE4qB7CD78YRvki4W1uje22QkbGP+v+SBntsR6S8XwcPxK9RKcKxxl/Rj0lIbVpRDSakkaNFomzGF+s7Adb40+XaQcCUYjxQOvHCBKjJDIl9hwnynzFqVOfbkcqGV+IPpwv1kjWQQEjsqu+zenJAuphEgvFHJpGKR+4msuzoBnPOW1b/eNWAC0/42wWCzU6gfMtLWv1PGNnWDA6/j8+qrUV0PP2tGxw2/Lwrcy2sray93b0T/M+kbt9hNwXDKjixu0EYDpdxobHd8jRpuX/HAzyo=
+r_github_packages:
+- dgrtwo/widyr
+- thomasp85/ggforce
+- thomasp85/ggraph
+- lionel-/ggstance
+- hadley/ggplot2
+- hadley/scales
