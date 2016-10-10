@@ -214,7 +214,7 @@ top_sentiment_words %>%
   ggplot(aes(word, contribution, fill = contribution > 0)) +
   geom_bar(stat = "identity", show.legend = FALSE) +
   facet_wrap(~ board, scales = "free") +
-  coord_flip()
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 We can also see how much sentiment is confounded with topic in this particular approach. An atheism board is likely to discuss "god" in detail even in a negative context, and we can see it makes the board look more positive. Similarly, the negative contribution of the word "gun" to the "talk.politics.guns" board would occur even if the board were positive.
@@ -303,7 +303,7 @@ usenet_bigram_counts %>%
   ggplot(aes(word2, contribution, fill = contribution > 0)) +
   geom_bar(stat = "identity", show.legend = FALSE) +
   facet_wrap(~ word1, scales = "free", nrow = 2) +
-  coord_flip()
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 TODO: Something is wrong with that plot? Shouldn't each panel have 10 words? Missing a `group_by`? Is it just because some of the words are in more than in panel?
