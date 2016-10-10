@@ -103,7 +103,7 @@ bigram_tf_idf %>%
   mutate(bigram = reorder(bigram, tf_idf)) %>%
   ggplot(aes(bigram, tf_idf, fill = book)) +
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
-  facet_wrap(~ book, ncol = 2, scales = "free_x") +
+  facet_wrap(~ book, ncol = 2, scales = "free_y") +
   coord_flip()
 ```
 

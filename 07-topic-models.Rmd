@@ -120,8 +120,8 @@ library(ggplot2)
 
 top_terms %>%
   mutate(term = reorder(term, beta)) %>%
-  ggplot(aes(term, beta)) +
-  geom_bar(stat = "identity") +
+  ggplot(aes(term, beta, fill = topic)) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
   coord_flip()
 ```
