@@ -117,13 +117,13 @@ This model lends itself to a visualization:
 
 ```{r top_terms_plot, fig.height=7, fig.width=7}
 library(ggplot2)
-library(ggstance)
 
 top_terms %>%
   mutate(term = reorder(term, beta)) %>%
-  ggplot(aes(beta, term)) +
-  geom_barh(stat = "identity") +
-  facet_wrap(~ topic, scales = "free")
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip()
 ```
 
 These topics are pretty clearly associated with the four books! There's no question that the topic of "nemo", "sea", and "nautilus" belongs to *Twenty Thousand Leagues Under the Sea*, and that "jane", "darcy", and "elizabeth" belongs to *Pride and Prejudice*. We see "pip" and "joe" from *Great Expectations* and "martians", "black", and "night" from *The War of the Worlds*.

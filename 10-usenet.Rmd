@@ -114,17 +114,17 @@ We can visualize this for a few select boards. For example, let's look at all th
 
 ```{r, fig.width=9, fig.height=8}
 library(ggplot2)
-library(ggstance)
 
 tf_idf %>%
   filter(str_detect(board, "^sci\\.")) %>%
   group_by(board) %>%
   top_n(12, tf_idf) %>%
   mutate(word = reorder(word, tf_idf)) %>%
-  ggplot(aes(tf_idf, word)) +
-  geom_barh(stat = "identity") +
+  ggplot(aes(word, tf_idf)) +
+  geom_bar(stat = "identity") +
   facet_wrap(~ board, scales = "free_y") +
-  xlab("tf-idf")
+  ylab("tf-idf") +
+  coord_flip()
 ```
 
 We could use almost the same code (not shown) to compare the "rec." (recreation) or "talk." boards:
@@ -135,10 +135,11 @@ plot_tf_idf <- function(d) {
     group_by(board) %>%
     top_n(10, tf_idf) %>%
     mutate(word = reorder(word, tf_idf)) %>%
-    ggplot(aes(tf_idf, word)) +
-    geom_barh(stat = "identity") +
+    ggplot(aes(word, tf_idf)) +
+    geom_bar(stat = "identity") +
     facet_wrap(~ board, scales = "free_y") +
-    xlab("tf-idf")
+    ylab("tf-idf") +
+    coord_flip()
 }
 
 tf_idf %>%
