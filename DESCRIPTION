@@ -23,6 +23,7 @@ Imports:
   lubridate,
   stringr
 Remotes:
+  rstudio/bookdown,
   dgrtwo/widyr,
   thomasp85/ggforce,
   thomasp85/ggraph,
