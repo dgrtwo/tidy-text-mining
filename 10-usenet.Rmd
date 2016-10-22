@@ -220,7 +220,7 @@ top_sentiment_words %>%
   mutate(board = reorder(board, contribution),
          word = reorder(word, contribution)) %>%
   ggplot(aes(word, contribution, fill = contribution > 0)) +
-  geom_bar(alph = 0.8, stat = "identity", show.legend = FALSE) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   facet_wrap(~ board, scales = "free") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -277,26 +277,40 @@ Well then.
 
 ## N-grams
 
-We can also 
+We can also examine the effect of words that are used in negation, like we did in [Chapter 5]{#ngrams}. Let's start by finding all the bigrams in the Usenet posts.
 
 ```{r usenet_2grams, dependson = "cleaned_text"}
 usenet_bigrams <- cleaned_text %>%
   unnest_tokens(bigram, text, token = "ngrams", n = 2)
+
+usenet_bigrams
 ```
 
-```{r dependson = "usenet_2grams"}
+Now let's count how many of these bigrams are used in each board.
+
+```{r usenet_bigram_counts, dependson = "usenet_2grams"}
 usenet_bigram_counts <- usenet_bigrams %>%
   count(board, bigram)
+
+usenet_bigram_counts %>% 
+  arrange(desc(n))
 ```
 
-```{r usenet_bigram_counts}
+Next, we can calculate tf-idf for the bigrams to find the ones that are important for each board.
+
+```{r bigram_tf_idf, dependson = "usenet_bigram_counts"}
 bigram_tf_idf <- usenet_bigram_counts %>%
   bind_tf_idf(bigram, board, n)
+
+bigram_tf_idf %>%
+  arrange(desc(tf_idf))
 ```
 
-```{r dependson = "usenet_bigram_counts"}
+Now we come back to the words used in negation that we are interested in examining. Let's define a vector of words that we suspect are used in negation, and use the same joining and counting approach from [Chapter 5]{#ngrams} to examine all of them at once.
+
+```{r negate_words, dependson = "usenet_bigram_counts", fig.width=10, fig.height=9}
 negate_words <- c("not", "without", "no", "isn't", "can't", "don't",
-                  "won't", "couldn't")
+                  "won't", "couldn't", "never")
 
 usenet_bigram_counts %>%
   ungroup() %>%
@@ -309,13 +323,14 @@ usenet_bigram_counts %>%
   ungroup() %>%
   mutate(word2 = reorder(word2, contribution)) %>%
   ggplot(aes(word2, contribution, fill = contribution > 0)) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
-  facet_wrap(~ word1, scales = "free", nrow = 2) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  facet_wrap(~ word1, scales = "free", nrow = 3) +
+  ylab("Words preceded by negation") +
+  xlab("Sentiment score * # of occurrences") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-TODO: Something is wrong with that plot? Shouldn't each panel have 10 words? Missing a `group_by`? Is it just because some of the words are in more than in panel?
-
+These words are the ones that contribute the most to the sentiment scores in the wrong direction, because they are being used with negation words before them. Phrases like "no problem" and "don't want" are important sources of misidentification.
 
 
 ```{r eval = FALSE, echo = FALSE}
