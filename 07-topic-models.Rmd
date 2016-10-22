@@ -3,7 +3,7 @@
 ```{r echo = FALSE}
 library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
-options(width = 100, dplyr.width = 100)
+options(width = 100, dplyr.width = 150)
 library(ggplot2)
 theme_set(theme_light())
 ```
@@ -115,7 +115,7 @@ top_terms
 
 This model lends itself to a visualization:
 
-```{r top_terms_plot, fig.height=7, fig.width=7}
+```{r top_terms_plot, fig.height=6, fig.width=7}
 library(ggplot2)
 
 top_terms %>%
