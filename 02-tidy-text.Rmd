@@ -58,7 +58,7 @@ Having the text data in this format lets us manipulate, process, and visualize t
 
 ## Tidying the works of Jane Austen
 
-Let's use the text of Jane Austen's 6 completed, published novels from the [janeaustenr](https://cran.r-project.org/package=janeaustenr) package, and transform them into a tidy format. The janeaustenr package provides these texts in a one-row-per-line format. Let’s start with that, annotate a `linenumber` quantity to keep track of lines in the original format, and use a regex to find where all the chapters are.
+Let's use the text of Jane Austen's 6 completed, published novels from the [janeaustenr](https://cran.r-project.org/package=janeaustenr) package [@R-janeaustenr], and transform them into a tidy format. The janeaustenr package provides these texts in a one-row-per-line format. Let’s start with that, annotate a `linenumber` quantity to keep track of lines in the original format, and use a regex to find where all the chapters are.
 
 ```{r original_books}
 library(janeaustenr)
@@ -85,7 +85,7 @@ tidy_books <- original_books %>%
 tidy_books
 ```
 
-This function uses the [tokenizers package](https://github.com/lmullen/tokenizers) to separate each line into words. The default tokenizing is for words, but other options include characters, n-grams, sentences, lines, paragraphs, or separation around a regex pattern.
+This function uses the [tokenizers package](https://github.com/lmullen/tokenizers) [@R-tokenizers] to separate each line into words. The default tokenizing is for words, but other options include characters, n-grams, sentences, lines, paragraphs, or separation around a regex pattern.
 
 Now that the data is in one-word-per-row format, we can manipulate it with tidy tools like dplyr. We can remove stop words (kept in the tidytext dataset `stop_words`) with an `anti_join`.
 
@@ -122,7 +122,7 @@ We could pipe this straight into ggplot2 because of our consistent use of tidy t
 
 ## The gutenbergr package
 
-TODO: Now that we've introduced the janeaustenr package, also include a brief intro to the gutenberg package.
+Now that we've used the janeaustenr package, let's introduce the [gutenbergr](https://github.com/ropenscilabs/gutenbergr) package [@R-gutenbergr]. The gutenbergr package provides access to the public domain works from the [Project Gutenberg](https://www.gutenberg.org/) collection. The package includes tools both for downloading books (stripping out the unhelpful header/footer information), and a complete dataset of Project Gutenberg metadata that can be used to find works of interest. In this book, we will use the function `gutenberg_download()` that downloads one or more works from Project Gutenberg by ID, but you can also use other functions to explore metadata, pair Gutenberg ID with title, author, language, etc., or gather information about authors. To learn more about gutenbergr, check out the [package's tutorial at rOpenSci](https://ropensci.org/tutorials/gutenbergr_tutorial.html), where it is one of rOpenSci's packages for data access.
 
 ## Word frequencies
 
@@ -197,7 +197,7 @@ We use `str_extract` here because the UTF-8 encoded texts from Project Gutenberg
 ```{r plot_compare, dependson = "frequency", fig.width=10, fig.height=5.5}
 library(scales)
 ggplot(frequency, aes(x = other, y = Austen, color = abs(Austen - other))) +
-  geom_abline(color = "gray40") +
+  geom_abline(color = "gray40", lty = 2) +
   geom_jitter(alpha = 0.1, size = 2.5, width = 0.4, height = 0.4) +
   geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
   scale_x_log10(labels = percent_format()) +
