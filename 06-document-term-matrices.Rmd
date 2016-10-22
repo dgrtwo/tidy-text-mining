@@ -10,24 +10,24 @@ theme_set(theme_light())
 
 So far, we've been analyzing data in a tidy text structure: a data frame with one-token-per-document-per-row. This lets us use the popular suite of tidy tools such as dplyr, tidyr, and ggplot2. We've demonstrated that many text analyses can be performed using these principles.
 
-But many of the existing tools for natural language processing don't work with this kind of structure. The [CRAN Task View for Natural Language Processing](https://cran.r-project.org/web/views/NaturalLanguageProcessing.html) lists a large selection of packages that take other inputs. One of the most common is the [document-term matrix](https://en.wikipedia.org/wiki/Document-term_matrix), a sparse matrix of counts with one row for each document and one column for each term. MORE HERE
+But many of the existing tools for natural language processing don't work with this kind of structure. The [CRAN Task View for Natural Language Processing](https://cran.r-project.org/web/views/NaturalLanguageProcessing.html) lists a large selection of packages that take other inputs. One of the most common is the [document-term matrix](https://en.wikipedia.org/wiki/Document-term_matrix), a sparse matrix with one row for each document in a collection and one column for each term or word. The value that goes into the matrix is usually a word count or sometimes tf-idf. These matrices are sparse (they consist mostly of zeroes), so special algorithms and data structures can be used to deal with them that are efficient and fast.
 
 The tidytext package can integrate these packages into an analysis while still relying on our tidy tools. The two key verbs are:
 
-* `tidy()`: 
-* `cast_`: Turn a tidy one-term-per-row data frame into a document-term matrix. This includes `cast_sparse()` (sparse Matrix), `cast_dtm()` (`DocumentTermMatrix` objects from tm), and `cast_dfm()` (`dfm` objects from quanteda).
+* `tidy()`: Constructs a data frame that summarizes a model's statistical findings.
+* `cast_`: Turns a tidy one-term-per-row data frame into a document-term matrix. This includes `cast_sparse()` (sparse Matrix), `cast_dtm()` (`DocumentTermMatrix` objects from tm), and `cast_dfm()` (`dfm` objects from quanteda).
 
 ## Tidying a document-term matrix
 
-Many existing text mining datasets expect and provide a **document-term matrix**, or DTM. A DTM is a matrix where:
+As we have discussed, many existing text mining datasets expect and provide a **document-term matrix**, or DTM. A DTM is a matrix where
 
-* Each row represents one document
-* Each column represents one term
-* Each value contains the number of appearances of that term in that document
+* each row represents one document,
+* each column represents one term, and
+* each value typically contains the number of appearances of that term in that document.
 
 DTMs are usually implemented as sparse matrices, meaning the vast majority of values are 0. These objects can be interacted with as though they were matrices, but are stored in a more efficient format.
 
-One commonly used implementation of DTMs in R is the `DocumentTermMatrix` class in the tm package. For example, consider the corpus of 2246 Associated Press articles from the topicmodels package:
+One commonly used implementation of DTMs in R is the `DocumentTermMatrix` class in the tm package. For example, consider the corpus of 2246 Associated Press articles from the topicmodels package.
 
 ```{r AssociatedPress}
 library(tm)
@@ -37,7 +37,7 @@ class(AssociatedPress)
 AssociatedPress
 ```
 
-We see that this dataset contains `r nrow(AssociatedPress)` documents (each of them an AP article) and `r ncol(AssociatedPress)` terms (words).
+We see that this dataset contains `r nrow(AssociatedPress)` documents (each of them an AP article) and `r ncol(AssociatedPress)` terms (words). Notice that this example DTM is 99% sparse.
 
 If we want to analyze this with tidy tools, we need to turn it into a one-token-per-document-per-row data frame first. The broom package [@R-broom] introduced the `tidy` verb, which takes a non-tidy object and turns it into a data frame. The tidytext package implements that method for `DocumentTermClass` objects:
 
@@ -76,7 +76,7 @@ ap_sentiments %>%
   mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
   mutate(term = reorder(term, n)) %>%
   ggplot(aes(term, n, fill = sentiment)) +
-  geom_bar(stat = "identity") +
+  geom_bar(alpha = 0.8, stat = "identity") +
   ylab("Contribution to sentiment") +
   coord_flip()
 ```
@@ -109,7 +109,7 @@ inaug_tf_idf
 
 inaug_tf_idf %>%
   group_by(document) %>%
-  top_n(6, tf_idf) %>%
+  top_n(8, tf_idf) %>%
   ungroup() %>%
   mutate(term = reorder(term, tf_idf)) %>%
   ggplot(aes(term, tf_idf, fill = document)) +
