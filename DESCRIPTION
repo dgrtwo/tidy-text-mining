@@ -6,7 +6,6 @@ Authors@R: c(person("David", "Robinson", email = "admiral.david@gmail.com", role
 Depends: R (>= 3.3.0)
 Imports:
   bookdown,
-  tidytext,
   dplyr,
   tidyr,
   reshape2,
@@ -24,6 +23,7 @@ Imports:
   lubridate,
   stringr
 Remotes:
+  juliasilge/tidytext,
   hadley/ggplot2,
   dgrtwo/widyr,
   thomasp85/ggforce,
