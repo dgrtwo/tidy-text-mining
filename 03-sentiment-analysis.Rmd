@@ -79,7 +79,7 @@ Now we can plot these sentiment scores across the plot trajectory of each novel.
 library(ggplot2)
 
 ggplot(janeaustensentiment, aes(index, sentiment, fill = book)) +
-        geom_bar(stat = "identity", show.legend = FALSE) +
+        geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
         facet_wrap(~book, ncol = 2, scales = "free_x")
 ```
 
@@ -108,7 +108,7 @@ bing_word_counts %>%
   mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(word, n, fill = sentiment)) +
-  geom_bar(stat = "identity") +
+  geom_bar(alpha = 0.8, stat = "identity") +
   labs(y = "Contribution to sentiment",
        x = NULL) +
   coord_flip()
@@ -131,7 +131,7 @@ tidy_books %>%
   with(wordcloud(word, n, max.words = 100))
 ```
 
-In other functions, such as `comparison.cloud`, you may need to turn it into a matrix with reshape2's `acast`. Let's do the sentiment analysis to tag positive and negative words using an inner join, then find the most common positive and negative words. Until the step where we need to send the data to `comparison.cloud`, this can all be done with joins, piping, and dplyr because our data is in tidy format.
+In other functions, such as `comparison.cloud`, you may need to turn the data frame into a matrix with reshape2's `acast`. Let's do the sentiment analysis to tag positive and negative words using an inner join, then find the most common positive and negative words. Until the step where we need to send the data to `comparison.cloud`, this can all be done with joins, piping, and dplyr because our data is in tidy format.
 
 ```{r wordcloud, dependson = "tidy_books", fig.height=5, fig.width=5}
 library(reshape2)
@@ -169,11 +169,15 @@ Another option in `unnest_tokens` is to split into tokens using a regex pattern.
 
 ```{r austen_chapters, dependson = "tidy_books"}
 austen_chapters <- austen_books() %>%
+  mutate(book = factor(book, levels = unique(book))) %>%
   group_by(book) %>%
   unnest_tokens(chapter, text, token = "regex", 
                 pattern = "Chapter|CHAPTER [\\dIVXLC]") %>%
   ungroup()
-austen_chapters %>% group_by(book) %>% summarise(chapters = n())
+
+austen_chapters %>% 
+  group_by(book) %>% 
+  summarise(chapters = n())
 ```
 
 We have recovered the correct number of chapters in each novel (plus an "extra" row for each novel title). In this data frame, each row corresponds to one chapter.
@@ -189,13 +193,15 @@ wordcounts <- tidy_books %>%
   summarize(words = n())
 
 tidy_books %>%
+  mutate(book = factor(book, levels = unique(book))) %>%
   semi_join(bingnegative) %>%
   group_by(book, chapter) %>%
   summarize(negativewords = n()) %>%
   left_join(wordcounts, by = c("book", "chapter")) %>%
   mutate(ratio = negativewords/words) %>%
   filter(chapter != 0) %>%
-  top_n(1)
+  top_n(1) %>%
+  ungroup
 ```
 
 These are the chapters with the most sad words in each book, normalized for number of words in the chapter. What is happening in these chapters? In Chapter 43 of *Sense and Sensibility* Marianne is seriously ill, near death, and in Chapter 34 of *Pride and Prejudice* Mr. Darcy proposes for the first time (so badly!). Chapter 46 of *Mansfield Park* is almost the end, when everyone learns of Henry's scandalous adultery, Chapter 15 of *Emma* is when horrifying Mr. Elton proposes, and in Chapter 21 of *Northanger Abbey* Catherine is deep in her Gothic faux fantasy of murder, etc. Chapter 4 of *Persuasion* is when the reader gets the full flashback of Anne refusing Captain Wentworth and how sad she was and what a terrible mistake she realized it to be.
