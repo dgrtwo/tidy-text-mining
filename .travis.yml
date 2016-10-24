@@ -26,3 +26,4 @@ r_github_packages:
 - thomasp85/ggforce
 - thomasp85/ggraph
 - juliasilge/tidytext
+- juliasilge/janeaustenr

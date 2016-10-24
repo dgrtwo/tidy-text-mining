@@ -14,7 +14,6 @@ Imports:
   igraph,
   readr,
   tm,
-  janeaustenr,
   Matrix,
   topicmodels,
   quanteda,
@@ -23,6 +22,7 @@ Imports:
   lubridate,
   stringr
 Remotes:
+  juliasilge/janeaustenr,
   juliasilge/tidytext,
   hadley/ggplot2,
   dgrtwo/widyr,
