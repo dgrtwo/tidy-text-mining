@@ -8,7 +8,7 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-So far we've considered words as individual units, and connected them to documents or sentiments. However, many interesting text analyses are based on the relationships between words, whether examining words commonly used in proximity to each other or within the same documents. 
+So far we've considered words as individual units, and connected them to documents or sentiments. However, many interesting text analyses are based on the relationships between words, whether examining words commonly used in proximity to each other or within the same documents.
 
 Here, we'll explore some of the tools tidytext offers for determining relationships between words in your text corpus. We'll also introduce the widyr package, which is useful for calculating pairwise correlations and distances within a tidy format.
 
@@ -109,7 +109,7 @@ bigram_tf_idf %>%
   ggplot(aes(bigram, tf_idf, fill = book)) +
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   facet_wrap(~ book, ncol = 2, scales = "free") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  coord_flip()
 ```
 
 Much as we discovered in [Chapter 4](#tfidf), the units that distinguish each Austen book are almost exclusively names.
@@ -193,12 +193,12 @@ negated_words %>%
   facet_wrap(~ word1, scales = "free") +
   xlab("Words preceded by negation") +
   ylab("Sentiment score * # of occurrences") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  coord_flip()
 ```
 
 ### Visualizing a network of bigrams with igraph
 
-We may be interested in . 
+We may be interested in visualizing all of the relationships among words simultaneously, rather than just the top few at a time.
 
 ```{r bigram_counts, dependson = "bigrams_filtered"}
 bigram_counts <- bigrams_filtered %>% 
@@ -406,7 +406,7 @@ word_cors %>%
   ggplot(aes(item2, correlation)) +
   geom_bar(stat = "identity") +
   facet_wrap(~ item1, scales = "free") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  coord_flip()
 ```
 
 Just as we used ggraph to visualize bigrams, we can use it to visualize the correlations and clusters of words that were found by the widyr package.
