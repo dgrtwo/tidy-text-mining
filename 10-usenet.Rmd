@@ -161,7 +161,7 @@ We see lots of characteristic words for these boards, from "pitching" and "hitte
 
 We can use the sentiment analysis techniques we explored in [Chapter 3](#sentiment) to examine how positive and negative words were used in these Usenet posts. Which boards used the most positive and negative words?
 
-```{r board_sentiments, dependson = "words_by_board", fig.width=6, fig.height=6}
+```{r board_sentiments, dependson = "words_by_board", fig.width=7, fig.height=6}
 AFINN <- sentiments %>%
   filter(lexicon == "AFINN")
 
@@ -308,9 +308,8 @@ bigram_tf_idf %>%
 
 Now we come back to the words used in negation that we are interested in examining. Let's define a vector of words that we suspect are used in negation, and use the same joining and counting approach from [Chapter 5](#ngrams) to examine all of them at once.
 
-```{r negate_words, dependson = "usenet_bigram_counts", fig.width=10, fig.height=9}
-negate_words <- c("not", "without", "no", "isn't", "can't", "don't",
-                  "won't", "couldn't", "never")
+```{r negate_words, dependson = "usenet_bigram_counts", fig.width=8, fig.height=10}
+negate_words <- c("not", "without", "no", "can't", "don't", "won't")
 
 usenet_bigram_counts %>%
   ungroup() %>%
@@ -325,8 +324,8 @@ usenet_bigram_counts %>%
   ggplot(aes(word2, contribution, fill = contribution > 0)) +
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   facet_wrap(~ word1, scales = "free", nrow = 3) +
-  ylab("Words preceded by negation") +
-  xlab("Sentiment score * # of occurrences") +
+  xlab("Words preceded by negation") +
+  ylab("Sentiment score * # of occurrences") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
