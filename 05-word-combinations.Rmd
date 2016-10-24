@@ -226,7 +226,7 @@ bigram_graph <- bigram_counts %>%
 bigram_graph
 ```
 
-igraph has plotting functions built in, but they're not what the package is designed to do. Many others have developed visualization methods for graphs. But we recommend the ggraph package, because it implements these visualizations in terms of the grammar of graphics, which we are already familiar with from ggplot2.
+igraph has plotting functions built in, but they're not what the package is designed to do. Many others have developed visualization methods for graphs. We recommend the ggraph package, because it implements these visualizations in terms of the grammar of graphics, which we are already familiar with from ggplot2.
 
 We can convert an igraph object into a ggraph with the `ggraph` function, after which we add layers to it, much like layers are added in ggplot2. For example, here we add nodes, edges, and text to construct the basics of a graph:
 
