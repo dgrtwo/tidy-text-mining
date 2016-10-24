@@ -91,7 +91,7 @@ TODO: The three different methods of calculating sentiment give results that are
 
 One advantage of having the data frame with both sentiment and word is that we can analyze word counts that contribute to each sentiment.
 
-```{r wordcounts, dependson = "tidy_books"}
+```{r wordcounts, fig.width=7, fig.height=6, dependson = "tidy_books"}
 bing_word_counts <- tidy_books %>%
   inner_join(bing) %>%
   count(word, sentiment, sort = TRUE) %>%
