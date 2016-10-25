@@ -162,8 +162,7 @@ We see lots of characteristic words for these boards, from "pitching" and "hitte
 We can use the sentiment analysis techniques we explored in [Chapter 3](#sentiment) to examine how positive and negative words were used in these Usenet posts. Which boards used the most positive and negative words?
 
 ```{r board_sentiments, dependson = "words_by_board", fig.width=7, fig.height=6}
-AFINN <- sentiments %>%
-  filter(lexicon == "AFINN")
+AFINN <- get_sentiments("afinn")
 
 word_board_sentiments <- words_by_board %>%
   inner_join(AFINN, by = "word")

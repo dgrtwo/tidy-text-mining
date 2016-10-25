@@ -129,9 +129,7 @@ By performing sentiment analysis on the bigram data, we can examine how often se
 Let's use the AFINN lexicon for sentiment analysis, which gives a numeric sentiment score for each word:
 
 ```{r AFINN_ngrams}
-AFINN <- sentiments %>%
-  filter(lexicon == "AFINN") %>%
-  select(word, score)
+AFINN <- get_sentiments("afinn")
 
 AFINN
 ```
