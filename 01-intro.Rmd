@@ -57,3 +57,14 @@ This book serves as an introduction to a framework along with a collection of ex
 * **Languages other than English:** Some of our users have had success applying tidytext to their text mining needs for languages other than English but we are not covering those issues in this book.
 
 We feel that the tidy data philosphy is a powerful tool to make handling data easier and more effective, and this is no less true when it comes to handling text. We also believe that the tools provided by tidy data principles and specifically tidy text mining are well suited to extensions beyond the examples we provide here.
+
+## Acknowledgements
+
+We are so thankful for the contributions, help, and perspective of people who have moved us forward in this project. There are several people and organizations we would like to thank in particular.
+
+* [rOpenSci](https://ropensci.org/), which hosted us at the unconference where we began work on our package
+* Gabriela de Queiroz for her contributions to the package while we were at the unconference
+* Lincoln Mullen for his work on the [tokenizers](https://github.com/ropensci/tokenizers) package
+* Kenneth Benoit for his work on the [quanteda](https://github.com/kbenoit/quanteda) package
+* the [NASA Datanauts](https://open.nasa.gov/explore/datanauts/) program, for the opportunities and support they have provided Julia during her time with them
+* Hadley Wickham for his work in framing tidy data principles and building tidy tools
