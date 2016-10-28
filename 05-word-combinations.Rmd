@@ -422,6 +422,6 @@ word_cors %>%
   theme_void()
 ```
 
-Note that unlike the bigram analysis, the relationship here are symmetric, rather than directional. We can also see that while pairings of names and titles that dominated bigram pairings are common, such as "colonel/fitzwilliam", we can also see pairings of words that appear close to each other, such as "walk" and "park".
+Note that unlike the bigram analysis, the relationships here are symmetric, rather than directional. We can also see that while pairings of names and titles that dominated bigram pairings are common, such as "colonel/fitzwilliam", we can also see pairings of words that appear close to each other, such as "walk" and "park".
 
 These network visualizations are a flexible tool for exploring relationships, and will play an important role in the case studies in later chapters.
