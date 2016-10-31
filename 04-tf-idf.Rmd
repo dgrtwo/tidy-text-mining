@@ -168,16 +168,18 @@ ggplot(plot_physics, aes(word, tf_idf, fill = author)) +
 Very interesting indeed. One thing we see here is "gif" in the Einstein text?!
 
 ```{r dependson = "physics"}
-grep("gif", physics$text, value = TRUE)[1:10]
+grep("eq\\.", physics$text, value = TRUE)[1:10]
 ```
 
-Some cleaning up of the text might be in order. The same thing is true for "eq", obviously here. "K1" is the name of a coordinate system for Einstein:
+Some cleaning up of the text might be in order. "K1" is the name of a coordinate system for Einstein:
 
 ```{r dependson = "physics"}
 grep("K1", physics$text, value = TRUE)[1]
 ```
 
-Also notice that in this line we have "co-ordinate", which explains why there are separate "co" and "ordinate" items in the high tf-idf words for the Einstein text. "AB", "RC", and so forth are names of rays, circles, angles, and so forth for Huygens.
+Maybe it makes sense to keep this one. Also notice that in this line we have "co-ordinate", which explains why there are separate "co" and "ordinate" items in the high tf-idf words for the Einstein text.
+
+"AB", "RC", and so forth are names of rays, circles, angles, and so forth for Huygens.
 
 ```{r dependson = "physics"}
 grep("AK", physics$text, value = TRUE)[1]
@@ -186,8 +188,8 @@ grep("AK", physics$text, value = TRUE)[1]
 Let's remove some of these less meaningful words to make a better, more meaningful plot. Notice that we make a custom list of stop words and use `anti_join` to remove them.
 
 ```{r mystopwords, dependson = "plot_physics", fig.height=7, fig.width=8}
-mystopwords <- data_frame(word = c("gif", "eq", "co", "rc", "ac", "ak", "bn", 
-                                   "fig", "file", "cg", "cb"))
+mystopwords <- data_frame(word = c("eq", "co", "rc", "ac", "ak", "bn", 
+                                   "fig", "file", "cg", "cb", "cm"))
 physics_words <- anti_join(physics_words, mystopwords, by = "word")
 plot_physics <- physics_words %>%
   arrange(desc(tf_idf)) %>%
