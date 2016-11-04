@@ -9,6 +9,8 @@ bookdown::gitbook:
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
     edit:
       link: https://github.com/dgrtwo/tidy-text-mining/edit/master/%s
+  includes:
+    in_header: _includes/analytics.html
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex
