@@ -180,16 +180,23 @@ Now, let's calculate the frequency for each word for the works of Jane Austen, t
 ```{r frequency, dependson = c("tidy_bronte", "tidy_hgwells", "tidy_books")}
 tidy_both <- bind_rows(
   mutate(tidy_bronte, author = "Brontë Sisters"),
-  mutate(tidy_hgwells, author = "H.G. Wells"))
-frequency <- tidy_both %>%
+  mutate(tidy_hgwells, author = "H.G. Wells")) %>%
   mutate(word = str_extract(word, "[a-z]+")) %>%
   count(author, word) %>%
   rename(other = n) %>%
-  inner_join(count(tidy_books, word)) %>%
-  rename(Austen = n) %>%
-  mutate(other = other / sum(other),
-         Austen = Austen / sum(Austen)) %>%
-  ungroup()
+  group_by(author) %>% 
+  mutate(sum_other = sum(other)) %>% 
+  ungroup() 
+tidy_Austen <- tidy_books %>% 
+  mutate(word = str_extract(word, "[a-z]+")) %>% 
+  count(word) %>% 
+  rename(Austen = n) %>% 
+  mutate(sum_Austen = sum(Austen)) 
+frequency <- tidy_both %>%
+  inner_join(tidy_Austen) %>% 
+  filter(!is.na(word)) %>% 
+  mutate(other = other / sum_other,
+         Austen = Austen / sum_Austen) 
 ```
 
 We use `str_extract` here because the UTF-8 encoded texts from Project Gutenberg have some examples of words with underscores around them to indicate emphasis (like italics). The tokenizer treated these as words but we don't want to count "\_any\_" separately from "any". Now let's plot.
