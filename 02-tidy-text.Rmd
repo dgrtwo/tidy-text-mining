@@ -210,7 +210,7 @@ ggplot(frequency, aes(x = other, y = Austen, color = abs(Austen - other))) +
   scale_x_log10(labels = percent_format()) +
   scale_y_log10(labels = percent_format()) +
   scale_color_gradient(limits = c(0, 0.001), low = "darkslategray4", high = "gray75") +
-  facet_wrap(~author, ncol = 2) +
+  facet_wrap(~author, ncol = 2, scales = "free_x") +
   theme(legend.position="none") +
   labs(y = "Jane Austen", x = NULL)
 ```
