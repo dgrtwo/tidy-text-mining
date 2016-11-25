@@ -14,10 +14,14 @@ There are 32,000+ datasets at [NASA](https://www.nasa.gov/), and we can use the 
 
 First, let's download the JSON file and take a look at the names.
 
-```{r download}
+```{r eval=FALSE}
 library(jsonlite)
-
 metadata <- fromJSON("https://data.nasa.gov/data.json")
+names(metadata$dataset)
+```
+
+```{r download, echo=FALSE}
+load("data/metadata.rda")
 names(metadata$dataset)
 ```
 
