@@ -9,6 +9,7 @@ addons:
     packages:
       - libgsl0-dev # for topicmodels
       - libxml2-dev # for XML, a dependency of quanteda
+      - libudunits2-dev # for units, a dependency of ggforce
 before_script:
 - chmod +x ./_build.sh
 - chmod +x ./_deploy.sh
