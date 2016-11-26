@@ -125,7 +125,7 @@ word_ratios %>%
 
 Which words are most likely to be from Julia's account or from David's account? Let's just take the top 15 most distinctive words for each account and plot them.
 
-```{r plotratios, dependson = "word_ratios", fig.width=8, fig.height=5}
+```{r plotratios, dependson = "word_ratios", fig.width=7, fig.height=5}
 word_ratios %>%
   group_by(logratio < 0) %>%
   top_n(15, abs(logratio)) %>%
