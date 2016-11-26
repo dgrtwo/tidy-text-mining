@@ -124,7 +124,7 @@ bing_and_nrc <- bind_rows(pride_prejudice %>%
 
 We now have an estimate of the net sentiment (positive - negative) in each chunk of the novel text for each sentiment lexicon. Let's bind them together and plot them.
 
-```{r compareplot, dependson = "comparesentiment", fig.width=9, fig.height=4}
+```{r compareplot, dependson = "comparesentiment", fig.width=9, fig.height=6}
 bind_rows(afinn, 
           bing_and_nrc) %>%
   ggplot(aes(index, sentiment, fill = method)) +
