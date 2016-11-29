@@ -65,7 +65,7 @@ tidy_books %>%
   count(word, sort = TRUE)
 ```
 
-Or instead we could examine how sentiment changes during each novel. Let's find a sentiment score for each word using the Bing lexicon, then count the number of positive and negative words in defined sections of each novel.
+Or instead we could examine how sentiment changes during each novel. We can do this with just a handful of lines that are mostly dplyr functions. First, we find a sentiment score for each word using the Bing lexicon and `inner_join`. Next, we count up how many positive and negative words there are in defined sections of each book. We define an `index` here to keep track of where we are in the narrative; this index (using integer division) counts up sections of 80 lines of text. Small sections of text may not have enough words in them to get a good estimate of sentiment while really large sections can wash out narrative structure. For these books, using 80 lines works well, but this can vary depending on individual texts, how long the lines were to start with, etc. We then use a `spread` operation so that we have negative and positive sentiment in separate columns, and lastly calculate a net sentiment (positive - minus).
 
 ```{r janeaustensentiment, dependson = "tidy_books"}
 library(tidyr)
@@ -77,7 +77,7 @@ janeaustensentiment <- tidy_books %>%
   mutate(sentiment = positive - negative)
 ```
 
-Now we can plot these sentiment scores across the plot trajectory of each novel.
+Now we can plot these sentiment scores across the plot trajectory of each novel. Notice that we are plotting against the `index` on the x-axis that keeps track of narrative time in sections of text.
 
 ```{r sentimentplot, dependson = "janeaustensentiment", fig.width=9, fig.height=10}
 library(ggplot2)
