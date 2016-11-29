@@ -23,8 +23,8 @@ Imports:
   XML,
   wordcloud,
   lubridate,
-  stringr
+  stringr,
+  ggforce
 Remotes:
   dgrtwo/widyr,
-  thomasp85/ggforce,
   thomasp85/ggraph
