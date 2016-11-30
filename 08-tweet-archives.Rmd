@@ -142,4 +142,72 @@ So David has tweeted about bioinformatics and Stack Overflow while Julia has bee
 
 ## Sentiment analysis
 
+David and Julia have tweeted using different words, reflecting the difference of a professional vs. a personal Twitter account over the bulk of our tweets, but what about the sentiment of each person's tweets? Let's look for similarities and differences in the emotional content of these tweets. 
+
+First, let's find the total number of words from each person; Julia has a much larger total number of tweets than David.
+
+```{r totals, dependson = "tidytweets"}
+totals <- tidy_tweets %>%
+  group_by(person) %>%
+  summarise(total_words = n())
+
+totals
+```
+
+Now let's measure the sentiment for each word in our tweet archives. First we use `inner_join` and the NRC sentiment lexicon to identify words that are associated with joy, anger, surprise, etc. Then we count how many of these words each person used. Next, we join the data frame with the total words so that we will be able to look at proportions.
+
+```{r sentiment_by_person, dependson = c("tidytweets", "totals")}
+sentiment_by_person <- tidy_tweets %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(sentiment, person) %>%
+  ungroup() %>%
+  left_join(totals) %>%
+  rename(words = n)
+
+sentiment_by_person
+```
+
+This is count data, so let's use a Poisson test to measure the difference between David's word use and Julia's. We want to test each sentiment separately, so first let's `nest` the data so that we have a list-column with the data for each sentiment. Then let's use `map` from the purrr library to apply the Poisson test to each little data frame individually.
+
+```{r sentiment_differences, dependson = "sentiment_by_person"}
+library(purrr)
+
+sentiment_differences <- sentiment_by_person %>% 
+  nest(-sentiment) %>%
+  mutate(tests = map(data, ~ poisson.test(.$words, .$total_words)))
+
+sentiment_differences
+```
+
+Now we can use `tidy` from the broom library and `unnest` to get back to a data frame without list-columns.
+
+```{r unnest_sentiment, dependson = "sentiment_differences"}
+library(broom)
+
+sentiment_differences <- sentiment_differences %>% 
+  unnest(map(tests, tidy)) %>% 
+  select(-data, -tests)
+
+sentiment_differences
+```
+
+We have measured the differences in sentiment between our two Twitter feeds; now let's plot them!
+
+```{r plot_unnest, dependson = "unnest_sentiment", fig.width=6, fig.height=7}
+library(scales)
+
+sentiment_differences %>%
+  ungroup() %>%
+  mutate(sentiment = reorder(sentiment, estimate)) %>%
+  mutate_each(funs(1 - .), estimate, conf.low, conf.high) %>%
+  ggplot(aes(estimate, sentiment)) +
+  geom_point(size = 2.5) +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high)) +
+  scale_x_continuous(labels = percent_format()) +
+  labs(x = "% increase for Julia relative to David",
+       y = "Sentiment")
+```
+
+We see here that Julia uses about 65% more words related to joy and 55% more words related to disgust than David; in fact, she uses more of *all* words associated with sentiments, both negative and positive. David's tweets are more neutral in sentiment while Julia's involve more dramatic word choices that communicate more emotions. This, again, reflects the different ways we have used our Twitter accounts.
+
 ## Words that contribute to sentiment in tweets
