@@ -193,7 +193,7 @@ sentiment_differences
 
 We have measured the differences in sentiment between our two Twitter feeds; now let's plot them!
 
-```{r plot_unnest, dependson = "unnest_sentiment", fig.width=6, fig.height=7}
+```{r plot_unnest, dependson = "unnest_sentiment", fig.width=7, fig.height=7}
 library(scales)
 
 sentiment_differences %>%
@@ -214,7 +214,7 @@ We see here that Julia uses about 65% more words related to joy and about 55% mo
 
 Which specific words are driving this difference in sentiment between Julia's and David's accounts? Let's go back to the data frame that contains the odds ratios for each word. We can use the same `inner_join` with the NRC sentiment lexicon to identify the words that are associated with emotions like joy, disgust, and so forth; these are exactly the words that are driving the differences in measured sentiment between our two accounts. Now let's find the words with the largest odds ratios. When we did a similar operation above, we took the `top_n` for each individual person to see the words that were more likely to come from each Twitter feed, but now we will take the `top_n` for each sentiment to see which word choices are the cause of the marked difference in sentiment.
 
-```{r plotsentiments, dependson = "word_ratios", fig.width=7, fig.height=6}
+```{r plotsentiments, dependson = "word_ratios", fig.width=8, fig.height=6}
 word_ratios %>%
   inner_join(get_sentiments("nrc")) %>%
   filter(!sentiment %in% c("positive", "negative")) %>%
