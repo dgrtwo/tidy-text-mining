@@ -208,6 +208,30 @@ sentiment_differences %>%
        y = "Sentiment")
 ```
 
-We see here that Julia uses about 65% more words related to joy and 55% more words related to disgust than David; in fact, she uses more of *all* words associated with sentiments, both negative and positive. David's tweets are more neutral in sentiment while Julia's involve more dramatic word choices that communicate more emotions. This, again, reflects the different ways we have used our Twitter accounts.
+We see here that Julia uses about 65% more words related to joy and about 55% more words related to disgust than David; in fact, she uses more of *all* words associated with sentiments, both negative and positive. David's tweets are more neutral in sentiment while Julia's involve more dramatic word choices that communicate more emotions. This, again, reflects the different ways we have used our Twitter accounts.
 
 ## Words that contribute to sentiment in tweets
+
+Which specific words are driving this difference in sentiment between Julia's and David's accounts? Let's go back to the data frame that contains the odds ratios for each word. We can use the same `inner_join` with the NRC sentiment lexicon to identify the words that are associated with emotions like joy, disgust, and so forth; these are exactly the words that are driving the differences in measured sentiment between our two accounts. Now let's find the words with the largest odds ratios. When we did a similar operation above, we took the `top_n` for each individual person to see the words that were more likely to come from each Twitter feed, but now we will take the `top_n` for each sentiment to see which word choices are the cause of the marked difference in sentiment.
+
+```{r plotsentiments, dependson = "word_ratios", fig.width=7, fig.height=6}
+word_ratios %>%
+  inner_join(get_sentiments("nrc")) %>%
+  filter(!sentiment %in% c("positive", "negative")) %>%
+  mutate(sentiment = reorder(sentiment, -logratio),
+         word = reorder(word, -logratio)) %>%
+  group_by(sentiment) %>%
+  top_n(10, abs(logratio)) %>%
+  ungroup() %>%
+  ggplot(aes(word, logratio, fill = logratio < 0)) +
+  facet_wrap(~ sentiment, scales = "free", nrow = 2) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(y = "log odds ratio (David/Julia)",
+       x = NULL) +
+  scale_fill_discrete(name = "", labels = c("David", "Julia"))
+```
+
+We see here that Julia's tweets have such a higher joy score because she has tweeted about things like birthdays, babies, and things that are delicious and sweet (probably sweet babies even!). Her disgust score is higher because she has tweeted about pregnancy, diapers, and being sick with stomach bugs. We see that there are some misidentifications visible in this plot; David's only joy word should actually be Excel, the Microsoft product (not excel, the verb) and he uses "wrangling" in the sense of "data wrangling", which is not fraught with disgust, anger, or fear (or is it?!). These misidentifications due to domain-specific word use mean that the difference between Julia and David for joy, digust, and some others should actually be even larger.
+
+## More favorites or retweets
