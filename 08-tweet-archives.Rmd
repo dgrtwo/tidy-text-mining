@@ -18,18 +18,15 @@ An individual can download their own Twitter archive by following [directions av
 library(lubridate)
 library(ggplot2)
 library(dplyr)
+library(readr)
 
-tweets_julia <- read.csv("data/tweets_julia.csv", stringsAsFactors = FALSE)
-tweets_dave <- read.csv("data/tweets_dave.csv", stringsAsFactors = FALSE)
-# take out the timezone thing if we don't do anything with times of day
-tweets_julia$timestamp <- with_tz(ymd_hms(tweets_julia$timestamp), 
-                                  "America/Denver")
-tweets_dave$timestamp <- with_tz(ymd_hms(tweets_dave$timestamp), 
-                                 "America/New_York")
+tweets_julia <- read_csv("data/tweets_julia.csv")
+tweets_dave <- read_csv("data/tweets_dave.csv")
 tweets <- bind_rows(tweets_julia %>% 
                       mutate(person = "Julia"),
                     tweets_dave %>% 
-                      mutate(person = "David"))
+                      mutate(person = "David")) %>%
+  mutate(timestamp = ymd_hms(timestamp))
 
 ggplot(tweets, aes(x = timestamp, fill = person)) +
   geom_histogram(alpha = 0.5, position = "identity")
@@ -234,4 +231,77 @@ word_ratios %>%
 
 We see here that Julia's tweets have such a higher joy score because she has tweeted about things like birthdays, babies, and things that are delicious and sweet (probably sweet babies even!). Her disgust score is higher because she has tweeted about pregnancy, diapers, and being sick with stomach bugs. We see that there are some misidentifications visible in this plot; David's only joy word should actually be Excel, the Microsoft product (not excel, the verb) and he uses "wrangling" in the sense of "data wrangling", which is not fraught with disgust, anger, or fear (or is it?!). These misidentifications due to domain-specific word use mean that the difference between Julia and David for joy, digust, and some others should actually be even larger.
 
-## More favorites or retweets
+## Favorites and retweets
+
+Another important characteristic of tweets is how many times they are favorited or retweeted. Let's explore which words are more likely to be retweeted or favorited for Julia's and David's tweets. When a user downloads their own Twitter archive, favorites and retweets are not included, so we constructed another dataset of the author's tweets that includes this information. We accessed our own tweets via the Twitter API and downloaded about 3200 tweets for each person. In both cases, that is about the last 18 months worth of Twitter activity. This corresponds to a period of increasing activity and increasing numbers of followers for both of us.
+
+```{r setup2}
+tweets_julia <- read_csv("data/juliasilge_tweets.csv")
+tweets_dave <- read_csv("data/drob_tweets.csv")
+tweets <- bind_rows(tweets_julia %>% 
+                      mutate(person = "Julia"),
+                    tweets_dave %>% 
+                      mutate(person = "David")) %>%
+  mutate(created_at = ymd_hms(created_at))
+```
+
+Now that we have this second, smaller set of only recent tweets, let's use `unnest_tokens` to transform these tweets to a tidy data set.
+
+```{r tidy_tweets2, dependson = "setup2"}
+tidy_tweets <- tweets %>% 
+  filter(!str_detect(text, "^RT")) %>%
+  mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT", "")) %>%
+  unnest_tokens(word, text, token = "regex", pattern = reg) %>%
+  anti_join(stop_words)
+
+tidy_tweets
+```
+
+To start with, let's look at retweets. Let's find the total number of retweets for each person.
+
+```{r totals, dependson = "tidy_tweets2"}
+totals <- tidy_tweets %>% 
+  group_by(person, id) %>% 
+  summarise(rts = sum(retweets)) %>% 
+  group_by(person) %>% 
+  summarise(total_rts = sum(rts))
+
+totals
+```
+
+Now let's find the number of retweets for each word and person (making sure to count each tweet only once) and join to this data frame of retweet totals.
+
+```{r word_by_rts, dependson = c("totals, "word_by_rts")}
+word_by_rts <- tidy_tweets %>% 
+  group_by(id, word, person) %>% 
+  summarise(rts = sum(retweets)) %>% 
+  group_by(person, word) %>% 
+  summarise(retweets = sum(rts)) %>%
+  left_join(totals) %>%
+  filter(retweets != 0) %>%
+  ungroup()
+
+word_by_rts %>% 
+  arrange(desc(retweets))
+```
+
+Now we can plot the words that have contributed the most to each of our retweets.
+
+```{r plot_rts, dependson = "word_by_rts", fig.width=10, fig.height=5}
+plot_rts <- word_by_rts %>%
+  mutate(ratio = retweets / total_rts) %>%  
+  group_by(person) %>%
+  top_n(8, ratio) %>%
+  ungroup() %>%
+  arrange(person, ratio) %>%
+  mutate(order = row_number())
+
+ggplot(plot_rts, aes(order, ratio, fill = person)) +
+  geom_bar(stat = "identity", alpha = 0.8, show.legend = FALSE) +
+  facet_wrap(~ person, scales = "free", ncol = 2) +
+  coord_flip() +
+  scale_x_continuous(breaks = plot_rts$order, labels = plot_rts$word) +
+  scale_y_continuous(labels = percent_format()) +
+  labs(x = NULL, y = "proportion of total RTs due to each word")
+```
+
