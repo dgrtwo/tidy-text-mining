@@ -271,7 +271,7 @@ totals
 
 Now let's find the number of retweets for each word and person (making sure to count each tweet only once) and join to this data frame of retweet totals.
 
-```{r word_by_rts, dependson = c("rt_totals, "word_by_rts")}
+```{r word_by_rts, dependson = c("rt_totals, "tidy_tweets2")}
 word_by_rts <- tidy_tweets %>% 
   group_by(id, word, person) %>% 
   summarise(rts = sum(retweets)) %>% 
