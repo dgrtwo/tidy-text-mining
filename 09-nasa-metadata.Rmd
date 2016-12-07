@@ -284,4 +284,36 @@ desc_tf_idf %>%
 
 These are the most important words in the description fields as measured by tf-idf, meaning they are common but not too common. Notice we have run into an issue here; both $n$ and term frequency are equal to 1 for these terms, meaning that these were description fields that only had a single word in them. If a description field only contains one word, the tf-idf algorithm will think that is a really important word. Depending on our analytic goals, it might be a good idea to throw out all description fields that have fewer than 5 words or similar.
 
-TODO: tf-idf, topic modeling
+We now know which words in the descriptions have high tf-idf, and we also have labels for these descriptions in the keywords. Let’s do a full join of the keyword data frame and the data frame of description words with tf-idf, and then find the highest tf-idf words for a given keyword.
+
+```{r full_join, dependson = "desc_tf_idf"}
+desc_tf_idf <- full_join(desc_tf_idf, nasa_keyword, by = "id")
+```
+
+Let's plot some of the most important words, as measured by tf-idf, for a few example keywords used on NASA datasets. First, let's use dplyr operations to filter for the keywords we want to examine and take just the top 15 words for each keyword. Then, let's plot those words.
+
+```{r plot_tf_idf, dependson = "full_join", fig.width=10, fig.height=6}
+desc_tf_idf %>% 
+  filter(!near(tf, 1)) %>%
+  filter(keyword %in% c("SOLAR ACTIVITY", "CLOUDS", 
+                        "SEISMOLOGY", "ASTROPHYSICS",
+                        "HUMAN HEALTH", "BUDGET")) %>%
+  arrange(desc(tf_idf)) %>%
+  group_by(keyword) %>%
+  distinct(word, keyword, .keep_all = TRUE) %>%
+  top_n(15, tf_idf) %>% 
+  ungroup() %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>%
+  ggplot(aes(word, tf_idf, fill = keyword)) +
+  geom_bar(stat = "identity", alpha = 0.8, show.legend = FALSE) +
+  facet_wrap(~keyword, ncol = 3, scales = "free") +
+  coord_flip() +
+  labs(title = "Highest tf-idf words in NASA Metadata Description Fields",
+       subtitle = "Distribution of tf-idf for words from datasets labeled with select keywords",
+       caption = "NASA metadata from https://data.nasa.gov/data.json",
+       x = NULL, y = "tf-idf")
+```
+
+Using tf-idf has allowed us to identify important description words for each of these keywords. Datasets labeled with the keyword **SEISMOLOGY** have words like "earthquake", "risk", and "hazard" in their description, while those labeled with **HUMAN HEALTH** have descriptions characterized by words like "wellbeing", "vulnerability", and "children." Most of the combinations of letters that are not English words are certainly acronyms (like OMB for the Office of Management and Budget), and the examples of years and numbers are important for these topics. The tf-idf statistic has identified the kinds of words it is intended to, important words for individual documents within a collection of documents.
+
+TODO: topic modeling
