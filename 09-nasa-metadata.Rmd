@@ -292,7 +292,7 @@ desc_tf_idf <- full_join(desc_tf_idf, nasa_keyword, by = "id")
 
 Let's plot some of the most important words, as measured by tf-idf, for a few example keywords used on NASA datasets. First, let's use dplyr operations to filter for the keywords we want to examine and take just the top 15 words for each keyword. Then, let's plot those words.
 
-```{r plot_tf_idf, dependson = "full_join", fig.width=10, fig.height=6}
+```{r plot_tf_idf, dependson = "full_join", fig.width=10, fig.height=7}
 desc_tf_idf %>% 
   filter(!near(tf, 1)) %>%
   filter(keyword %in% c("SOLAR ACTIVITY", "CLOUDS", 
@@ -316,4 +316,50 @@ desc_tf_idf %>%
 
 Using tf-idf has allowed us to identify important description words for each of these keywords. Datasets labeled with the keyword **SEISMOLOGY** have words like "earthquake", "risk", and "hazard" in their description, while those labeled with **HUMAN HEALTH** have descriptions characterized by words like "wellbeing", "vulnerability", and "children." Most of the combinations of letters that are not English words are certainly acronyms (like OMB for the Office of Management and Budget), and the examples of years and numbers are important for these topics. The tf-idf statistic has identified the kinds of words it is intended to, important words for individual documents within a collection of documents.
 
-TODO: topic modeling
+## Topic modeling
+
+Let's try another approach to the question of what the NASA descriptions fields are about. We can use topic modeling as described in [Chapter 7](#topicmodeling) to model each document (description field) as a mixture of topics and each topic as a mixture of words. As in earlier chapters, we will use [latent Dirichlet allocation (LDA)](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) for our topic modeling; there are other possible approaches.
+
+To do the topic modeling as implemented here, we need to make a `DocumentTermMatrix`, a special kind of matrix from the tm package (of course, there is just a general concept of a "document-term matrix"). Rows correspond to documents (description texts in our case) and columns correspond to terms (i.e., words); it is a sparse matrix and the values are word counts.
+
+Let’s clean up the text a bit using stop words to remove some of the nonsense "words" leftover from HTML or other character encoding.
+
+```{r}
+my_stop_words <- bind_rows(stop_words, 
+                           data_frame(word = c("nbsp", "amp", "gt", "lt",
+                                               "timesnewromanpsmt", "font",
+                                               "td", "li", "br", "tr", "quot",
+                                               "st", "img", "src", "strong",
+                                               as.character(1:10)), 
+                                      lexicon = rep("custom", 25)))
+
+word_counts <- nasa_desc %>%
+    anti_join(my_stop_words) %>%
+    count(id, word, sort = TRUE) %>%
+    ungroup()
+
+word_counts
+```
+
+This is the information we need, the number of times each word is used in each document, to make a `DocumentTermMatrix`. We can `cast` from our tidy text format to this non-tidy format as described in detail in [Chapter 6](#dtm).
+
+```{r}
+desc_dtm <- word_counts %>%
+  cast_dtm(id, word, n)
+
+desc_dtm
+```
+
+We see that this dataset contains documents (each of them a NASA description field) and terms (words). Notice that this example document-term matrix is (nearly) 100% sparse.
+
+Now let’s use the [topicmodels](https://cran.r-project.org/package=topicmodels) package to create an LDA model. How many topics will we tell the algorithm to make? This is a question much like in $k$-means clustering; we don’t really know ahead of time. We tried this modeling procedure using 8, 16, 24, 32, and 64 topics; we found that at 24 topics, documents were still getting sorted into topics cleanly but going much beyond that caused the distributions of $\gamma$, the probability that each document belongs in each topic, to look worrisome. We will show more details on this below.
+
+```{r}
+library(topicmodels)
+
+desc_lda <- LDA(desc_dtm, k = 24, control = list(seed = 1234))
+
+desc_lda
+```
+
+This is a stochastic algorithm that could have different results depending on where the algorithm starts, so we need to specify a `seed` for reproducibility.
