@@ -363,3 +363,6 @@ desc_lda
 ```
 
 This is a stochastic algorithm that could have different results depending on where the algorithm starts, so we need to specify a `seed` for reproducibility.
+
+TODO: finish topic modeling
+
