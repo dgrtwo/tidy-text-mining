@@ -160,14 +160,14 @@ library(ggplot2)
 library(igraph)
 library(ggraph)
 
-set.seed(2016)
+set.seed(1234)
 title_words %>%
   filter(n >= 250) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
   geom_node_point(color = "darkslategray4", size = 5) +
-  geom_node_text(aes(label = name), vjust = 1.8) +
+  geom_node_text(aes(label = name), repel = TRUE) +
   ggtitle("Word Network in NASA Dataset Titles") +
   theme_void()
 ```
@@ -177,14 +177,14 @@ This is a good start, although it looks like there may still a bit more cleaning
 Let's look at the words in descriptions.
 
 ```{r plot_desc, dependson = "desc_words", fig.height=6, fig.width=9}
-set.seed(2016)
+set.seed(1234)
 desc_words %>%
   filter(n >= 5000) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
   geom_node_point(color = "indianred4", size = 5) +
-  geom_node_text(aes(label = name), vjust = 1.8) +
+  geom_node_text(aes(label = name), repel = TRUE) +
   ggtitle("Word Network in NASA Dataset Descriptions") +
   theme_void()
 
@@ -198,21 +198,18 @@ my_stopwords <- bind_rows(my_stopwords,
                                              "instrument", "resolution",
                                              "product", "level")))
 
-nasa_desc <- nasa_desc %>% 
-  anti_join(my_stopwords)
-desc_words <- nasa_desc %>% 
-  pairwise_count(word, id, sort = TRUE)
 set.seed(1234)
-desc_words %>%
+nasa_desc %>% 
+  anti_join(my_stopwords) %>%
+  pairwise_count(word, id, sort = TRUE) %>%
   filter(n >= 4600) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
   geom_node_point(color = "indianred4", size = 5) +
-  geom_node_text(aes(label = name), vjust = 1.8) +
+  geom_node_text(aes(label = name), repel = TRUE) +
   ggtitle("Word Network in NASA Dataset Descriptions") +
   theme_void()
-
 ```
 
 We still are not seeing clusters the way we did with the titles (the descriptions appear to use very similar words compared to each other), so using tf-idf may be a better way to go when approaching the description fields.
@@ -225,14 +222,14 @@ keyword_counts <- nasa_keyword %>%
 
 keyword_counts
 
-set.seed(2016)
+set.seed(1234)
 keyword_counts %>%
   filter(n >= 700) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = n, edge_width = n)) +
   geom_node_point(color = "royalblue3", size = 5) +
-  geom_node_text(aes(label = name), vjust = 1.8) +
+  geom_node_text(aes(label = name), repel = TRUE) +
   ggtitle("Co-occurrence Network in NASA Dataset Keywords") +
   theme_void()
 ```
@@ -242,7 +239,7 @@ These are the most commonly co-occurring words, but also just the most common ke
 ```{r keyword_cors, dependson = "toupper"}
 keyword_cors <- nasa_keyword %>% 
   group_by(keyword) %>%
-  filter(n() >= 20) %>%
+  filter(n() >= 50) %>%
   pairwise_cor(keyword, id, sort = TRUE)
 
 keyword_cors
@@ -250,15 +247,15 @@ keyword_cors
 
 Notice that these keywords at the top of this sorted data frame have correlation coefficients equal to 1; they always occur together. This means these are redundant keywords and it may not make sense to continue to use both of these sets of pairs. Let's visualize the network of keyword correlations, just as we did for keyword co-occurences.
 
-```{r plot_cors, dependson = "keyword_cors", fig.height=7, fig.width=9}
-set.seed(2016)
+```{r plot_cors, dependson = "keyword_cors", fig.height=8, fig.width=12}
+set.seed(1234)
 keyword_cors %>%
   filter(correlation > .6) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = correlation, edge_width = correlation)) +
   geom_node_point(color = "royalblue3", size = 5) +
-  geom_node_text(aes(label = name), vjust = 1.8) +
+  geom_node_text(aes(label = name), repel = TRUE) +
   ggtitle("Correlation Network in NASA Dataset Keywords") +
   theme_void()
 ```
@@ -319,9 +316,9 @@ Using tf-idf has allowed us to identify important description words for each of 
 
 ## Topic modeling
 
-Let's try another approach to the question of what the NASA descriptions fields are about. We can use topic modeling as described in [Chapter 7](#topicmodeling) to model each document (description field) as a mixture of topics and each topic as a mixture of words. As in earlier chapters, we will use [latent Dirichlet allocation (LDA)](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) for our topic modeling; there are other possible approaches.
+Let's try another approach to the question of what the NASA descriptions fields are about. We can use topic modeling as described in [Chapter 7](#topicmodeling) to model each document (description field) as a mixture of topics and each topic as a mixture of words. As in earlier chapters, we will use [latent Dirichlet allocation (LDA)](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) for our topic modeling; there are other possible approaches for topic modeling.
 
-To do the topic modeling as implemented here, we need to make a `DocumentTermMatrix`, a special kind of matrix from the tm package (of course, there is just a general concept of a "document-term matrix"). Rows correspond to documents (description texts in our case) and columns correspond to terms (i.e., words); it is a sparse matrix and the values are word counts.
+To do the topic modeling as implemented here, we need to make a `DocumentTermMatrix`, a special kind of matrix from the tm package (of course, this is just a specific implementation of the general concept of a "document-term matrix"). Rows correspond to documents (description texts in our case) and columns correspond to terms (i.e., words); it is a sparse matrix and the values are word counts.
 
 Let’s clean up the text a bit using stop words to remove some of the nonsense "words" leftover from HTML or other character encoding.
 
@@ -355,15 +352,57 @@ We see that this dataset contains documents (each of them a NASA description fie
 
 Now let’s use the [topicmodels](https://cran.r-project.org/package=topicmodels) package to create an LDA model. How many topics will we tell the algorithm to make? This is a question much like in $k$-means clustering; we don’t really know ahead of time. We tried this modeling procedure using 8, 16, 24, 32, and 64 topics; we found that at 24 topics, documents were still getting sorted into topics cleanly but going much beyond that caused the distributions of $\gamma$, the probability that each document belongs in each topic, to look worrisome. We will show more details on this below.
 
-```{r desc_lda, dependson = "desc_dtm", eval = FALSE}
+```{r, eval = FALSE}
 library(topicmodels)
 
 desc_lda <- LDA(desc_dtm, k = 24, control = list(seed = 1234))
+desc_lda
+```
+
+```{r desc_lda, echo=FALSE}
+load("data/desc_lda.rda")
 
 desc_lda
 ```
 
 This is a stochastic algorithm that could have different results depending on where the algorithm starts, so we need to specify a `seed` for reproducibility.
+
+Now that we have built the model, let's use the broom package and `tidy` the results of the model.
+
+```{r tidy_lda, dependson = "desc_lda"}
+library(broom)
+
+tidy_lda <- tidy(desc_lda)
+tidy_lda
+```
+
+The column $\beta$ tells us the probability of that term being generated from that topic for that document. Notice that some of very, very low, and some are not so low.
+
+What are the top 5 terms for each topic?
+
+```{r top_terms, dependson = "tidy_lda"}
+top_terms <- tidy_lda %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+top_terms
+```
+
+Let’s look at this visually.
+
+```{r plot_lda, dependson = "top_terms", fig.width=10, fig.height=16}
+ggplot(top_terms, aes(term, beta, fill = as.factor(topic))) +
+    geom_bar(stat = "identity", show.legend = FALSE, alpha = 0.8) +
+    coord_flip() +
+    labs(title = "Top 10 Terms in Each LDA Topic",
+         subtitle = "Topic modeling of NASA metadata description field texts",
+         x = NULL, y = expression(beta)) +
+    facet_wrap(~topic, ncol = 4, scales = "free")
+```
+
+We can see what a dominant word “data” is in these description texts. In addition, there are meaningful differences between these collections of terms, from terms about soil and biomass to terms about design, systems, and technology.
 
 TODO: finish topic modeling
 
