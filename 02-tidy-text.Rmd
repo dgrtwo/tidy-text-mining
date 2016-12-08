@@ -178,17 +178,22 @@ Interesting that "time", "eyes", and "hand" are in the top 10 for both H.G. Well
 Now, let's calculate the frequency for each word for the works of Jane Austen, the Brontë sisters, and H.G. Wells.
 
 ```{r frequency, dependson = c("tidy_bronte", "tidy_hgwells", "tidy_books")}
+library(tidyr)
+
 tidy_both <- bind_rows(
   mutate(tidy_bronte, author = "Brontë Sisters"),
   mutate(tidy_hgwells, author = "H.G. Wells"))
+
+austen_percent <- tidy_books %>%
+  count(word) %>%
+  transmute(word, austen = n / sum(n))
+
 frequency <- tidy_both %>%
   mutate(word = str_extract(word, "[a-z]+")) %>%
   count(author, word) %>%
-  rename(other = n) %>%
-  inner_join(count(tidy_books, word)) %>%
-  rename(Austen = n) %>%
-  mutate(other = other / sum(other),
-         Austen = Austen / sum(Austen)) %>%
+  mutate(other = n / sum(n)) %>%
+  full_join(austen_percent) %>%
+  replace_na(list(austen = 0, other = 0)) %>%
   ungroup()
 ```
 
