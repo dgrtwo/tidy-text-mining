@@ -360,19 +360,18 @@ desc_lda
 ```
 
 ```{r desc_lda, echo=FALSE}
+library(topicmodels)
 load("data/desc_lda.rda")
-
 desc_lda
 ```
 
 This is a stochastic algorithm that could have different results depending on where the algorithm starts, so we need to specify a `seed` for reproducibility.
 
-Now that we have built the model, let's use the broom package and `tidy` the results of the model.
+Now that we have built the model, let's `tidy` the results of the model. The tidytext package includes a tidying method for LDA models from the topicmodels package.
 
 ```{r tidy_lda, dependson = "desc_lda"}
-library(broom)
-
 tidy_lda <- tidy(desc_lda)
+
 tidy_lda
 ```
 
