@@ -2,7 +2,8 @@
 
 ```{r echo = FALSE}
 library(knitr)
-opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
+opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE,
+               cache.lazy = FALSE)
 options(width = 100, dplyr.width = 100)
 library(ggplot2)
 theme_set(theme_light())
