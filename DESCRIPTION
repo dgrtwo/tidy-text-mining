@@ -10,6 +10,7 @@ Imports:
   tidytext,
   dplyr,
   tidyr,
+  ggplot2,
   reshape2,
   gutenbergr,
   jsonlite,
@@ -22,9 +23,8 @@ Imports:
   XML,
   wordcloud,
   lubridate,
-  stringr
+  stringr,
+  ggforce
 Remotes:
-  hadley/ggplot2,
   dgrtwo/widyr,
-  thomasp85/ggforce,
   thomasp85/ggraph
