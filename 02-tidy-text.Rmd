@@ -185,6 +185,7 @@ tidy_both <- bind_rows(
   mutate(tidy_hgwells, author = "H.G. Wells"))
 
 austen_percent <- tidy_books %>%
+  mutate(word = str_extract(word, "[a-z]+")) %>%
   count(word) %>%
   transmute(word, austen = n / sum(n))
 
@@ -192,8 +193,7 @@ frequency <- tidy_both %>%
   mutate(word = str_extract(word, "[a-z]+")) %>%
   count(author, word) %>%
   mutate(other = n / sum(n)) %>%
-  full_join(austen_percent) %>%
-  replace_na(list(austen = 0, other = 0)) %>%
+  left_join(austen_percent) %>%
   ungroup()
 ```
 
@@ -201,9 +201,9 @@ We use `str_extract` here because the UTF-8 encoded texts from Project Gutenberg
 
 ```{r plot_compare, dependson = "frequency", fig.width=10, fig.height=5.5}
 library(scales)
-ggplot(frequency, aes(x = other, y = Austen, color = abs(Austen - other))) +
+ggplot(frequency, aes(x = other, y = austen, color = abs(austen - other))) +
   geom_abline(color = "gray40", lty = 2) +
-  geom_jitter(alpha = 0.1, size = 2.5, width = 0.4, height = 0.4) +
+  geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
   geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
   scale_x_log10(labels = percent_format()) +
   scale_y_log10(labels = percent_format()) +
@@ -213,7 +213,7 @@ ggplot(frequency, aes(x = other, y = Austen, color = abs(Austen - other))) +
   labs(y = "Jane Austen", x = NULL)
 ```
 
-Words that are close to the line in these plots have similar frequencies in both sets of texts, for example, in both Austen and Brontë texts ("miss", "time", "lady", "day" at the upper frequency end) or in both Austen and Wells texts ("time", "day", "mind", "brother" at the high frequency end). Words that are far from the line are words that are found more in one set of texts than another. For example, in the Austen-Brontë plot, words like "elizabeth", "emma", "captain", and "bath" (all proper nouns) are found in Austen's texts but not much in the Brontë texts, while words like "arthur", "dark", "dog", and "doctor" are found in the Brontë texts but not the Austen texts. In comparing H.G. Wells with Jane Austen, Wells uses words like "beast", "guns", "brute", and "animal" that Austen does not, while Austen uses words like "family", "friend", "letter", and "agreeable" that Wells does not.
+Words that are close to the line in these plots have similar frequencies in both sets of texts, for example, in both Austen and Brontë texts ("miss", "time", "lady", "day" at the upper frequency end) or in both Austen and Wells texts ("time", "day", "house" at the high frequency end). Words that are far from the line are words that are found more in one set of texts than another. For example, in the Austen-Brontë plot, words like "elizabeth", "emma", and "edmund" (all proper nouns) are found in Austen's texts but not much in the Brontë texts, while words like "arthur", "chin", and "ham" are found in the Brontë texts but not the Austen texts. In comparing H.G. Wells with Jane Austen, Wells uses words like "beach", "smoke", and "animals" that Austen does not, while Austen uses words like "family", "friend", "letter", and "dear" that Wells does not.
 
 Overall, notice that the words in the Austen-Brontë plot are closer to the zero-slope line than in the Austen-Wells plot and also extend to lower frequencies; Austen and the Brontë sisters use more similar words than Austen and H.G. Wells. Also, we might notice the percent frequencies for individual words are different in one plot when compared to another because of the inner join; not all the words are found in all three sets of texts so the percent frequency is a different quantity.
 
