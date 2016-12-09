@@ -48,13 +48,13 @@ Let's set up tidy data frames for title, description, and keyword and keep the d
 library(dplyr)
 
 nasa_title <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
-                        title = metadata$dataset$title)
+                         title = metadata$dataset$title)
 nasa_title
 ```
 
 ```{r desc, dependson = "download", dplyr.width = 150}
 nasa_desc <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
-                       desc = metadata$dataset$description)
+                        desc = metadata$dataset$description)
 nasa_desc
 ```
 
@@ -72,7 +72,7 @@ Now we can do the keywords, which must be unnested since they are in a list-colu
 library(tidyr)
 
 nasa_keyword <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
-                          keyword = metadata$dataset$keyword) %>%
+                           keyword = metadata$dataset$keyword) %>%
   unnest(keyword)
 nasa_keyword
 ```
@@ -110,8 +110,8 @@ It looks like we might want to remove digits and some "words" like "v1" from the
 
 ```{r my_stopwords, dependson = "unnest"}
 my_stopwords <- data_frame(word = c(as.character(1:10), 
-                                   "v1", "v03", "l2", "l3", "v5.2.0", 
-                                   "v003", "v004", "v005", "v006"))
+                                    "v1", "v03", "l2", "l3", "v5.2.0", 
+                                    "v003", "v004", "v005", "v006"))
 nasa_title <- nasa_title %>% 
   anti_join(my_stopwords)
 nasa_desc <- nasa_desc %>% 
@@ -194,9 +194,9 @@ Here there are such *strong* connections between the top dozen or so words (word
 
 ```{r plot_desc2, dependson = c("desc_words", "my_stopwords"), fig.height=6, fig.width=9}
 my_stopwords <- bind_rows(my_stopwords,
-                         data_frame(word = c("data", "global", 
-                                             "instrument", "resolution",
-                                             "product", "level")))
+                          data_frame(word = c("data", "global", 
+                                              "instrument", "resolution",
+                                              "product", "level")))
 
 set.seed(1234)
 nasa_desc %>% 
@@ -284,7 +284,7 @@ These are the most important words in the description fields as measured by tf-i
 
 We now know which words in the descriptions have high tf-idf, and we also have labels for these descriptions in the keywords. Let’s do a full join of the keyword data frame and the data frame of description words with tf-idf, and then find the highest tf-idf words for a given keyword.
 
-```{r full_join, dependson = "desc_tf_idf"}
+```{r full_join, dependson = c("desc_tf_idf", "toupper")}
 desc_tf_idf <- full_join(desc_tf_idf, nasa_keyword, by = "id")
 ```
 
@@ -332,9 +332,9 @@ my_stop_words <- bind_rows(stop_words,
                                       lexicon = rep("custom", 25)))
 
 word_counts <- nasa_desc %>%
-    anti_join(my_stop_words) %>%
-    count(id, word, sort = TRUE) %>%
-    ungroup()
+  anti_join(my_stop_words) %>%
+  count(id, word, sort = TRUE) %>%
+  ungroup()
 
 word_counts
 ```
@@ -367,6 +367,8 @@ desc_lda
 
 This is a stochastic algorithm that could have different results depending on where the algorithm starts, so we need to specify a `seed` for reproducibility.
 
+## Interpreting the topic model
+
 Now that we have built the model, let's `tidy` the results of the model. The tidytext package includes a tidying method for LDA models from the topicmodels package.
 
 ```{r tidy_lda, dependson = "desc_lda"}
@@ -391,17 +393,51 @@ top_terms
 
 Let’s look at this visually.
 
-```{r plot_lda, dependson = "top_terms", fig.width=10, fig.height=16}
+```{r plot_beta, dependson = "top_terms", fig.width=12, fig.height=16}
 ggplot(top_terms, aes(term, beta, fill = as.factor(topic))) +
-    geom_bar(stat = "identity", show.legend = FALSE, alpha = 0.8) +
-    coord_flip() +
-    labs(title = "Top 10 Terms in Each LDA Topic",
-         subtitle = "Topic modeling of NASA metadata description field texts",
-         x = NULL, y = expression(beta)) +
-    facet_wrap(~topic, ncol = 4, scales = "free")
+  geom_bar(stat = "identity", show.legend = FALSE, alpha = 0.8) +
+  coord_flip() +
+  labs(title = "Top 10 Terms in Each LDA Topic",
+       subtitle = "Topic modeling of NASA metadata description field texts",
+       x = NULL, y = expression(beta)) +
+  facet_wrap(~topic, ncol = 4, scales = "free")
 ```
 
 We can see what a dominant word “data” is in these description texts. In addition, there are meaningful differences between these collections of terms, from terms about soil and biomass to terms about design, systems, and technology.
+
+Next, let’s examine which topics are associated with which description fields (i.e., documents). We will look at a different probability for this, $\gamma$, the probability that each document belongs in each topic.
+
+```{r lda_gamma, dependson = "desc_lda"}
+lda_gamma <- tidy(desc_lda, matrix = "gamma")
+
+lda_gamma
+```
+
+Notice that these probabilites visible at the top of the data frame are quite low; some are higher, as we will see in a moment. Our model has assigned some probability to each description belonging to each of the topics we constructed from the sets of words. How are the probabilities distributed? Let's visualize them.
+
+```{r plot_gamma, dependson = "lda_gamma", fig.width=12, fig.height=16}
+ggplot(lda_gamma, aes(gamma, fill = as.factor(topic))) +
+  geom_histogram(show.legend = FALSE, alpha = 0.8) +
+  facet_wrap(~topic, ncol = 4) +
+  scale_y_log10() +
+  labs(title = "Distribution of Probability for Each Topic",
+       subtitle = "Topic modeling of NASA metadata description field texts",
+       y = "Number of documents", x = expression(gamma))
+
+```
+
+First notice that the y-axis is plotted on a log scale; otherwise it is difficult to make out any detail. Next, notice that $\gamma$ runs from 0 to 1 in each panel and remember that this is the probability that a given document belongs in a given topic. There are many values near zero, which means there are many documents that do not belong in those topics. Also, most of these panels show a higher number of documents near $\gamma = 1$; these are the documents that *do* belong in those topics.
+
+## Connecting topic modeling with keywords
+
+Let’s connect these topic models with the keywords and see what happens. We can `join` this dataframe to the human-tagged keywords and see which keywords are associated with which topic.
+
+```{r lda_gamma, dependson = c("lda_gamma", "toupper")}
+lda_gamma <- full_join(lda_gamma, nasa_keyword, by = c("document" = "id"))
+
+lda_gamma
+```
+
 
 TODO: finish topic modeling
 
