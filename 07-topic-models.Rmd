@@ -215,7 +215,7 @@ assignments %>%
   spread(consensus, n, fill = 0)
 ```
 
-We notice that almost all the words for *Pride and Prejudice*, *Twenty Thousand Leagues Under the Sea*, and *War of the Worlds* were correctly assigned, while *Great Expectations* had a fair amount of misassignment.
+We notice that almost all the words for *Great Expectations*, *Twenty Thousand Leagues Under the Sea*, and *War of the Worlds* were correctly assigned, while *Pride and Prejudice* had a fair amount of misassignment.
 
 What were the most commonly mistaken words?
 
