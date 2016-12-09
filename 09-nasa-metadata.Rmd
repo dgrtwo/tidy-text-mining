@@ -432,10 +432,21 @@ First notice that the y-axis is plotted on a log scale; otherwise it is difficul
 
 Let’s connect these topic models with the keywords and see what happens. We can `join` this dataframe to the human-tagged keywords and see which keywords are associated with which topic.
 
-```{r lda_gamma, dependson = c("lda_gamma", "toupper")}
+```{r lda_join, dependson = c("lda_gamma", "toupper")}
 lda_gamma <- full_join(lda_gamma, nasa_keyword, by = c("document" = "id"))
 
 lda_gamma
+```
+
+Now we can use `filter` to keep only the document-topic entries that have probabilities greater than 0.9. After that, let's find the top keywords for each topic.
+
+```{r top_keywords, dependson = "lda_join"}
+top_keywords <- lda_gamma %>% 
+  filter(gamma > 0.9) %>% 
+  group_by(topic, keyword) %>% 
+  count(keyword, sort = TRUE)
+
+top_keywords
 ```
 
 
