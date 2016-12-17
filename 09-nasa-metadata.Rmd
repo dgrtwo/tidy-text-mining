@@ -85,7 +85,7 @@ nasa_keyword
 
 This is a tidy data frame because we have one row for each keyword; this means we will have multiple rows for each dataset because a dataset can have more than one keyword.
 
-Now it is time to use tidytext's `unnest_tokens` for the title and description fields so we can do the text analysis. Let's also remove common English words from the titles and descriptions. We will not remove stop words from the keywords, because those are short, human-assigned keywords like "RADIATION" or "CLIMATE INDICATORS".
+Now it is time to use tidytext's `unnest_tokens` for the title and description fields so we can do the text analysis. Let's also remove common English words from the titles and descriptions. We will not remove stop words from the keywords, because those are short, human-assigned keywords like **RADIATION** or **CLIMATE INDICATORS**.
 
 ```{r unnest, dependson = c("title","desc")}
 library(tidytext)
@@ -93,14 +93,23 @@ library(tidytext)
 nasa_title <- nasa_title %>% 
   unnest_tokens(word, title) %>% 
   anti_join(stop_words)
+
 nasa_desc <- nasa_desc %>% 
   unnest_tokens(word, desc) %>% 
   anti_join(stop_words)
 ```
 
+These are now in the tidy text format that we have been working with throughout this book, with one token (word, in this case) per row; let's take a look before we move on in our analysis.
+
+```{r dependson = "unnest"}
+nasa_title
+nasa_desc
+```
+
+
 ## Some initial simple exploration
 
-What are the most common words in the NASA dataset titles? We can use `count` from dplyr to find this.
+What are the most common words in the NASA dataset titles? We can use `count` from dplyr to check this out.
 
 ```{r dependson = "unnest"}
 nasa_title %>%
@@ -114,12 +123,12 @@ nasa_desc %>%
   count(word, sort = TRUE)
 ```
 
-Words like "data" and "global" are used very often in NASA titles and descriptions. We may want to remove digits and some "words" like "v1" from these data frames for many types of analyses; they are not too meaningful for most audiences. We can do this by making a list of custom stop words and using `anti_join` to remove them from the data frame, just like we removed the default stop words that are in the tidytext package. This approach can be used in many instances.
+Words like "data" and "global" are used very often in NASA titles and descriptions. We may want to remove digits and some "words" like "v1" from these data frames for many types of analyses; they are not too meaningful for most audiences. We can do this by making a list of custom stop words and using `anti_join` to remove them from the data frame, just like we removed the default stop words that are in the tidytext package. This approach can be used in many instances and is a great tool to bear in mind.
 
 ```{r my_stopwords, dependson = "unnest"}
 my_stopwords <- data_frame(word = c(as.character(1:10), 
-                                    "v1", "v03", "l2", "l3", "v5.2.0", 
-                                    "v003", "v004", "v005", "v006"))
+                                    "v1", "v03", "l2", "l3", "l4", "v5.2.0", 
+                                    "v003", "v004", "v005", "v006", "v7"))
 nasa_title <- nasa_title %>% 
   anti_join(my_stopwords)
 nasa_desc <- nasa_desc %>% 
@@ -134,7 +143,7 @@ nasa_keyword %>%
   count(sort = TRUE)
 ```
 
-Many NASA datasets have *Project completed* as a set of keywords. We likely want to change all of the keywords to either lower or upper case to get rid of duplicates like *OCEANS* and *Oceans*. Let's do that here.
+Many NASA datasets have **Project completed** as a set of keywords. We likely want to change all of the keywords to either lower or upper case to get rid of duplicates like **OCEANS** and **Oceans**. Let's do that here.
 
 ```{r toupper, dependson = "keyword"}
 nasa_keyword <- nasa_keyword %>% 
@@ -202,7 +211,7 @@ desc_words %>%
 
 ```
 
-Here there are such *strong* connections between the top dozen or so words (words like "data", "resolution", and "instrument") that we do not see clear clustering structure in the network. We may want to use tf-idf (as described in detail in [Chapter 4](#tfidf)) as a metric to find characteristic words for each description field, instead of looking at counts of words. 
+Here there are such *strong* connections between the top dozen or so words (words like "data", "global", "resolution", and "instrument") that we do not see clear clustering structure in the network. We may want to use tf-idf (as described in detail in [Chapter 4](#tfidf)) as a metric to find characteristic words for each description field, instead of looking at counts of words. 
 
 Next, let's make a network of the keywords to see which keywords commonly occur together in the same datasets.
 
@@ -224,7 +233,7 @@ keyword_counts %>%
   theme_void()
 ```
 
-We definitely see clustering here, and strong connections between keywords like *OCEANS*, *OCEAN OPTICS*, and *OCEAN COLOR*, or *PROJECT* and *COMPLETED*. These are the most commonly co-occurring words, but also just the most common keywords in general. To examine the relationships among keywords in a different way, we can find the correlation among the keywords as described in [Chapter 5](#ngrams). This looks for which keywords that are more likely to occur together than with other keywords in a description field.
+We definitely see clustering here, and strong connections between keywords like **OCEANS**, **OCEAN OPTICS**, and **OCEAN COLOR**, or **PROJECT* and *COMPLETED**. These are the most commonly co-occurring words, but also just the most common keywords in general. To examine the relationships among keywords in a different way, we can find the correlation among the keywords as described in [Chapter 5](#ngrams). This looks for which keywords that are more likely to occur together than with other keywords in a description field.
 
 ```{r keyword_cors, dependson = "toupper"}
 keyword_cors <- nasa_keyword %>% 
