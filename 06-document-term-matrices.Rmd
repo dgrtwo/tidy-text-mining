@@ -154,7 +154,7 @@ year_term_counts %>%
   geom_point() +
   geom_smooth() +
   facet_wrap(~ term) +
-  scale_y_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = scales::percent_format()) +
   ylab("% frequency of word in inaugural address")
 ```
 
