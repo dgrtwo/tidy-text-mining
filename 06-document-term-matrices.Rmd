@@ -96,7 +96,7 @@ inaug_dfm
 
 The `tidy` method works on these objects as well, turning them into a one-token-per-document-per-row table:
 
-```{r dependson = "inaug_dfm"}
+```{r inaug_td, dependson = "inaug_dfm"}
 inaug_td <- tidy(inaug_dfm)
 inaug_td
 ```
@@ -113,7 +113,7 @@ inaug_tf_idf
 
 We could then pick four notable inaugural addresses (from Washington, Lincoln, Kennedy, and Obama), and visualize the words most specific to each speech.
 
-```{r}
+```{r dependson = "presidents"}
 speeches <- c("1793-Washington", "1861-Lincoln",
               "1961-Kennedy", "2009-Obama")
 
@@ -219,7 +219,7 @@ reuters_td
 
 Another variation of a corpus object is `corpus` from the quanteda package:
 
-```{r inaug_td}
+```{r inaug_td2}
 library(quanteda)
 
 data("inaugCorpus")
@@ -232,7 +232,7 @@ inaug_td
 
 This lets us work with tidy tools like `unnest_tokens` to analyze the text alongside the metadata.
 
-```{r inaug_words, dependson = "inaug_td"}
+```{r inaug_words, dependson = "inaug_td2"}
 inaug_words <- inaug_td %>%
   unnest_tokens(word, text) %>%
   anti_join(stop_words)
