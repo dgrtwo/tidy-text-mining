@@ -85,7 +85,7 @@ ap_sentiments %>%
 
 Other text mining packages provide alternative implementations of document-term matrices, such as the `dfm` (document-feature matrix) class from the quanteda package [@R-quanteda]. Consider the corpus of presidential inauguration speeches that comes with the quanteda package:
 
-```{r inaug_td, message = FALSE}
+```{r inaug_dfm, message = FALSE}
 library(methods)
 
 data("inaugCorpus", package = "quanteda")
@@ -96,7 +96,7 @@ inaug_dfm
 
 The `tidy` method works on these objects as well, turning them into a one-token-per-document-per-row table:
 
-```{r dependson = "inaug_td"}
+```{r dependson = "inaug_dfm"}
 inaug_td <- tidy(inaug_dfm)
 inaug_td
 ```
