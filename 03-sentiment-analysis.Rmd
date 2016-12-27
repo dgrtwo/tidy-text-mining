@@ -8,9 +8,13 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
+In the previous chapter, we explored in depth what we mean by the tidy text format and showed how this format can be used to approach questions about word frequency. This allowed us to analyze which words are used most frequently in documents and to compare documents, but now let's investigate a different topic. Let's address the topic of opinion mining or sentiment analysis. When human readers approach a text, we use our understanding of the emotional intent of words to infer whether a section of text is positive or negative, or perhaps characterized by some other more nuanced emotion like surprise or disgust. We can use the tools of text mining to approach the emotional content of text programmatically.
+
+One way to analyze the sentiment of a text is to consider the text as a combination of its individual words and the sentiment content of the whole text as the sum of the sentiment content of the individual words. This isn't the only way to approach sentiment analysis, but it is an often-used approach, *and* an approach that naturally takes advantage of the tidy tool ecosystem.
+
 ## The `sentiments` dataset
 
-There are a variety of methods and dictionaries that exist for evaluating the opinion or emotion in text. The tidytext package contains three sentiment lexicons in the `sentiments` dataset. 
+As discussed above, there are a variety of methods and dictionaries that exist for evaluating the opinion or emotion in text. The tidytext package contains three sentiment lexicons in the `sentiments` dataset. 
 
 ```{r}
 library(tidytext)
@@ -24,7 +28,7 @@ The three lexicons are
 * `bing` from [Bing Liu and collaborators](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html), and
 * `nrc` from [Saif Mohammad and Peter Turney](http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm).
 
-All three of these lexicons are based on unigrams (or single words). These lexicons contain many English words and the words are assigned scores for positive/negative sentiment, and also possibly emotions like joy, anger, sadness, and so forth. The `nrc` lexicon categorizes words in a binary fashion ("yes"/"no") into categories of positive, negative, anger, anticipation, disgust, fear, joy, sadness, surprise, and trust. The `bing` lexicon categorizes words in a binary fashion into positive and negative categories. The `AFINN` lexicon assigns words with a score that runs between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment. All of this information is tabulated in the `sentiments` dataset, and tidytext provides a function `get_sentiments()` to get specific sentiment lexicons without the columns that are not used in that lexicon.
+All three of these lexicons are based on unigrams, i.e., single words. These lexicons contain many English words and the words are assigned scores for positive/negative sentiment, and also possibly emotions like joy, anger, sadness, and so forth. The `nrc` lexicon categorizes words in a binary fashion ("yes"/"no") into categories of positive, negative, anger, anticipation, disgust, fear, joy, sadness, surprise, and trust. The `bing` lexicon categorizes words in a binary fashion into positive and negative categories. The `AFINN` lexicon assigns words with a score that runs between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment. All of this information is tabulated in the `sentiments` dataset, and tidytext provides a function `get_sentiments()` to get specific sentiment lexicons without the columns that are not used in that lexicon.
 
 ```{r}
 get_sentiments("afinn")
@@ -32,14 +36,17 @@ get_sentiments("bing")
 get_sentiments("nrc")
 ```
 
+How were these sentiment lexicons put together and validated? They were constructed via either crowdsourcing (using, for example, Amazon Mechanical Turk) or by the labor of one of the authors, and were validated using some combination of crowdsourcing again, restaurant or movie reviews, or Twitter data. Given this information, we may hesitate to apply these sentiment lexicons to styles of text dramatically different from what they were validated on, such as narrative fiction from 200 years ago. While it is true that using these sentiment lexicons with, for example, Jane Austen's novels may give us less accurate results than with tweets sent by a contemporary writer, we still can measure the sentiment content for words that are shared across the lexicon and the text.
 
-These dictionary-based methods find the total sentiment of a piece of text by adding up the individual sentiment scores for each word in the text. Not every English word is in the lexicons because many English words are pretty neutral. It is important to keep in mind that these methods do not take into account qualifiers before a word, such as in "no good" or "not true"; a lexicon-based method like this is based on unigrams only. For many kinds of text (like the narrative examples below), there are not sustained sections of sarcasm or negated text, so this is not an important effect. 
+Dictionary-based methods like the ones we are discussing find the total sentiment of a piece of text by adding up the individual sentiment scores for each word in the text. Not every English word is in the lexicons because many English words are pretty neutral. It is important to keep in mind that these methods do not take into account qualifiers before a word, such as in "no good" or "not true"; a lexicon-based method like this is based on unigrams only. For many kinds of text (like the narrative examples below), there are not sustained sections of sarcasm or negated text, so this is not an important effect. Also, we can use a tidy text approach to begin to understand what kinds of negation words are important in a given text; see [Chapter 10](#usenet) for an extended example of such an analysis.
 
-One last caveat is that the size of the chunk of text that we add up unigram sentiment scores for can have an important effect for an analysis. A paragraph-sized text can often have positive and negative sentiment averaged out to about zero, while sentence-sized text often works better.
+One last caveat is that the size of the chunk of text that we use to add up unigram sentiment scores can have an effect on an analysis. A text the size of many paragraphs can often have positive and negative sentiment averaged out to about zero, while sentence-sized or paragraph-sized text often works better.
 
 ## Sentiment analysis with inner join
 
-With data in a tidy format, sentiment analysis can be done as an inner join. Let's look at the words with a joy score from the NRC lexicon. What are the most common joy words in *Emma*?
+With data in a tidy format, sentiment analysis can be done as an inner join. This is another of the great successes of viewing text mining as a tidy data analysis task; much as removing stop words is an antijoin operation, performing sentiment analysis is an inner join operation.
+
+Let's look at the words with a joy score from the NRC lexicon. What are the most common joy words in *Emma*? First, we need to take the text of the novels and convert the text to the tidy format using `unnest_tokens`.
 
 ```{r tidy_books}
 library(janeaustenr)
@@ -55,24 +62,28 @@ tidy_books <- austen_books() %>%
   unnest_tokens(word, text)
 ```
 
+Now that the text is in a tidy format with one term per row, we are ready to do the sentiment analysis. First, let's use the NRC lexicon and `filter` for the joy words. Next, let's `filter` the data frame with the text from the books for the words from *Emma* and then use `inner_join` to perform the sentiment analysis. What are the most common joy words in *Emma*? Let's use `count` from dplyr.
+
 ```{r nrcjoy, dependson = "tidy_books"}
 nrcjoy <- get_sentiments("nrc") %>% 
   filter(sentiment == "joy")
 
 tidy_books %>%
   filter(book == "Emma") %>%
-  semi_join(nrcjoy) %>%
+  inner_join(nrcjoy) %>%
   count(word, sort = TRUE)
 ```
 
-Or instead we could examine how sentiment changes during each novel. We can do this with just a handful of lines that are mostly dplyr functions. First, we find a sentiment score for each word using the Bing lexicon and `inner_join`. Next, we count up how many positive and negative words there are in defined sections of each book. We define an `index` here to keep track of where we are in the narrative; this index (using integer division) counts up sections of 80 lines of text. Small sections of text may not have enough words in them to get a good estimate of sentiment while really large sections can wash out narrative structure. For these books, using 80 lines works well, but this can vary depending on individual texts, how long the lines were to start with, etc. We then use a `spread` operation so that we have negative and positive sentiment in separate columns, and lastly calculate a net sentiment (positive - negative).
+We see many positive, happy words about hope, friendship, and love here.
+
+Or instead we could examine how sentiment changes during each novel. We can do this with just a handful of lines that are mostly dplyr functions. First, we find a sentiment score for each word using the Bing lexicon and `inner_join`. Next, we count up how many positive and negative words there are in defined sections of each book. We define an `index` here to keep track of where we are in the narrative; this index (using integer division) counts up sections of 100 lines of text. Small sections of text may not have enough words in them to get a good estimate of sentiment while really large sections can wash out narrative structure. For these books, using 100 lines works well, but this can vary depending on individual texts, how long the lines were to start with, etc. We then use a `spread` operation so that we have negative and positive sentiment in separate columns, and lastly calculate a net sentiment (positive - negative).
 
 ```{r janeaustensentiment, dependson = "tidy_books"}
 library(tidyr)
 
 janeaustensentiment <- tidy_books %>%
   inner_join(get_sentiments("bing")) %>%
-  count(book, index = linenumber %/% 80, sentiment) %>%
+  count(book, index = linenumber %/% 100, sentiment) %>%
   spread(sentiment, n, fill = 0) %>%
   mutate(sentiment = positive - negative)
 ```
@@ -164,13 +175,14 @@ bing_word_counts
 
 This can be shown visually, and we can pipe straight into ggplot2, if we like, because of the way we are consistently using tools built for handling tidy data frames.
 
-```{r pipetoplot, dependson = "wordcounts", fig.width=6, fig.height=6}
+```{r pipetoplot, dependson = "wordcounts", fig.width=8, fig.height=4}
 bing_word_counts %>%
-  filter(n > 150) %>%
-  mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
+  group_by(sentiment) %>%
+  top_n(10) %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(word, n, fill = sentiment)) +
-  geom_bar(alpha = 0.8, stat = "identity") +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free_y") +
   labs(y = "Contribution to sentiment",
        x = NULL) +
   coord_flip()
@@ -182,7 +194,7 @@ This lets us spot an anomaly in the sentiment analysis; the word "miss" is coded
 
 We've seen that this tidy text mining approach works well with ggplot2, but having our data in a tidy format is useful for other plots as well.
 
-For example, consider the wordcloud package. Let's look at the most common words in Jane Austen's works as a whole again.
+For example, consider the wordcloud package, which uses base R graphics. Let's look at the most common words in Jane Austen's works as a whole again.
 
 ```{r firstwordcloud, dependson = "tidy_books", fig.height=6, fig.width=6}
 library(wordcloud)
