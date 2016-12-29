@@ -284,30 +284,77 @@ word_by_rts %>%
   arrange(desc(retweets))
 ```
 
-At the top of this sorted data frame, we see David's tweet about his blog post on Donald Trump's own tweets. A search tells us that this is the only time David has ever used the word "angrier" in his tweets, so that word has an extremely high median retweet rate.
+At the top of this sorted data frame, we see David's tweet about [his blog post on Donald Trump's own tweets](http://varianceexplained.org/r/trump-tweets/) that went viral. A search tells us that this is the only time David has ever used the word "angrier" in his tweets, so that word has an extremely high median retweet rate.
 
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">New post: Analysis of Trump tweets confirms he writes only the angrier Android half <a href="https://t.co/HRr4yj30hx">https://t.co/HRr4yj30hx</a> <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a> <a href="https://t.co/cmwdNeYSE7">pic.twitter.com/cmwdNeYSE7</a></p>&mdash; David Robinson (@drob) <a href="https://twitter.com/drob/status/763048283531055104">August 9, 2016</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 Now we can plot the words that have contributed the most to each of our retweets.
 
-```{r plot_rts, dependson = "word_by_rts", fig.width=10, fig.height=5}
-plot_rts <- word_by_rts %>%
+```{r dependson = "word_by_rts", fig.width=10, fig.height=5}
+word_by_rts %>%
   mutate(ratio = retweets / total_rts) %>%  
   group_by(person) %>%
-  top_n(8, ratio) %>%
+  top_n(10, ratio) %>%
+  arrange(ratio) %>%
+  mutate(word = factor(word, unique(word))) %>%
   ungroup() %>%
-  arrange(person, ratio) %>%
-  mutate(order = row_number())
-
-ggplot(plot_rts, aes(order, ratio, fill = person)) +
+  ggplot(aes(word, ratio, fill = person)) +
   geom_bar(stat = "identity", alpha = 0.8, show.legend = FALSE) +
   facet_wrap(~ person, scales = "free", ncol = 2) +
   coord_flip() +
-  scale_x_continuous(breaks = plot_rts$order, labels = plot_rts$word) +
   scale_y_continuous(labels = percent_format()) +
   labs(x = NULL, 
        y = "proportion of total RTs due to each word",
        title = "Words with highest median retweets")
 ```
 
+We see more words from David's tweet about his Trump blog post, and words from Julia making announcements about blog posts and new package releases. These are some pretty good tweets; we can see why people retweeted them.
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">NEW POST: Mapping ghost sightings in Kentucky using Leaflet 👻👻👻 <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a> <a href="https://t.co/rRFTSsaKWQ">https://t.co/rRFTSsaKWQ</a> <a href="https://t.co/codPf3gy6O">pic.twitter.com/codPf3gy6O</a></p>&mdash; Julia Silge (@juliasilge) <a href="https://twitter.com/juliasilge/status/761667180148641793">August 5, 2016</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Me: Git makes it easy to revert your local changes<br><br>Them: Great! So what command do I use?<br><br>Me: I said it was easy not that I knew how</p>&mdash; David Robinson (@drob) <a href="https://twitter.com/drob/status/770706647585095680">August 30, 2016</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+We can follow a similar procedure to see which words led to more favorites. Are they different than the words that lead to more retweets?
+
+```{r word_by_favs, dependson = "tidy_tweets2"}
+totals <- tidy_tweets %>% 
+  group_by(person, id) %>% 
+  summarise(favs = sum(favorites)) %>% 
+  group_by(person) %>% 
+  summarise(total_favs = sum(favs))
+
+word_by_favs <- tidy_tweets %>% 
+  group_by(id, word, person) %>% 
+  summarise(favs = first(favorites)) %>% 
+  group_by(person, word) %>% 
+  summarise(favorites = median(favs)) %>%
+  left_join(totals) %>%
+  filter(favorites != 0) %>%
+  ungroup()
+```
+
+```{r dependson = "word_by_favs", fig.width=10, fig.height=5}
+word_by_favs %>%
+  mutate(ratio = favorites / total_favs) %>%  
+  group_by(person) %>%
+  top_n(10, ratio) %>%
+  arrange(ratio) %>%
+  mutate(word = factor(word, unique(word))) %>%
+  ungroup() %>%
+  ggplot(aes(word, ratio, fill = person)) +
+  geom_bar(stat = "identity", alpha = 0.8, show.legend = FALSE) +
+  facet_wrap(~ person, scales = "free", ncol = 2) +
+  coord_flip() +
+  scale_y_continuous(labels = percent_format()) +
+  labs(x = NULL, 
+       y = "proportion of total favorites due to each word",
+       title = "Words with highest median favorites")
+```
+
+We see some minor differences, especially near the bottom of the top 10 list, but these are largely the same words as for favorites. In general, the same words that lead to retweets lead to favorites. There are some exceptions, though.
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">🎶 I am writing a Shiny app for my joooooooob 🎶🎶 I am living the dreeeeeeeeeam... 🎶🎶 <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a></p>&mdash; Julia Silge (@juliasilge) <a href="https://twitter.com/juliasilge/status/732645241610600448">May 17, 2016</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
