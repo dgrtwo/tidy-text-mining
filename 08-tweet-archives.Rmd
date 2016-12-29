@@ -8,11 +8,13 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-One type of text that has received its share of attention in recent years is text shared online via Twitter. In fact, several of the sentiment lexicons used in this book (and commonly used in general) were designed for use with and validated on tweets. Both of the authors of this book are on Twitter and are fairly regular users of it so in this case study, let's compare the entire Twitter archives of [Julia](https://twitter.com/juliasilge) and [David](https://twitter.com/drob).
+One type of text that has risen to attention in recent years is text shared online via Twitter. In fact, several of the sentiment lexicons used in this book (and commonly used in general) were designed for use with and validated on tweets. Both of the authors of this book are on Twitter and are fairly regular users of it so in this case study, let's compare the entire Twitter archives of [Julia](https://twitter.com/juliasilge) and [David](https://twitter.com/drob).
+
+TODO: download Twitter archives again
 
 ## Getting the data and distribution of tweets
 
-An individual can download their own Twitter archive by following [directions available here](https://support.twitter.com/articles/20170160). We each downloaded ours and will now open them up. Let's use the lubridate package to convert the string timestamps to date-time objects and initially take a look at our tweeting patterns overall.
+An individual can download their own Twitter archive by following [directions available on Twitter's website](https://support.twitter.com/articles/20170160). We each downloaded ours and will now open them up. Let's use the lubridate package to convert the string timestamps to date-time objects and initially take a look at our tweeting patterns overall.
 
 ```{r setup, fig.width=8, fig.height=6}
 library(lubridate)
@@ -32,11 +34,11 @@ ggplot(tweets, aes(x = timestamp, fill = person)) +
   geom_histogram(alpha = 0.5, position = "identity")
 ```
 
-David and Julia tweet at about the same rate currently and joined Twitter about a year apart from each other, but there about 5 years where David was not active on Twitter and Julia was. In total, Julia has about 4 times as many tweets as David.
+David and Julia tweet at about the same rate currently and joined Twitter about a year apart from each other, but there were about 5 years where David was not active on Twitter and Julia was. In total, Julia has about 4 times as many tweets as David.
 
 ## Word frequencies
 
-Let's use `unnest_tokens` to make a tidy dataframe of all the words in our tweets, and remove the common English stop words. There are certain conventions in how people use text on Twitter, so we will do a bit more work with our text here than, for example, we did with the narrative text from Project Gutenberg. The first `mutate` line below removes links and cleans out some characters that we don't want. In the call to `unnest_tokens`, we unnest using a regex pattern, instead of just looking for single unigrams (words). This regex pattern is very useful for dealing with Twitter text; it retains hashtags and mentions of usernames with the `@` symbol. Because we have kept these types of symbols in the text, we can't use a simple `anti_join` to remove stop words. Instead, we can take the approach shown in the `filter` line that uses `str_detect` from the stringr library.
+Let's use `unnest_tokens` to make a tidy dataframe of all the words in our tweets, and remove the common English stop words. There are certain conventions in how people use text on Twitter, so we will do a bit more work with our text here than, for example, we did with the narrative text from Project Gutenberg. The first `mutate` line below removes links and cleans out some characters that we don't want like ampersands. In the call to `unnest_tokens`, we unnest using a regex pattern, instead of just looking for single unigrams (words). This regex pattern is very useful for dealing with Twitter text; it retains hashtags and mentions of usernames with the `@` symbol. Because we have kept these types of symbols in the text, we can't use a simple `anti_join` to remove stop words. Instead, we can take the approach shown in the `filter` line that uses `str_detect` from the stringr library.
 
 ```{r tidytweets, dependson = "setup"}
 library(tidytext)
@@ -44,13 +46,13 @@ library(stringr)
 
 reg <- "([^A-Za-z_\\d#@']|'(?![A-Za-z_\\d#@]))"
 tidy_tweets <- tweets %>% 
-  mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT", "")) %>%
+  mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https", "")) %>%
   unnest_tokens(word, text, token = "regex", pattern = reg) %>%
   filter(!word %in% stop_words$word,
          str_detect(word, "[a-z]"))
 ```
 
-Now we can calculate word frequencies for each person
+Now we can calculate word frequencies for each person. First, we group by person and count how many times each person used each word. Then we use `left_join` to add a column of the total number of words used by each person. (This is higher for Julia than David since she has more tweets than David.) Finally, we calculate a frequency for each person and word.
 
 ```{r frequency, dependson = "tidytweets"}
 frequency <- tidy_tweets %>% 
@@ -64,22 +66,24 @@ frequency <- tidy_tweets %>%
 frequency
 ```
 
-This is a lovely, tidy data frame but we would actually like to plot those frequencies on the x- and y-axes of a plot, so we will need to use an `inner_join` and make a different dataframe.
+This is a nice, tidy data frame but we would actually like to plot those frequencies on the x- and y-axes of a plot, so we will need to use `spread` from tidyr make a differently shaped dataframe.
 
-```{r spread, dependson = "frequency", fig.height=7, fig.width=7}
-frequency <- inner_join(frequency %>% 
-                          filter(person == "Julia") %>% 
-                          rename(Julia = freq),
-                        frequency %>% 
-                          filter(person == "David") %>% 
-                          rename(David = freq),
-                        by = "word") %>% 
-  ungroup() %>% 
-  select(word, Julia, David)
+```{r spread, dependson = "frequency"}
+library(tidyr)
+
+frequency <- frequency %>% 
+  select(person, word, freq) %>% 
+  spread(person, freq) %>%
+  arrange(Julia, David)
 
 frequency
+```
 
+Now this is ready for us to plot. Let's use `geom_jitter` so that we don't see the discreteness at the low end of frequency as much.
+
+```{r dependson = "spread", fig.height=7, fig.width=7}
 library(scales)
+
 ggplot(frequency, aes(Julia, David)) +
   geom_jitter(alpha = 0.1, size = 2.5, width = 0.25, height = 0.25) +
   geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
@@ -89,11 +93,18 @@ ggplot(frequency, aes(Julia, David)) +
 ```
 
 
-This may not even need to be pointed out, but David and Julia have used their Twitter accounts rather differently over the course of the past several years. David has used his Twitter account almost exclusively for professional purposes since he became more active, while Julia used it for entirely personal purposes until late 2015. We see these differences immediately in this plot exploring word frequencies, and they will continue to be obvious in the rest of this chapter. Words near the red line in this plot are used with about equal frequencies by David and Julia, while words far away from the line are used much more by one person compared to the other. Because of the inner join we did above, words, hashtags, and usernames that appear in this plot are ones that we have both used at least once.
+This may not even need to be pointed out, but David and Julia have used their Twitter accounts rather differently over the course of the past several years. David has used his Twitter account almost exclusively for professional purposes since he became more active, while Julia used it for entirely personal purposes until late 2015. We see these differences immediately in this plot exploring word frequencies, and they will continue to be obvious in the rest of this chapter. Words near the red line in this plot are used with about equal frequencies by David and Julia, while words far away from the line are used much more by one person compared to the other. Words, hashtags, and usernames that appear in this plot are ones that we have both used at least once in tweets or retweets.
 
 ## Comparing word usage 
 
-We just made a plot comparing raw word frequencies, but now let's find which words are more or less likely to come from each person's account using the log odds ratio. First, let's use `str_detect` to remove Twitter usernames from the `word` column, because otherwise, the results here are dominated only by people who Julia or David know and the other does not. After removing these, we count how many times each person uses each word and keep only the words used more than 5 times. After a `spread` operation, we can calculate the log odds ratio for each word, using
+We just made a plot comparing raw word frequencies over our whole Twitter histories; now let's find which words are more or less likely to come from each person's account using the log odds ratio. First, let's restrict the analysis moving forward to tweets from David and Julia sent during 2016. David was consistently active on Twitter for all of 2016 and this was about when Julia transitioned into data science as a career.
+
+```{r}
+tidy_tweets <- tidy_tweets %>%
+  filter(timestamp >= as.Date("2016-01-01"))
+```
+
+Next, let's use `str_detect` to remove Twitter usernames from the `word` column, because otherwise, the results here are dominated only by people who Julia or David know and the other does not. After removing these, we count how many times each person uses each word and keep only the words used more than 5 times. After a `spread` operation, we can calculate the log odds ratio for each word, using
 
 
 $$\text{log odds ratio} = \ln{\left(\frac{\left[\frac{n+1}{\text{total}+1}\right]_\text{David}}{\left[\frac{n+1}{\text{total}+1}\right]_\text{Julia}}\right)}$$
@@ -101,7 +112,6 @@ $$\text{log odds ratio} = \ln{\left(\frac{\left[\frac{n+1}{\text{total}+1}\right
 where $n$ is the number of times the word in question is used by each person and the total indicates the total words for each person.
 
 ```{r word_ratios, dependson = "tidytweets"}
-library(tidyr)
 word_ratios <- tidy_tweets %>%
   filter(!str_detect(word, "^@")) %>%
   count(word, person) %>%
@@ -120,6 +130,8 @@ word_ratios %>%
   arrange(abs(logratio))
 ```
 
+We are about equally likely to tweet about programming, writing, and cool things like the Broadway musical *Hamilton*.
+
 Which words are most likely to be from Julia's account or from David's account? Let's just take the top 15 most distinctive words for each account and plot them.
 
 ```{r plotratios, dependson = "word_ratios", fig.width=7, fig.height=6}
@@ -135,101 +147,88 @@ word_ratios %>%
   scale_fill_discrete(name = "", labels = c("David", "Julia"))
 ```
 
-So David has tweeted about bioinformatics and Stack Overflow while Julia has been tweeting about preschool, naps, and the snow.
+So David has tweeted about matrices, models, and his R packages like broom and gganimate while Julia tweeted about Salt Lake City, physics, and maps.
 
-## Sentiment analysis
+## Changes in word use
 
-David and Julia have tweeted using different words, reflecting the difference of a professional vs. a personal Twitter account over the bulk of our tweets, but what about the sentiment of each person's tweets? Let's look for similarities and differences in the emotional content of these tweets. 
+REDO THIS SECTION WITH UPDATED ARCHIVES
 
-First, let's find the total number of words from each person; Julia has a much larger total number of tweets than David.
+The section above looked at overall word use, but now let's ask a different question. Which words' frequencies have changed the fastest in our Twitter feeds? Or to state this another way, which words have we tweeted about at a higher or lower rate as time has passed? To do this, we will define a new time variable in the dataframe that defines which unit of time each tweet was posted in. We can use `floor_date()` from lubridate to do this, with a unit of our choosing; using 15 days seems to work well for this year of tweets from both of us.
 
-```{r word_totals, dependson = "tidytweets"}
-totals <- tidy_tweets %>%
-  group_by(person) %>%
-  summarise(total_words = n())
+After we have the time bins defined, we count how many times each of us used each word in each time bin. After that, we add columns to the dataframe for the total number of words used in each time bin by each person and the total number of times each word was used by each person. We can then `filter` to only keep words used at least some minimum number of times (30, in this case).
 
-totals
-```
-
-Now let's measure the sentiment for each word in our tweet archives. First we use `inner_join` and the NRC sentiment lexicon to identify words that are associated with joy, anger, surprise, etc. Then we count how many of these words each person used. Next, we join the data frame with the total words so that we will be able to look at proportions.
-
-```{r sentiment_by_person, dependson = c("tidytweets", "word_totals")}
-sentiment_by_person <- tidy_tweets %>%
-  inner_join(get_sentiments("nrc")) %>%
-  count(sentiment, person) %>%
+```{r words_by_time, dependson = "tidytweets"}
+words_by_time <- tidy_tweets %>%
+  filter(!str_detect(word, "^@")) %>%
+  mutate(time_floor = floor_date(timestamp, unit = "15 days")) %>%
+  count(time_floor, person, word) %>%
   ungroup() %>%
-  left_join(totals) %>%
-  rename(words = n)
+  group_by(person, time_floor) %>%
+  mutate(time_total = sum(n)) %>%
+  group_by(word) %>%
+  mutate(word_total = sum(n)) %>%
+  ungroup() %>%
+  rename(count = n) %>%
+  filter(word_total > 30)
 
-sentiment_by_person
+words_by_time
 ```
 
-This is count data, so let's use a Poisson test to measure the difference between David's word use and Julia's. We want to test each sentiment separately, so first let's `nest` the data so that we have a list-column with the data for each sentiment. Then let's use `map` from the purrr library to apply the Poisson test to each little data frame individually.
+Each row in this dataframe corresponds to one person using one word in a given time bin. The `count` column tells us how many times that person used that word in that time bin, the `time_total` column tells us how many words that person used during that time bin, and the `word_total` column tells us how many times that person used that word over the whole year. This is the data set we can use for modeling. 
 
-```{r sentiment_differences, dependson = "sentiment_by_person"}
+We can use `nest` from tidyr to make a data frame with a list column that contains little miniature data frames for each word. Let's do that now and take a look at the resulting structure.
+
+```{r nest, dependson = "words_by_time"}
+nested_models <- words_by_time %>%
+  nest(-word, -person) 
+
+nested_models
+```
+
+This data frame has one row for each person-word combination; the `data` column is a list column that contains data frames, one for each combination of person and word. Let's use `map` from the purrr library to apply our modeling procedure to each of those little data frames inside our big data frame. This is count data so let’s use `glm` with `family = "binomial"` for modeling. We can think about this modeling procedure answering a question like, "Was a given word mentioned in a given time bin? Yes or no? How does the count of word mentions depend on time?"
+
+```{r nested_models, dependson = "nest", eval = FALSE}
 library(purrr)
 
-sentiment_differences <- sentiment_by_person %>% 
-  nest(-sentiment) %>%
-  mutate(tests = map(data, ~ poisson.test(.$words, .$total_words)))
+nested_models <- nested_models %>%
+  mutate(models = map(data, ~ glm(cbind(count, time_total) ~ time_floor, ., 
+                                  family = "binomial")))
 
-sentiment_differences
+nested_models
 ```
 
-Now we can use `tidy` from the broom library and `unnest` to get back to a data frame without list-columns.
+Now notice that we have a new column for the modeling results; it is another list column and contains `glm` objects. The next step is to use `map` and `tidy` from the broom package to pull out the slopes for each of these models and find the important ones. We are comparing many slopes here and some of them are not statistically significant, so let's apply an adjustment to the p-values for multiple comparisons.
 
-```{r unnest_sentiment, dependson = "sentiment_differences"}
+```{r slopes, dependson = "nested_models", eval = FALSE}
 library(broom)
 
-sentiment_differences <- sentiment_differences %>% 
-  unnest(map(tests, tidy)) %>% 
-  select(-data, -tests)
-
-sentiment_differences
+slopes <- nested_models %>%
+  unnest(map(models, tidy)) %>%
+  filter(term == "time_floor") %>%
+  mutate(adjusted.p.value = p.adjust(p.value))
 ```
 
-We have measured the differences in sentiment between our two Twitter feeds; now let's plot them!
+Now let's find the most important slopes. Which words have changed in frequency at a significant level in our tweets?
 
-```{r plot_unnest, dependson = "unnest_sentiment", fig.width=7, fig.height=7}
-library(scales)
+```{r top_slopes2, dependson = "slopes", eval = FALSE}
+top_slopes <- slopes %>% 
+  filter(adjusted.p.value < 0.05)
 
-sentiment_differences %>%
-  ungroup() %>%
-  mutate(sentiment = reorder(sentiment, estimate)) %>%
-  mutate_each(funs(1 - .), estimate, conf.low, conf.high) %>%
-  ggplot(aes(estimate, sentiment)) +
-  geom_point(size = 2.5) +
-  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high)) +
-  scale_x_continuous(labels = percent_format()) +
-  labs(x = "% increase for Julia relative to David",
-       y = "Sentiment")
+top_slopes
 ```
 
-We see here that Julia uses about 65% more words related to joy and about 55% more words related to disgust than David; in fact, she uses more of *all* words associated with sentiments, both negative and positive. David's tweets are more neutral in sentiment while Julia's involve more dramatic word choices that communicate more emotions. This, again, reflects the different ways we have used our Twitter accounts.
+To visualize our results, we can plot these words' use for both David and Julia over this year of tweets.
 
-## Words that contribute to sentiment in tweets
-
-Which specific words are driving this difference in sentiment between Julia's and David's accounts? Let's go back to the data frame that contains the odds ratios for each word. We can use the same `inner_join` with the NRC sentiment lexicon to identify the words that are associated with emotions like joy, disgust, and so forth; these are exactly the words that are driving the differences in measured sentiment between our two accounts. Now let's find the words with the largest odds ratios. When we did a similar operation above, we took the `top_n` for each individual person to see the words that were more likely to come from each Twitter feed, but now we will take the `top_n` for each sentiment to see which word choices are the cause of the marked difference in sentiment.
-
-```{r plotsentiments, dependson = "word_ratios", fig.width=8, fig.height=6}
-word_ratios %>%
-  inner_join(get_sentiments("nrc")) %>%
-  filter(!sentiment %in% c("positive", "negative")) %>%
-  mutate(sentiment = reorder(sentiment, -logratio),
-         word = reorder(word, -logratio)) %>%
-  group_by(sentiment) %>%
-  top_n(10, abs(logratio)) %>%
-  ungroup() %>%
-  ggplot(aes(word, logratio, fill = logratio < 0)) +
-  facet_wrap(~ sentiment, scales = "free", nrow = 2) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  labs(y = "log odds ratio (David/Julia)",
-       x = NULL) +
-  scale_fill_discrete(name = "", labels = c("David", "Julia"))
+```{r dependson = c("words_by_time", "top_slopes2"), fig.width=5, fig.height=8, eval = FALSE}
+words_by_time %>%
+  inner_join(top_slopes, by = c("word", "person")) %>%
+  ggplot(aes(time_floor, count/time_total, color = word)) +
+  facet_wrap(~ person, nrow = 2) +
+  geom_line(alpha = 0.8, size = 1.3) +
+  labs(x = NULL, y = "Word frequency",
+       title = "Trending words in our tweets")
 ```
 
-We see here that Julia's tweets have such a higher joy score because she has tweeted about things like birthdays, babies, and things that are delicious and sweet (probably sweet babies even!). Her disgust score is higher because she has tweeted about pregnancy, diapers, and being sick with stomach bugs. We see that there are some misidentifications visible in this plot; David's only joy word should actually be Excel, the Microsoft product (not excel, the verb) and he uses "wrangling" in the sense of "data wrangling", which is not fraught with disgust, anger, or fear (or is it?!). These misidentifications due to domain-specific word use mean that the difference between Julia and David for joy, digust, and some others should actually be even larger.
 
 ## Favorites and retweets
 
@@ -245,12 +244,12 @@ tweets <- bind_rows(tweets_julia %>%
   mutate(created_at = ymd_hms(created_at))
 ```
 
-Now that we have this second, smaller set of only recent tweets, let's use `unnest_tokens` to transform these tweets to a tidy data set.
+Now that we have this second, smaller set of only recent tweets, let's use `unnest_tokens` to transform these tweets to a tidy data set. (Let's also remove any retweets from this data set so we only look at tweets that David and Julia have posted directly.)
 
 ```{r tidy_tweets2, dependson = "setup2"}
 tidy_tweets <- tweets %>% 
   filter(!str_detect(text, "^RT")) %>%
-  mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT", "")) %>%
+  mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https", "")) %>%
   unnest_tokens(word, text, token = "regex", pattern = reg) %>%
   anti_join(stop_words)
 
@@ -269,14 +268,14 @@ totals <- tidy_tweets %>%
 totals
 ```
 
-Now let's find the number of retweets for each word and person (making sure to count each tweet only once) and join to this data frame of retweet totals.
+Now let's find the median number of retweets for each word and person; we probably want to count each tweet/word combination only once, so we will use `group_by` and `summarise` twice, one right after the other. Next, we can join this to the data frame of retweet totals.
 
 ```{r word_by_rts, dependson = c("rt_totals", "tidy_tweets2")}
 word_by_rts <- tidy_tweets %>% 
   group_by(id, word, person) %>% 
-  summarise(rts = sum(retweets)) %>% 
+  summarise(rts = first(retweets)) %>% 
   group_by(person, word) %>% 
-  summarise(retweets = sum(rts)) %>%
+  summarise(retweets = median(rts)) %>%
   left_join(totals) %>%
   filter(retweets != 0) %>%
   ungroup()
@@ -284,6 +283,11 @@ word_by_rts <- tidy_tweets %>%
 word_by_rts %>% 
   arrange(desc(retweets))
 ```
+
+At the top of this sorted data frame, we see David's tweet about his blog post on Donald Trump's own tweets. A search tells us that this is the only time David has ever used the word "angrier" in his tweets, so that word has an extremely high median retweet rate.
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">New post: Analysis of Trump tweets confirms he writes only the angrier Android half <a href="https://t.co/HRr4yj30hx">https://t.co/HRr4yj30hx</a> <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a> <a href="https://t.co/cmwdNeYSE7">pic.twitter.com/cmwdNeYSE7</a></p>&mdash; David Robinson (@drob) <a href="https://twitter.com/drob/status/763048283531055104">August 9, 2016</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 Now we can plot the words that have contributed the most to each of our retweets.
 
@@ -302,6 +306,8 @@ ggplot(plot_rts, aes(order, ratio, fill = person)) +
   coord_flip() +
   scale_x_continuous(breaks = plot_rts$order, labels = plot_rts$word) +
   scale_y_continuous(labels = percent_format()) +
-  labs(x = NULL, y = "proportion of total RTs due to each word")
+  labs(x = NULL, 
+       y = "proportion of total RTs due to each word",
+       title = "Words with highest median retweets")
 ```
 
