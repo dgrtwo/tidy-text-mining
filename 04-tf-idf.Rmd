@@ -55,6 +55,43 @@ There are very long tails to the right for these novels (those extremely common 
 
 TODO
 
+```{r freq_by_rank, dependson = book_words}
+freq_by_rank <- book_words %>% 
+  group_by(book) %>% 
+  mutate(rank = row_number(), 
+         `term frequency` = n/total)
+
+freq_by_rank
+```
+
+```{r zipf, dependson = "freq_by_rank", fig.width=9, fig.height=6}
+freq_by_rank %>% 
+  ggplot(aes(rank, `term frequency`, color = book)) + 
+  geom_line(size = 1.2, alpha = 0.8) + 
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+Notice that this plot is in log-log coordinates.
+
+```{r lower_rank, dependson = "freq_by_rank"}
+lower_rank <- freq_by_rank %>% 
+  filter(rank < 500)
+
+lm(log10(`term frequency`) ~ log10(rank), data = lower_rank)
+```
+
+
+```{r zipf_fit, dependson = "freq_by_rank", fig.width=9, fig.height=6}
+freq_by_rank %>% 
+  ggplot(aes(rank, `term frequency`, color = book)) + 
+  geom_abline(intercept = -0.77, slope = -1.05, color = "gray50", linetype = 2) +
+  geom_line(size = 1.2, alpha = 0.8) + 
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+
 ## The `bind_tf_idf` function
 
 The idea of tf-idf is to find the important words for the content of each document by decreasing the weight for commonly used words and increasing the weight for words that are not used very much in a collection or corpus of documents, in this case, the group of Jane Austen's novels as a whole. Calculating tf-idf attempts to find the words that are important (i.e., common) in a text, but not *too* common. Let's do that now.
