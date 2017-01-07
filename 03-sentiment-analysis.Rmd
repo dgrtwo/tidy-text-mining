@@ -218,6 +218,8 @@ tidy_books %>%
                    max.words = 100)
 ```
 
+The size of a word's text in this wordcloud is in proportion to its frequency within its sentiment. We can use this visualization to see the most important positive and negative words, but the sizes of the words are not comparable across sentiments.
+
 ## Looking at units beyond just words
 
 Lots of useful work can be done by tokenizing at the word level, but sometimes it is useful or necessary to look at different units of text. For example, some sentiment analysis algorithms look beyond only unigrams (i.e. single words) to try to understand the sentiment of a sentence as a whole. These algorithms try to understand that
