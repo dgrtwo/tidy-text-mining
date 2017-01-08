@@ -171,7 +171,7 @@ words_by_time <- tidy_tweets %>%
   mutate(word_total = sum(n)) %>%
   ungroup() %>%
   rename(count = n) %>%
-  filter(word_total > 10)
+  filter(word_total > 30)
 
 words_by_time
 ```
@@ -207,7 +207,7 @@ library(broom)
 slopes <- nested_models %>%
   unnest(map(models, tidy)) %>%
   filter(term == "time_floor") %>%
-  mutate(adjusted.p.value = p.adjust(p.value, "BH"))
+  mutate(adjusted.p.value = p.adjust(p.value))
 ```
 
 Now let's find the most important slopes. Which words have changed in frequency at a moderately significant level in our tweets?
@@ -231,7 +231,7 @@ words_by_time %>%
        title = "Trending words in David's tweets")
 ```
 
-David tweeted a lot about the UseR conference while he was there and then quickly stopped. He has tweeted more about Stack Overflow toward the end of the year and less about base graphics and ggplot2 as the year has progressed. (That's probably healthy.)
+David tweeted a lot about the UseR conference while he was there and then quickly stopped. He has tweeted more about Stack Overflow toward the end of the year and less about ggplot2 as the year has progressed.
 
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Me: I&#39;m so sick of data science wars. <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a> vs Python, frequentist vs Bayesian...<br><br>Them: base vs ggplot2...<br><br>Me: WHY WHICH SIDE ARE YOU ON</p>&mdash; David Robinson (@drob) <a href="https://twitter.com/drob/status/712639593703542785">March 23, 2016</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -246,7 +246,7 @@ words_by_time %>%
        title = "Trending words in Julia's tweets")
 ```
 
-All the significant slopes for Julia are negative. This means she has not tweeted at a higher rate using any specific words, but instead using a variety of different words; her tweets earlier in the year contained the words shown in this plot at higher rates. Words she uses when publicizing a new blog post like the #rstats hashtag and "post" have gone down in frequency, and she has tweeted less about reading.
+All the significant slopes for Julia are negative. This means she has not tweeted at a higher rate using any specific words, but instead using a variety of different words; her tweets earlier in the year contained the words shown in this plot at higher proportions. Words she uses when publicizing a new blog post like the #rstats hashtag and "post" have gone down in frequency, and she has tweeted less about reading.
 
 ## Favorites and retweets
 
