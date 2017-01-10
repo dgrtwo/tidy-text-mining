@@ -24,7 +24,8 @@ Imports:
   wordcloud,
   lubridate,
   stringr,
-  ggforce
+  ggforce,
+  mallet
 Remotes:
   dgrtwo/widyr,
   thomasp85/ggraph

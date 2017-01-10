@@ -8,7 +8,6 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-
 Topic modeling is a method for unsupervised classification of documents, by modeling each document as a mixture of topics and each topic as a mixture of words. [Latent Dirichlet allocation](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) is a particularly popular method for fitting a topic model.
 
 We can use tidy text principles, as described in [Chapter 2](#tidytext), to approach topic modeling using consistent and effective tools. In particular, we'll be using tidying functions for LDA objects from the [topicmodels package](https://cran.r-project.org/package=topicmodels).
@@ -22,9 +21,9 @@ Suppose a vandal has broken into your study and torn apart four of your books:
 * *Twenty Thousand Leagues Under the Sea* by Jules Verne
 * *Pride and Prejudice* by Jane Austen
 
-This vandal has torn the books into individual chapters, and left them in one large pile. How can we restore these disorganized chapters to their original books? We'll use topic modeling to discover how chapters are distinguished into distinct topics.
+This vandal has torn the books into individual chapters, and left them in one large pile. How can we restore these disorganized chapters to their original books? This is a challenging problem since the individual chapters are **unlabeled**: we don't know what words might distinguish them into groups. We'll thus use topic modeling to discover how chapters cluster into distinct topics, each of them representing one of the words.
 
-We'll retrieve these four books using the gutenbergr package:
+We'll retrieve the text of these four books using the gutenbergr package:
 
 ```{r titles}
 library(dplyr)
@@ -44,58 +43,64 @@ books <- gutenberg_works(title %in% titles) %>%
 load("data/books.rda")
 ```
 
-As pre-processing, we divide these into chapters, use tidytext's `unnest_tokens` to separate them into words, then remove `stop_words`. We're treating every chapter as a separate "document", each with a name like `Great Expectations_1` or `Pride and Prejudice_11`.
+As pre-processing, we divide these into chapters, use tidytext's `unnest_tokens` to separate them into words, then remove `stop_words`, similar to the analyses we've done in Chapter \@ref{sentiment}. We're treating every chapter as a separate "document", each with a name like `Great Expectations_1` or `Pride and Prejudice_11`. (In practice, each document might be one newspaper article, or one blog post).
 
 ```{r word_counts, dependson = "topic_books"}
 library(tidytext)
 library(stringr)
 library(tidyr)
 
+# Divide into documents, each representing one chapter
 by_chapter <- books %>%
   group_by(title) %>%
   mutate(chapter = cumsum(str_detect(text, regex("^chapter ", ignore_case = TRUE)))) %>%
   ungroup() %>%
-  filter(chapter > 0)
+  filter(chapter > 0) %>%
+  unite(document, title, chapter)
 
+# Split into words
 by_chapter_word <- by_chapter %>%
-  unite(title_chapter, title, chapter) %>%
   unnest_tokens(word, text)
 
+# Find document-word counts
 word_counts <- by_chapter_word %>%
   anti_join(stop_words) %>%
-  count(title_chapter, word, sort = TRUE) %>%
+  count(document, word, sort = TRUE) %>%
   ungroup()
 
 word_counts
 ```
 
+word_counts
+
 ## Latent Dirichlet allocation with the topicmodels package
 
-Right now this data frame is in a tidy form, with one-term-per-document-per-row. However, the topicmodels package requires a `DocumentTermMatrix` (from the tm package). As described in [Chapter 6](#dtm), we can cast a one-token-per-row table into a `DocumentTermMatrix` with tidytext's `cast_dtm`:
+Right now this data frame is in a tidy form, with one-term-per-document-per-row. However, the topicmodels package requires a `DocumentTermMatrix` (from the tm package). As described in Chapter \@ref{#dtm}, we can cast a one-token-per-row table into a `DocumentTermMatrix` with tidytext's `cast_dtm`:
 
 ```{r chapters_dtm}
 chapters_dtm <- word_counts %>%
-  cast_dtm(title_chapter, word, n)
+  cast_dtm(document, word, n)
 
 chapters_dtm
 ```
 
-Now we are ready to use the [topicmodels](https://cran.r-project.org/package=topicmodels) package to create a four topic LDA model.
+We're now ready ready to use the [topicmodels](https://cran.r-project.org/package=topicmodels) package, specifically the `LDA` function, to create a four topic Latent Dirichlet Allocation model. (In this case we know there are four topics because there are four books: in other problems we may need to try a few different values of `k`).
 
 ```{r chapters_lda}
 library(topicmodels)
+
+# setting a seed so that the output is predictable
 chapters_lda <- LDA(chapters_dtm, k = 4, control = list(seed = 1234))
 chapters_lda
+class(chapters_lda)
 ```
 
-(In this case we know there are four topics because there are four books; in practice we may need to try a few different values of `k`).
+This produces an LDA model of class `LDA_VEM`, containing the 
 
-Now tidytext gives us the option of *returning* to a tidy analysis, using the `tidy` and `augment` verbs borrowed from the [broom package](https://github.com/dgrtwo/broom). In particular, we start with the `tidy` verb.
+The tidytext package now gives us the option of *returning* to a tidy analysis, using the `tidy` and `augment` verbs borrowed from the [broom package](https://github.com/dgrtwo/broom). Note the similarity with the tidying functions in Chapter \@ref{#casting}: each . In particular, we start with the `tidy` verb.
 
 ```{r chapters_lda_td}
-library(tidytext)
-
-chapters_lda_td <- tidytext:::tidy.LDA(chapters_lda)
+chapters_lda_td <- tidy(chapters_lda)
 chapters_lda_td
 ```
 
@@ -239,3 +244,40 @@ word_counts %>%
 ```
 
 The algorithm is stochastic and iterative, and it can accidentally land on a topic that spans multiple books.
+
+## Alternative LDA implementations
+
+The `LDA` function in the topicmodels package is only one implementation of . For example, the [mallet](https://cran.r-project.org/package=mallet) package implements a wrapper around the  [MALLET](http://mallet.cs.umass.edu/)
+
+```{r mallet_model, dependson = "word_counts", results = "hide"}
+library(mallet)
+
+collapsed <- by_chapter_word %>%
+  anti_join(stop_words, by = "word") %>%
+  mutate(word = str_replace(word, "'", "")) %>%
+  group_by(document) %>%
+  summarize(text = paste(word, collapse = " "))
+
+# The mallet package requires a file of stopwords
+# Since we've already filtered them, we can give it an empty file
+file.create(empty_file <- tempfile())
+docs <- mallet.import(collapsed$document, collapsed$text, empty_file)
+
+mallet_model <- MalletLDA(num.topics = 4)
+mallet_model$loadDocuments(docs)
+mallet_model$train(200)
+```
+
+The inputs and outputs of the tidying functions are almost identical to the tidiers described in this rest of this chapter. In particular, they take
+
+```{r}
+# word-topic pairs
+tidy(mallet_model)
+
+# document-topic pairs
+tidy(mallet_model, matrix = "gamma")
+
+# column needs to be named "term" for "augment"
+word_counts <- rename(word_counts, term = word)
+augment(mallet_model, word_counts)
+```

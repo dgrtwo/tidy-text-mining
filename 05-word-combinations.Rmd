@@ -1,4 +1,4 @@
-# Working with combinations of words using n-grams and widyr {#ngrams}
+# Relationships between words {#ngrams}
 
 ```{r echo = FALSE}
 library(knitr)
@@ -8,15 +8,15 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-So far we've considered words as individual units, and connected them to documents or sentiments. However, many interesting text analyses are based on the relationships between words, whether examining words commonly used in proximity to each other or within the same documents.
+So far we've considered words as individual units, and connected them to documents or sentiments to perform our analyses. However, many interesting text analyses are based on the relationships between words, whether examining words commonly used in proximity to each other or that tend to occur within the same documents.
 
-Here, we'll explore some of the tools tidytext offers for determining relationships between words in your text corpus. We'll also introduce the widyr package, which is useful for calculating pairwise correlations and distances within a tidy format.
+In this chapter, we'll explore some of the tools that tidytext offers for determining relationships between words in your text dataset. This includes the `token = "ngrams"` argument, which tokenizes by pairs of adjacent words rather than by individual words. We'll also introduce two new packages: [ggraph](https://github.com/thomasp85/ggraph), which extends ggplot2 to construct network plots, nd [widyr](https://github.com/dgrtwo/widyr) package, which calculates pairwise correlations and distances within a tidy data frame.
 
 ## Tokenizing by n-gram
 
-We've been using the `unnest_tokens` function to tokenize by word, or sometimes by sentence or paragraph. But we can also tokenize into consecutive sequences of words, called **n-grams**.
+We've been using the `unnest_tokens` function to tokenize by word, or sometimes by sentence or paragraph, which is useful . But we can also use the function to tokenize into consecutive sequences of words, called **n-grams**. By seeing how often word X is followed by word Y, we can then build a model of the relationships between them.
 
-We do this by adding the `token = "ngrams"` option to `unnest_tokens()`, as well as the `n` argument. When we set `n` to 2, we are examining pairs of two words, often called `bigrams`: 
+We do this by adding the `token = "ngrams"` option to `unnest_tokens()`, and setting `n` to the number of words we wish to capture in each n-gram. When we set `n` to 2, we are examining pairs of two consecutive words, often called "bigrams":
 
 ```{r austen_bigrams}
 library(dplyr)
@@ -29,20 +29,20 @@ austen_bigrams <- austen_books() %>%
 austen_bigrams
 ```
 
-This data structure is still a variation of the tidy text format. It is structured as one-row-per-token, but now each token represents a bigram. Notice that these bigrams are overlapping: "sense and" is one token, while "and sensibility" is another.
+This data structure is still a variation of the tidy text format. It is structured as one-row-per-token (with extra metadata, such as `book`, still preserved), but each token now represents a bigram. Notice that these bigrams overlap: "sense and" is one token, while "and sensibility" is another.
 
 ### Counting and filtering n-grams
 
-Our usual tidy tools apply equally well to n-gram analysis. We can examine the most common bigrams using `count`:
+Our usual tidy tools apply equally well to n-gram analysis. We can examine the most common bigrams using dplyr's `count()`:
 
-```{r}
+```{r, dependson = "austen_bigrams"}
 austen_bigrams %>%
   count(bigram, sort = TRUE)
 ```
 
-As expected, a lot of them are pairs of common (relatively uninteresting) words. This is a useful time to use tidyr's `separate()`, which splits a column into multiple based on a delimiter. This lets us separate it into two columns, "word1" and "word2", which we can remove stop-words from individually:
+As one might expect, a lot of the most common bigrams are pairs of common (uninteresting) words, such as `of the` and `to be`: what we call "stop-words" (see Chapter \@ref{#tidytext}). This is a useful time to use tidyr's `separate()`, which splits a column into multiple based on a delimiter. This lets us separate it into two columns, "word1" and "word2", at which we can remove cases where either is a stop-word .
 
-```{r}
+```{r dependson = "austen_bigrams"}
 library(tidyr)
 
 bigrams_separated <- austen_bigrams %>%
@@ -52,19 +52,14 @@ bigrams_filtered <- bigrams_separated %>%
   filter(!word1 %in% stop_words$word) %>%
   filter(!word2 %in% stop_words$word)
 
-bigrams_filtered
-```
-
-We can now count the most common pairs of words:
-
-```{r}
+# New bigram counts:
 bigrams_filtered %>%
   count(word1, word2, sort = TRUE)
 ```
 
 We can see that names (whether first and last or with a salutation) are the most common pairs in Jane Austen books.
 
-We may want to work with the recombined words. tidyr's `unite()` function is the inverse of `separate()`, and lets us recombine the columns into one.
+In other analyses, we may want to work with the recombined words. tidyr's `unite()` function is the inverse of `separate()`, and lets us recombine the columns into one.
 
 ```{r bigrams_united, dependson = "bigrams_filtered"}
 bigrams_united <- bigrams_filtered %>%
@@ -73,7 +68,7 @@ bigrams_united <- bigrams_filtered %>%
 bigrams_united
 ```
 
-You could also easily work with trigrams (sequences of 3 words) by setting `n = 3`:
+We may also be interested in the most common tri-grams, sequences of 3 words. We can find this by setting `n = 3`:
 
 ```{r}
 austen_books() %>%
@@ -87,7 +82,15 @@ austen_books() %>%
 
 ### Analyzing bigrams
 
-A bigram can be treated as a term in a document in the same way that we treated individual words. For example, we can look at tf-idf of bigrams:
+This one-row-per-bigram format is helpful for exploratory analyses of the text. As a simple example, we might be interested in the most common "streets" mentioned in each book:
+
+```{r}
+bigrams_filtered %>%
+  filter(word2 == "street") %>%
+  count(book, word1, sort = TRUE)
+```
+
+A bigram can also be treated as a term in a document in the same way that we treated individual words. For example, we can look at the TF-IDF (Chapter \@ref{#tf_idf}) of bigrams across Austen novels.
 
 ```{r bigram_tf_idf, dependson = "bigram_counts"}
 bigram_tf_idf <- bigrams_united %>%
@@ -98,7 +101,7 @@ bigram_tf_idf <- bigrams_united %>%
 bigram_tf_idf
 ```
 
-This can be visualized within each book, just as we did for words:
+These TF-IDF values can be visualized within each book, just as we did for words.
 
 ```{r bigram_tf_idf_plot, dependson = "bigram_tf_idf", echo = FALSE, fig.width=9, fig.height=9}
 bigram_tf_idf %>%
@@ -109,16 +112,22 @@ bigram_tf_idf %>%
   ggplot(aes(bigram, tf_idf, fill = book)) +
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   facet_wrap(~ book, ncol = 2, scales = "free") +
-  coord_flip()
+  coord_flip() +
+  labs(y = "TF-IDF of bigram to novel",
+       x = "")
 ```
 
-Much as we discovered in [Chapter 4](#tfidf), the units that distinguish each Austen book are almost exclusively names.
+Much as we discovered in [Chapter 4](#tfidf), the units that distinguish each Austen book are almost exclusively names. We also notice some pairings of a common verb and a name, such as "replied elizabeth" in Pride & Prejudice, or "cried emma" in Emma.
+
+There are advantages and disadvantages to examining the TF-IDF of bigrams rather than individual words. Pairs of consecutive words might capture structure that isn't present when one is just counting single words, and may provide context that makes tokens more understandable (for example, "pulteney street", in Northanger Abbey, is more informative than "pulteney"). However, the per-bigram counts are also *sparser*: a typical two-word pair is rarer than either of its component words. Thus, bigrams can be especially useful when you have a very large text dataset.
 
 ### Using bigrams to provide context in sentiment analysis
 
-Our sentiment analysis approch in [Chapter 3](#sentiment) simply counted the appearance of positive or negative words, according to a reference lexicon. One of the problems with this approach is that a word's context can matter nearly as much as its presence. For example, the words "happy" and "like" will be counted as positive, even in a sentence like "I'm not **happy** and I don't **like** it!"
+Our sentiment analysis approch in Chapter \ref{3](#sentiment) simply counted the appearance of positive or negative words, according to a reference lexicon. One of the problems with this approach is that a word's context can matter nearly as much as its presence. For example, the words "happy" and "like" will be counted as positive, even in a sentence like "I'm not **happy** and I don't **like** it!"
 
-```{r}
+Now that we have the data organized into bigrams, it's easy to tell how often words are preceded by a word like "not":
+
+```{r dependson = "bigrams_separated"}
 bigrams_separated %>%
   filter(word1 == "not") %>%
   count(word1, word2, sort = TRUE)
@@ -126,7 +135,7 @@ bigrams_separated %>%
 
 By performing sentiment analysis on the bigram data, we can examine how often sentiment-associated words are preceded by "not" or other negating words. We could use this to ignore or even reverse their contribution to the sentiment score.
 
-Let's use the AFINN lexicon for sentiment analysis, which gives a numeric sentiment score for each word:
+Let's use the AFINN lexicon for sentiment analysis, which you may recall gives a numeric sentiment score for each word:
 
 ```{r AFINN_ngrams}
 AFINN <- get_sentiments("afinn")
@@ -146,6 +155,8 @@ not_words <- bigrams_separated %>%
 not_words
 ```
 
+For example, the most common sentiment-associated word to follow "not" was "like", which would normally have a (positive) sentiment score of 2.
+
 It's worth asking which words contributed the most in the "wrong" direction. To compute that, we can multiply their score by the number of times they appear (so that a word with a sentiment score of +3 occurring 10 times has as much impact as a word with a sentiment score of +1 occurring 30 times).
 
 ```{r not_words_plot, dependson = "not_words", fig.width=8, fig.height=6}
@@ -156,14 +167,14 @@ not_words %>%
   mutate(word2 = reorder(word2, contribution)) %>%
   ggplot(aes(word2, n * score, fill = n * score > 0)) +
   geom_bar(stat = "identity", show.legend = FALSE) +
-  ylab("Words preceded by \"not\"") +
-  xlab("Sentiment score * # of occurrences") +
+  xlab("Words preceded by \"not\"") +
+  ylab("Sentiment score * number of occurrences") +
   coord_flip()
 ```
 
 The bigrams "not like" and "not help" were overwhelmingly the largest causes of misidentification, making the text seem much more positive than it is. But we can see phrases like "not afraid" and "not fail" sometimes suggest text is more negative than it is.
 
-"Not" isn't the only word that provides context. We could make a vector of words that we suspect are used in negation, and use the same joining and counting approach to examine all of them at once.
+"Not" isn't the only term that provides some context for the following word. We could pick four common words (or more) that negate the following, and use the same joining and counting approach to examine all of them at once.
 
 ```{r negated_words, dependson = "bigrams_separated"}
 negation_words <- c("not", "no", "never", "without")
@@ -178,18 +189,16 @@ negated_words
 ```
 
 ```{r negated_words_plot, dependson = "negated_words", fig.width=9, fig.height=9}
-## TODO: make the ordering vary depending on each facet
-## (not easy to fix)
-
 negated_words %>%
   mutate(contribution = n * score) %>%
-  mutate(word2 = reorder(word2, contribution)) %>%
+  mutate(word2 = reorder(paste(word2, word1, sep = "__"), contribution)) %>%
   group_by(word1) %>%
   top_n(10, abs(contribution)) %>%
   ggplot(aes(word2, contribution, fill = n * score > 0)) +
   geom_bar(stat = "identity", show.legend = FALSE) +
   facet_wrap(~ word1, scales = "free") +
-  xlab("Words preceded by negation") +
+  scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
+  xlab("Words preceded by negation term") +
   ylab("Sentiment score * # of occurrences") +
   coord_flip()
 ```
