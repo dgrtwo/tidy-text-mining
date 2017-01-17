@@ -24,3 +24,4 @@ env:
 r_github_packages:
   - thomasp85/ggraph
   - dgrtwo/widyr
+  - juliasilge/tidytext
