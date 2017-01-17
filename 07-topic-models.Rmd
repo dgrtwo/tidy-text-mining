@@ -5,6 +5,7 @@ library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
 options(width = 100, dplyr.width = 150)
 library(ggplot2)
+library(methods)
 theme_set(theme_light())
 ```
 
