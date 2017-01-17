@@ -90,7 +90,7 @@ janeaustensentiment <- tidy_books %>%
 
 Now we can plot these sentiment scores across the plot trajectory of each novel. Notice that we are plotting against the `index` on the x-axis that keeps track of narrative time in sections of text.
 
-```{r sentimentplot, dependson = "janeaustensentiment", fig.width=9, fig.height=10}
+```{r sentimentplot, dependson = "janeaustensentiment", fig.width=9, fig.height=10, fig.cap="Sentiment through the narratives of Jane Austen's novels"}
 library(ggplot2)
 
 ggplot(janeaustensentiment, aes(index, sentiment, fill = book)) +
@@ -98,7 +98,7 @@ ggplot(janeaustensentiment, aes(index, sentiment, fill = book)) +
   facet_wrap(~book, ncol = 2, scales = "free_x")
 ```
 
-We can see here how the plot of each novel changes toward more positive or negative sentiment over the trajectory of the story.
+We can see in Figure \@ref(fig:sentimentplot) how the plot of each novel changes toward more positive or negative sentiment over the trajectory of the story.
 
 ## Comparing the three sentiment dictionaries
 
@@ -135,7 +135,9 @@ bing_and_nrc <- bind_rows(pride_prejudice %>%
 
 We now have an estimate of the net sentiment (positive - negative) in each chunk of the novel text for each sentiment lexicon. Let's bind them together and plot them.
 
-```{r compareplot, dependson = "comparesentiment", fig.width=9, fig.height=7.5}
+(ref:comparecap) Comparing three sentiment lexicons using *Pride and Prejudice*
+
+```{r compareplot, dependson = "comparesentiment", fig.width=9, fig.height=7.5, fig.cap="(ref:comparecap) "}
 bind_rows(afinn, 
           bing_and_nrc) %>%
   ggplot(aes(index, sentiment, fill = method)) +
@@ -164,7 +166,7 @@ Both lexicons have more negative than positive words, but the ratio of negative 
 
 One advantage of having the data frame with both sentiment and word is that we can analyze word counts that contribute to each sentiment.
 
-```{r wordcounts, fig.width=7, fig.height=6, dependson = "tidy_books"}
+```{r wordcounts, dependson = "tidy_books"}
 bing_word_counts <- tidy_books %>%
   inner_join(get_sentiments("bing")) %>%
   count(word, sentiment, sort = TRUE) %>%
@@ -175,7 +177,7 @@ bing_word_counts
 
 This can be shown visually, and we can pipe straight into ggplot2, if we like, because of the way we are consistently using tools built for handling tidy data frames.
 
-```{r pipetoplot, dependson = "wordcounts", fig.width=8, fig.height=4}
+```{r pipetoplot, dependson = "wordcounts", fig.width=8, fig.height=4, fig.cap="Words that contribute to positive and negative sentiment in Jane Austen's novels"}
 bing_word_counts %>%
   group_by(sentiment) %>%
   top_n(10) %>%
@@ -196,7 +198,7 @@ We've seen that this tidy text mining approach works well with ggplot2, but havi
 
 For example, consider the wordcloud package, which uses base R graphics. Let's look at the most common words in Jane Austen's works as a whole again.
 
-```{r firstwordcloud, dependson = "tidy_books", fig.height=6, fig.width=6}
+```{r firstwordcloud, dependson = "tidy_books", fig.height=6, fig.width=6, fig.cap="The most common words in Jane Austen's novels"}
 library(wordcloud)
 
 tidy_books %>%
@@ -207,7 +209,7 @@ tidy_books %>%
 
 In other functions, such as `comparison.cloud`, you may need to turn the data frame into a matrix with reshape2's `acast`. Let's do the sentiment analysis to tag positive and negative words using an inner join, then find the most common positive and negative words. Until the step where we need to send the data to `comparison.cloud`, this can all be done with joins, piping, and dplyr because our data is in tidy format.
 
-```{r wordcloud, dependson = "tidy_books", fig.height=5, fig.width=5}
+```{r wordcloud, dependson = "tidy_books", fig.height=5, fig.width=5, fig.cap="Most common positive and negative words in Jane Austen's novels"}
 library(reshape2)
 
 tidy_books %>%
@@ -218,7 +220,7 @@ tidy_books %>%
                    max.words = 100)
 ```
 
-The size of a word's text in this wordcloud is in proportion to its frequency within its sentiment. We can use this visualization to see the most important positive and negative words, but the sizes of the words are not comparable across sentiments.
+The size of a word's text in Figure \@ref(fig:wordcloud) is in proportion to its frequency within its sentiment. We can use this visualization to see the most important positive and negative words, but the sizes of the words are not comparable across sentiments.
 
 ## Looking at units beyond just words
 
