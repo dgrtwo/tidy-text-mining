@@ -309,7 +309,7 @@ kjv <- gutenberg_download(10)
 ```
 
 ```{r kjv, echo = FALSE}
-load("~/Repositories/tidy-text-mining/data/kjv.rda")
+load("data/kjv.rda")
 ```
 
 ```{r kjv_bigrams, dependson = "kjv"}
@@ -336,7 +336,7 @@ Tidy data is a useful structure for comparing between variables or grouping by r
 
 We'll examine some of the ways tidy text can be turned into a wide matrix in Chapter 6, but in this case it isn't necessary. the [widyr](https://github.com/dgrtwo/widyr) package makes operations such as computing counts and correlations easy, by simplifying the pattern of "widen data, perform an operation, then re-tidy data." We'll focus on a set of functions that make pairwise comparisons between groups of observations (for example, between documents, or sections of text).
 
-![The philosophy behind the widyr package, which can operations such as counting and correlating on pairs of values in a tidy dataset.](/Users/dgrtwo/Repositories/tidy-text-mining/images/widyr.jpg)
+![The philosophy behind the widyr package, which can operations such as counting and correlating on pairs of values in a tidy dataset.](images/widyr.jpg)
 
 ### Counting and correlating among sections
 

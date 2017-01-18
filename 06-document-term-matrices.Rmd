@@ -267,7 +267,7 @@ load("data/stock_articles.rda")
 stock_articles
 ```
 
-Each of the items in the `corpus` column is a `WebCorpus` object. We can turn each into a data frame using the `tidy` function, then tokenize each of the individual articles using `unnest_tokens`.
+Each of the items in the `corpus` column is a `WebCorpus` object, which is a special case of a corpus like `acq`. We can thus turn each into a data frame using the `tidy` function, then tokenize the `text` column of the individual articles using `unnest_tokens`.
 
 ```{r stock_tokens, dependson = "stock_articles"}
 stock_tokens <- stock_articles %>%
@@ -367,4 +367,4 @@ stock_sentiment_count %>%
        y = "Positivity score among 20 recent news articles")
 ```
 
-Based on this analysis, we'd say that in January 2017, when this analysis was run, most of the coverage of Yahoo and Twitter was strongly negative, while coverage of Google and Amazon was the most positive. A glance at current financial headlines suggest that it's on the right track. If you were interested in further analysis, you could use one of R's many quantitative finance packages to compare these articles to recent stock prices and other metrics.
+Based on this analysis, we'd say that in January 2017 most of the coverage of Yahoo and Twitter was strongly negative, while coverage of Google and Amazon was the most positive. A glance at current financial headlines suggest that it's on the right track. If you were interested in further analysis, you could use one of R's many quantitative finance packages to compare these articles to recent stock prices and other metrics.
