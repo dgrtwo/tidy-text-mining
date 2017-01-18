@@ -14,7 +14,7 @@ One type of text that has risen to attention in recent years is text shared onli
 
 An individual can download their own Twitter archive by following [directions available on Twitter's website](https://support.twitter.com/articles/20170160). We each downloaded ours and will now open them up. Let's use the lubridate package to convert the string timestamps to date-time objects and initially take a look at our tweeting patterns overall.
 
-```{r setup, fig.width=8, fig.height=6}
+```{r setup, fig.width=8, fig.height=6, fig.cap="All tweets from our accounts"}
 library(lubridate)
 library(ggplot2)
 library(dplyr)
@@ -82,7 +82,7 @@ frequency
 
 Now this is ready for us to plot. Let's use `geom_jitter` so that we don't see the discreteness at the low end of frequency as much.
 
-```{r dependson = "spread", fig.height=7, fig.width=7}
+```{r spreadplot, dependson = "spread", fig.height=7, fig.width=7, fig.cap= "Comparing the frequency of words used by Julia and David"}
 library(scales)
 
 ggplot(frequency, aes(Julia, David)) +
@@ -94,7 +94,7 @@ ggplot(frequency, aes(Julia, David)) +
 ```
 
 
-Words near the red line in this plot are used with about equal frequencies by David and Julia, while words far away from the line are used much more by one person compared to the other. Words, hashtags, and usernames that appear in this plot are ones that we have both used at least once in tweets.
+Words near the red line in Figure \@ref(fig:spreadplot) are used with about equal frequencies by David and Julia, while words far away from the line are used much more by one person compared to the other. Words, hashtags, and usernames that appear in this plot are ones that we have both used at least once in tweets.
 
 This may not even need to be pointed out, but David and Julia have used their Twitter accounts rather differently over the course of the past several years. David has used his Twitter account almost exclusively for professional purposes since he became more active, while Julia used it for entirely personal purposes until late 2015 and still uses it more personally than David. We see these differences immediately in this plot exploring word frequencies, and they will continue to be obvious in the rest of this chapter. 
 
@@ -138,7 +138,7 @@ We are about equally likely to tweet about maps, email, APIs, and functions.
 
 Which words are most likely to be from Julia's account or from David's account? Let's just take the top 15 most distinctive words for each account and plot them.
 
-```{r plotratios, dependson = "word_ratios", fig.width=7, fig.height=6}
+```{r plotratios, dependson = "word_ratios", fig.width=7, fig.height=6, fig.cap="Comparing the odds ratios of words from our accounts"}
 word_ratios %>%
   group_by(logratio < 0) %>%
   top_n(15, abs(logratio)) %>%
@@ -221,14 +221,13 @@ top_slopes
 
 To visualize our results, we can plot these words' use for both David and Julia over this year of tweets.
 
-```{r dependson = c("words_by_time", "top_slopes2"), fig.width=8, fig.height=5}
+```{r top_dave, dependson = c("words_by_time", "top_slopes2"), fig.width=8, fig.height=5, fig.cap = "Trending words in David's tweets"}
 words_by_time %>%
   inner_join(top_slopes, by = c("word", "person")) %>%
   filter(person == "David") %>%
   ggplot(aes(time_floor, count/time_total, color = word)) +
   geom_line(alpha = 0.8, size = 1.3) +
-  labs(x = NULL, y = "Word frequency",
-       title = "Trending words in David's tweets")
+  labs(x = NULL, y = "Word frequency")
 ```
 
 David tweeted a lot about the UseR conference while he was there and then quickly stopped. He has tweeted more about Stack Overflow toward the end of the year and less about ggplot2 as the year has progressed.
@@ -236,14 +235,13 @@ David tweeted a lot about the UseR conference while he was there and then quickl
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Me: I&#39;m so sick of data science wars. <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a> vs Python, frequentist vs Bayesian...<br><br>Them: base vs ggplot2...<br><br>Me: WHY WHICH SIDE ARE YOU ON</p>&mdash; David Robinson (@drob) <a href="https://twitter.com/drob/status/712639593703542785">March 23, 2016</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-```{r dependson = c("words_by_time", "top_slopes2"), fig.width=8, fig.height=5}
+```{r top_julia, dependson = c("words_by_time", "top_slopes2"), fig.width=8, fig.height=5, fig.cap="Trending words in Julia's tweets"}
 words_by_time %>%
   inner_join(top_slopes, by = c("word", "person")) %>%
   filter(person == "Julia") %>%
   ggplot(aes(time_floor, count/time_total, color = word)) +
   geom_line(alpha = 0.8, size = 1.3) +
-  labs(x = NULL, y = "Word frequency",
-       title = "Trending words in Julia's tweets")
+  labs(x = NULL, y = "Word frequency")
 ```
 
 All the significant slopes for Julia are negative. This means she has not tweeted at a higher rate using any specific words, but instead using a variety of different words; her tweets earlier in the year contained the words shown in this plot at higher proportions. Words she uses when publicizing a new blog post like the #rstats hashtag and "post" have gone down in frequency, and she has tweeted less about reading.
@@ -309,7 +307,7 @@ At the top of this sorted data frame, we see David's tweet about [his blog post 
 
 Now we can plot the words that have contributed the most to each of our retweets.
 
-```{r dependson = "word_by_rts", fig.width=10, fig.height=5}
+```{r plot_rts, dependson = "word_by_rts", fig.width=10, fig.height=5, fig.cap="Words with highest median retweets"}
 word_by_rts %>%
   mutate(ratio = retweets / total_rts) %>%  
   group_by(person) %>%
@@ -323,8 +321,7 @@ word_by_rts %>%
   coord_flip() +
   scale_y_continuous(labels = percent_format()) +
   labs(x = NULL, 
-       y = "proportion of total RTs due to each word",
-       title = "Words with highest median retweets")
+       y = "proportion of total RTs due to each word")
 ```
 
 We see more words from David's tweet about his Trump blog post, and words from Julia making announcements about blog posts and new package releases. These are some pretty good tweets; we can see why people retweeted them.
@@ -354,7 +351,7 @@ word_by_favs <- tidy_tweets %>%
   ungroup()
 ```
 
-```{r dependson = "word_by_favs", fig.width=10, fig.height=5}
+```{r plot_favs, dependson = "word_by_favs", fig.width=10, fig.height=5, fig.cap="Words with highest median favorites"}
 word_by_favs %>%
   mutate(ratio = favorites / total_favs) %>%  
   group_by(person) %>%
@@ -368,11 +365,10 @@ word_by_favs %>%
   coord_flip() +
   scale_y_continuous(labels = percent_format()) +
   labs(x = NULL, 
-       y = "proportion of total favorites due to each word",
-       title = "Words with highest median favorites")
+       y = "proportion of total favorites due to each word")
 ```
 
-We see some minor differences, especially near the bottom of the top 10 list, but these are largely the same words as for favorites. In general, the same words that lead to retweets lead to favorites. There are some exceptions, though.
+We see some minor differences between Figures \@ref(fig:plot_rts) and \@ref(fig:plot_favs), especially near the bottom of the top 10 list, but these are largely the same words as for favorites. In general, the same words that lead to retweets lead to favorites. There are some exceptions, though.
 
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">🎶 I am writing a Shiny app for my joooooooob 🎶🎶 I am living the dreeeeeeeeeam... 🎶🎶 <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a></p>&mdash; Julia Silge (@juliasilge) <a href="https://twitter.com/juliasilge/status/732645241610600448">May 17, 2016</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>

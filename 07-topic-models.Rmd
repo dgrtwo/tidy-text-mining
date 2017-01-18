@@ -250,6 +250,8 @@ The algorithm is stochastic and iterative, and it can accidentally land on a top
 
 The `LDA` function in the topicmodels package is only one implementation of . For example, the [mallet](https://cran.r-project.org/package=mallet) package implements a wrapper around the  [MALLET](http://mallet.cs.umass.edu/)
 
+The inputs and outputs of the tidying functions are almost identical to the tidiers described in this rest of this chapter. In particular, they take
+
 ```{r mallet_model, dependson = "word_counts", results = "hide"}
 library(mallet)
 
@@ -267,11 +269,7 @@ docs <- mallet.import(collapsed$document, collapsed$text, empty_file)
 mallet_model <- MalletLDA(num.topics = 4)
 mallet_model$loadDocuments(docs)
 mallet_model$train(200)
-```
 
-The inputs and outputs of the tidying functions are almost identical to the tidiers described in this rest of this chapter. In particular, they take
-
-```{r}
 # word-topic pairs
 tidy(mallet_model)
 
