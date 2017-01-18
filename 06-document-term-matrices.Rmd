@@ -323,9 +323,9 @@ stock_tf_idf %>%
        y = "TF-IDF")
 ```
 
-If we were interested in using recent news to analyze the market and make investment decisions, we'd likely want to use sentiment analysis to determine whether the news coverage was positive or negative. Before we run such an analysis, we should look at what words would contribute the most to positive and negative sentiments, as was shown in Chapter \ref{most-positive-negative}. For example, we could examine this within the AFINN lexicon.
+If we were interested in using recent news to analyze the market and make investment decisions, we'd likely want to use sentiment analysis to determine whether the news coverage was positive or negative. Before we run such an analysis, we should look at what words would contribute the most to positive and negative sentiments, as was shown in Chapter \ref{most-positive-negative}. For example, we could examine this within the AFINN lexicon (Figure \ref{fig:stockafinn}).
 
-```{r dependson = "stock_articles", fig.cap = "N"}
+```{r stockafinn, dependson = "stock_articles", fig.cap = "The words with the largest contribution to sentiment scores in recent financial articles, according to the AFINN dictionary. The 'contribution' is the product of the word and the sentiment score."}
 stock_tokens %>%
   anti_join(stop_words, by = "word") %>%
   count(word, id, sort = TRUE) %>%
@@ -345,7 +345,7 @@ Instead, we introduce another sentiment lexicon: the Loughran and McDonald dicti
 
 The Loughran data divides words into six sentiments: "positive", "negative", "litigious", "uncertain", "constraining", and "superfluous". We could start by examining the most common words belonging to each sentiment within this text dataset.
 
-```{r stockloughransentiments, fig.cap = "The most "}
+```{r stockloughransentiments, fig.cap = "The most common words in the financial news articles associated with each of the six sentiments in the Loughran and McDonald lexicon"}
 stock_tokens %>%
   count(word) %>%
   inner_join(get_sentiments("loughran"), by = "word") %>%
@@ -356,7 +356,8 @@ stock_tokens %>%
   ggplot(aes(word, n)) +
   geom_col() +
   coord_flip() +
-  facet_wrap(~ sentiment, scales = "free")
+  facet_wrap(~ sentiment, scales = "free") +
+  ylab("Frequency of this word in the recent financial articles")
 ```
 
 These assignments (Figure \ref{fig:stockloughransentiments}) of words to sentiments look more reasonable: common positive words include "strong" and "better", but not "shares" or "growth", while negative words include "volatility" but not "fool". The other sentiments look reasonable as well: the most common "uncertainty" terms include "could" and "may".
