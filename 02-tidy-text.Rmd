@@ -106,7 +106,7 @@ tidy_books %>%
 
 For example, this allows us to visualize the commonly used words using ggplot2.
 
-```{r plot_count, dependson = "tidy_books", fig.width=6, fig.height=5, fig.cap="The most common words in Jane Austen's novels"}
+```{r plotcount, dependson = "tidy_books", fig.width=6, fig.height=5, fig.cap="The most common words in Jane Austen's novels"}
 library(ggplot2)
 
 tidy_books %>%
@@ -199,7 +199,7 @@ frequency <- tidy_both %>%
 
 We use `str_extract` here because the UTF-8 encoded texts from Project Gutenberg have some examples of words with underscores around them to indicate emphasis (like italics). The tokenizer treated these as words but we don't want to count "\_any\_" separately from "any". Now let's plot.
 
-```{r plot_compare, dependson = "frequency", fig.width=10, fig.height=5.5, fig.cap="Comparing the word frequencies of Jane Austen, the Brontë sisters, and H.G. Wells"}
+```{r plotcompare, dependson = "frequency", fig.width=10, fig.height=5.5, fig.cap="Comparing the word frequencies of Jane Austen, the Brontë sisters, and H.G. Wells"}
 library(scales)
 
 ggplot(frequency, aes(x = other, y = austen, color = abs(austen - other))) +
@@ -216,7 +216,7 @@ ggplot(frequency, aes(x = other, y = austen, color = abs(austen - other))) +
 
 Words that are close to the line in these plots have similar frequencies in both sets of texts, for example, in both Austen and Brontë texts ("miss", "time", "day" at the upper frequency end) or in both Austen and Wells texts ("time", "day", "brother" at the high frequency end). Words that are far from the line are words that are found more in one set of texts than another. For example, in the Austen-Brontë panel, words like "elizabeth", "emma", and "edmund" (all proper nouns) are found in Austen's texts but not much in the Brontë texts, while words like "arthur", "dog", and "ham" are found in the Brontë texts but not the Austen texts. In comparing H.G. Wells with Jane Austen, Wells uses words like "beast", "island", "feet", and "black" that Austen does not, while Austen uses words like "family", "friend", "letter", and "dear" that Wells does not.
 
-Overall, notice in Figure \@ref(fig:plot_compare) that the words in the Austen-Brontë panel are closer to the zero-slope line than in the Austen-Wells panel and also extend to lower frequencies; Austen and the Brontë sisters use more similar words than Austen and H.G. Wells. Also, we  notice that not all the words are found in all three sets of texts and there are fewer points in the plot for Austen and H.G. Wells.
+Overall, notice in Figure \@ref(fig:plotcompare) that the words in the Austen-Brontë panel are closer to the zero-slope line than in the Austen-Wells panel and also extend to lower frequencies; Austen and the Brontë sisters use more similar words than Austen and H.G. Wells. Also, we  notice that not all the words are found in all three sets of texts and there are fewer points in the plot for Austen and H.G. Wells.
 
 Let's quantify how similar and different these sets of word frequencies are using a correlation test. How correlated are the word frequencies between Austen and the Brontë sisters, and between Austen and Wells?
 

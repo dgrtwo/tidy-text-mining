@@ -8,7 +8,7 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-One type of text that has risen to attention in recent years is text shared online via Twitter. In fact, several of the sentiment lexicons used in this book (and commonly used in general) were designed for use with and validated on tweets. Both of the authors of this book are on Twitter and are fairly regular users of it so in this case study, let's compare the entire Twitter archives of [Julia](https://twitter.com/juliasilge) and [David](https://twitter.com/drob).
+One type of text that gets plenty of attention is text shared online via Twitter. In fact, several of the sentiment lexicons used in this book (and commonly used in general) were designed for use with and validated on tweets. Both of the authors of this book are on Twitter and are fairly regular users of it so in this case study, let's compare the entire Twitter archives of [Julia](https://twitter.com/juliasilge) and [David](https://twitter.com/drob).
 
 ## Getting the data and distribution of tweets
 
@@ -67,7 +67,7 @@ frequency <- tidy_tweets %>%
 frequency
 ```
 
-This is a nice, tidy data frame but we would actually like to plot those frequencies on the x- and y-axes of a plot, so we will need to use `spread` from tidyr make a differently shaped dataframe.
+This is a nice and tidy data frame but we would actually like to plot those frequencies on the x- and y-axes of a plot, so we will need to use `spread` from tidyr make a differently shaped dataframe.
 
 ```{r spread, dependson = "frequency"}
 library(tidyr)
@@ -159,7 +159,7 @@ The section above looked at overall word use, but now let's ask a different ques
 
 After we have the time bins defined, we count how many times each of us used each word in each time bin. After that, we add columns to the dataframe for the total number of words used in each time bin by each person and the total number of times each word was used by each person. We can then `filter` to only keep words used at least some minimum number of times (30, in this case).
 
-```{r words_by_time, dependson = "tidytweets"}
+```{r words_by_time, dependson = "tidy_tweets"}
 words_by_time <- tidy_tweets %>%
   filter(!str_detect(word, "^@")) %>%
   mutate(time_floor = floor_date(timestamp, unit = "1 month")) %>%
@@ -221,7 +221,7 @@ top_slopes
 
 To visualize our results, we can plot these words' use for both David and Julia over this year of tweets.
 
-```{r top_dave, dependson = c("words_by_time", "top_slopes2"), fig.width=8, fig.height=5, fig.cap = "Trending words in David's tweets"}
+```{r topdave, dependson = "top_slopes2", fig.width=8, fig.height=5, fig.cap = "Trending words in David's tweets"}
 words_by_time %>%
   inner_join(top_slopes, by = c("word", "person")) %>%
   filter(person == "David") %>%
@@ -235,7 +235,9 @@ David tweeted a lot about the UseR conference while he was there and then quickl
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Me: I&#39;m so sick of data science wars. <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a> vs Python, frequentist vs Bayesian...<br><br>Them: base vs ggplot2...<br><br>Me: WHY WHICH SIDE ARE YOU ON</p>&mdash; David Robinson (@drob) <a href="https://twitter.com/drob/status/712639593703542785">March 23, 2016</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-```{r top_julia, dependson = c("words_by_time", "top_slopes2"), fig.width=8, fig.height=5, fig.cap="Trending words in Julia's tweets"}
+Now let's plot words that have changed frequency in Julia's tweets.
+
+```{r topjulia, dependson = "top_slopes2", fig.width=8, fig.height=5, fig.cap="Trending words in Julia's tweets"}
 words_by_time %>%
   inner_join(top_slopes, by = c("word", "person")) %>%
   filter(person == "Julia") %>%
@@ -248,7 +250,7 @@ All the significant slopes for Julia are negative. This means she has not tweete
 
 ## Favorites and retweets
 
-Another important characteristic of tweets is how many times they are favorited or retweeted. Let's explore which words are more likely to be retweeted or favorited for Julia's and David's tweets. When a user downloads their own Twitter archive, favorites and retweets are not included, so we constructed another dataset of the author's tweets that includes this information. We accessed our own tweets via the Twitter API and downloaded about 3200 tweets for each person. In both cases, that is about the last 18 months worth of Twitter activity. This corresponds to a period of increasing activity and increasing numbers of followers for both of us.
+Another important characteristic of tweets is how many times they are favorited or retweeted. Let's explore which words are more likely to be retweeted or favorited for Julia's and David's tweets. When a user downloads their own Twitter archive, favorites and retweets are not included, so we constructed another dataset of the authors' tweets that includes this information. We accessed our own tweets via the Twitter API and downloaded about 3200 tweets for each person. In both cases, that is about the last 18 months worth of Twitter activity. This corresponds to a period of increasing activity and increasing numbers of followers for both of us.
 
 ```{r setup2}
 tweets_julia <- read_csv("data/juliasilge_tweets.csv")
@@ -260,11 +262,11 @@ tweets <- bind_rows(tweets_julia %>%
   mutate(created_at = ymd_hms(created_at))
 ```
 
-Now that we have this second, smaller set of only recent tweets, let's use `unnest_tokens` to transform these tweets to a tidy data set. (Let's again remove any retweets from this data set so we only look at tweets that David and Julia have posted directly.)
+Now that we have this second, smaller set of only recent tweets, let's use `unnest_tokens` to transform these tweets to a tidy data set. Let's remove all retweets and replies from this data set so we only look at regular tweets that David and Julia have posted directly.
 
 ```{r tidy_tweets2, dependson = "setup2"}
 tidy_tweets <- tweets %>% 
-  filter(!str_detect(text, "^RT")) %>%
+  filter(!str_detect(text, "^(RT|@)")) %>%
   mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https", "")) %>%
   unnest_tokens(word, text, token = "regex", pattern = reg) %>%
   anti_join(stop_words)
@@ -284,53 +286,42 @@ totals <- tidy_tweets %>%
 totals
 ```
 
-Now let's find the median number of retweets for each word and person; we probably want to count each tweet/word combination only once, so we will use `group_by` and `summarise` twice, one right after the other. Next, we can join this to the data frame of retweet totals.
+Now let's find the median number of retweets for each word and person. We probably want to count each tweet/word combination only once, so we will use `group_by` and `summarise` twice, one right after the other. In the second `summarise` statement, we can also count the number of times each word was used ever and keep that in `uses`. Next, we can join this to the data frame of retweet totals. Let's `filter` to only keep words mentioned at least 5 times.
 
 ```{r word_by_rts, dependson = c("rt_totals", "tidy_tweets2")}
 word_by_rts <- tidy_tweets %>% 
   group_by(id, word, person) %>% 
   summarise(rts = first(retweets)) %>% 
   group_by(person, word) %>% 
-  summarise(retweets = median(rts)) %>%
+  summarise(retweets = median(rts), uses = n()) %>%
   left_join(totals) %>%
   filter(retweets != 0) %>%
   ungroup()
 
 word_by_rts %>% 
+  filter(uses >= 5) %>%
   arrange(desc(retweets))
 ```
 
-At the top of this sorted data frame, we see David's tweet about [his blog post on Donald Trump's own tweets](http://varianceexplained.org/r/trump-tweets/) that went viral. A search tells us that this is the only time David has ever used the word "angrier" in his tweets, so that word has an extremely high median retweet rate.
+At the top of this sorted data frame, we see tweets from Julia and David about packages that they work on, like [gutenbergr](https://cran.r-project.org/package=gutenbergr), [gganimate](https://github.com/dgrtwo/gganimate), and [tidytext](https://cran.r-project.org/package=tidytext). Let's plot the words that have the highest median retweets for each of our accounts.
 
-<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">New post: Analysis of Trump tweets confirms he writes only the angrier Android half <a href="https://t.co/HRr4yj30hx">https://t.co/HRr4yj30hx</a> <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a> <a href="https://t.co/cmwdNeYSE7">pic.twitter.com/cmwdNeYSE7</a></p>&mdash; David Robinson (@drob) <a href="https://twitter.com/drob/status/763048283531055104">August 9, 2016</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-Now we can plot the words that have contributed the most to each of our retweets.
-
-```{r plot_rts, dependson = "word_by_rts", fig.width=10, fig.height=5, fig.cap="Words with highest median retweets"}
+```{r plotrts, dependson = "word_by_rts", fig.width=10, fig.height=5, fig.cap="Words with highest median retweets"}
 word_by_rts %>%
-  mutate(ratio = retweets / total_rts) %>%  
+  filter(uses >= 5) %>%
   group_by(person) %>%
-  top_n(10, ratio) %>%
-  arrange(ratio) %>%
+  top_n(10, retweets) %>%
+  arrange(retweets) %>%
   mutate(word = factor(word, unique(word))) %>%
   ungroup() %>%
-  ggplot(aes(word, ratio, fill = person)) +
+  ggplot(aes(word, retweets, fill = person)) +
   geom_bar(stat = "identity", alpha = 0.8, show.legend = FALSE) +
   facet_wrap(~ person, scales = "free", ncol = 2) +
   coord_flip() +
-  scale_y_continuous(labels = percent_format()) +
   labs(x = NULL, 
-       y = "proportion of total RTs due to each word")
+       y = "Median # of retweets for tweets containing each word")
 ```
 
-We see more words from David's tweet about his Trump blog post, and words from Julia making announcements about blog posts and new package releases. These are some pretty good tweets; we can see why people retweeted them.
-
-<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">NEW POST: Mapping ghost sightings in Kentucky using Leaflet 👻👻👻 <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a> <a href="https://t.co/rRFTSsaKWQ">https://t.co/rRFTSsaKWQ</a> <a href="https://t.co/codPf3gy6O">pic.twitter.com/codPf3gy6O</a></p>&mdash; Julia Silge (@juliasilge) <a href="https://twitter.com/juliasilge/status/761667180148641793">August 5, 2016</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Me: Git makes it easy to revert your local changes<br><br>Them: Great! So what command do I use?<br><br>Me: I said it was easy not that I knew how</p>&mdash; David Robinson (@drob) <a href="https://twitter.com/drob/status/770706647585095680">August 30, 2016</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+We see lots of word about R packages, including tidytext, a package about which you are reading right now! The "0" for David comes from tweets where he mentions version numbers of packages, like ["broom 0.4.0"](https://twitter.com/drob/status/671430703234576384) or similar.
 
 We can follow a similar procedure to see which words led to more favorites. Are they different than the words that lead to more retweets?
 
@@ -345,30 +336,28 @@ word_by_favs <- tidy_tweets %>%
   group_by(id, word, person) %>% 
   summarise(favs = first(favorites)) %>% 
   group_by(person, word) %>% 
-  summarise(favorites = median(favs)) %>%
+  summarise(favorites = median(favs), uses = n()) %>%
   left_join(totals) %>%
   filter(favorites != 0) %>%
   ungroup()
 ```
 
-```{r plot_favs, dependson = "word_by_favs", fig.width=10, fig.height=5, fig.cap="Words with highest median favorites"}
+We have built the dataframes we need. Now let's make our visualization.
+
+```{r plotfavs, dependson = "word_by_favs", fig.width=10, fig.height=5, fig.cap="Words with highest median favorites"}
 word_by_favs %>%
-  mutate(ratio = favorites / total_favs) %>%  
+  filter(uses >= 5) %>%
   group_by(person) %>%
-  top_n(10, ratio) %>%
-  arrange(ratio) %>%
+  top_n(10, favorites) %>%
+  arrange(favorites) %>%
   mutate(word = factor(word, unique(word))) %>%
   ungroup() %>%
-  ggplot(aes(word, ratio, fill = person)) +
+  ggplot(aes(word, favorites, fill = person)) +
   geom_bar(stat = "identity", alpha = 0.8, show.legend = FALSE) +
   facet_wrap(~ person, scales = "free", ncol = 2) +
   coord_flip() +
-  scale_y_continuous(labels = percent_format()) +
   labs(x = NULL, 
-       y = "proportion of total favorites due to each word")
+       y = "Median # of favorites for tweets containing each word")
 ```
 
-We see some minor differences between Figures \@ref(fig:plot_rts) and \@ref(fig:plot_favs), especially near the bottom of the top 10 list, but these are largely the same words as for favorites. In general, the same words that lead to retweets lead to favorites. There are some exceptions, though.
-
-<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">🎶 I am writing a Shiny app for my joooooooob 🎶🎶 I am living the dreeeeeeeeeam... 🎶🎶 <a href="https://twitter.com/hashtag/rstats?src=hash">#rstats</a></p>&mdash; Julia Silge (@juliasilge) <a href="https://twitter.com/juliasilge/status/732645241610600448">May 17, 2016</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+We see some minor differences between Figures \@ref(fig:plotrts) and \@ref(fig:plotfavs), especially near the bottom of the top 10 list, but these are largely the same words as for retweets. In general, the same words that lead to retweets lead to favorites. A prominent word for Julia in both plots is the hashtag for the NASA Datanauts program that she has participated in; read on to [Chapter 9](#nasa) to learn more about NASA data and what we can learn from text analysis of NASA datasets.
