@@ -162,7 +162,7 @@ get_sentiments("bing") %>%
 
 Both lexicons have more negative than positive words, but the ratio of negative to positive words is higher in the Bing lexicon than the NRC lexicon. This will contribute to the effect we see in the plot above, as will any systematic difference in word matches, e.g. if the negative words in the NRC lexicon do not match the words that Jane Austen uses very well. Whatever the source of these differences, we see similar relative trajectories across the narrative arc, with similar changes in slope, but marked differences in absolute sentiment from lexicon to lexicon. This is all important context to keep in mind when choosing a sentiment lexicon for analysis.
 
-## Most common positive and negative words
+## Most common positive and negative words {#most-positive-negative}
 
 One advantage of having the data frame with both sentiment and word is that we can analyze word counts that contribute to each sentiment.
 
