@@ -16,4 +16,4 @@ cp -r ../_book/* ./
 # Add all files to the repo
 git add *
 git commit -a -m "Updating book (${TRAVIS_BUILD_NUMBER})"
-git push origin gh-pages
+git push -q origin gh-pages
