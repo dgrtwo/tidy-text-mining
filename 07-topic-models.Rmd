@@ -16,7 +16,104 @@ In text mining, we often have collections of documents, such as blog posts or ne
 
 We can use tidy text principles to approach topic modeling using consistent and effective tools. In particular, we'll be tidying LDA objects from the [topicmodels package](https://cran.r-project.org/package=topicmodels). In this chapter, we'll use the example of clustering chapters from several books, where we can see that a topic model *learns* to tell the difference based on the text content.
 
-## The great library heist
+## Latent Dirichlet allocation
+
+Latent Dirichlet allocation is one of the most common algorithms for topic modeling. Without diving into the math behind the model, we can understand it using two principles.
+
+* **Every topic is a mixture of words.** for example, we could imagine a two-topic model of American news, with one topic for "politics" and one for "entertainment." The most common words in the politics topic might be "President", "Congress", and "government", while the entertainment topic may be made up of words such as "movies", "television", and "actor". Importantly, words can be shared between topics- a word like "budget" might appear in both equally.
+* **Every document is a mixture of topics.** for example, in a two-topic model we could say "Document 1 is 90% topic A and 10% topic B, while Document 2 is 30% topic A and 70% topic B."
+
+LDA is a mathematical method for estimating both of these at the same time: finding the mixture of words that is associated with each topic, while also determining the mixture of topics that describes each word. It has a number of existing implementations, and we'll explore one of them.
+
+In Chapter \ref{dtm} we briefly introduced the `AssociatedPress` dataset provided by the topicmodels package, as an example of a DocumentTermMatrix. This is a collection of 2246 news articles 
+
+```{r}
+library(topicmodels)
+AssociatedPress
+```
+
+```{r ap_lda}
+ap_lda <- LDA(AssociatedPress, k = 2, control = list(seed = 1234))
+ap_lda
+```
+
+In Chapter \ref{dtm} we introduced the `tidy()` method, originally from the [broom package](https://github.com/dgrtwo/broom), for tidying model objects. The tidytext package provides this method for extracting the per-topic-per-word probabilities, called $\beta$ ("beta"), from the model.
+
+```{r chapters_lda_td}
+library(tidytext)
+
+ap_lda_td <- tidy(ap_lda)
+ap_lda_td
+```
+
+Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term 
+
+We could use dplyr's `top_n()` to find the top 10 terms within each topic:
+
+```{r top_terms}
+top_terms <- ap_lda_td %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+top_terms
+```
+
+As a tidy data frame, this lends itself well to a ggplot2 visualization (Figure \ref{fig:aptoptermsplot}).
+
+```{r aptoptermsplot, fig.height=6, fig.width=7, fig.cap = "The terms that are most common within each topic"}
+library(ggplot2)
+
+top_terms %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip()
+```
+
+This visualization lets us understand the two topics that were extracted from the articles. The most common words in topic 1 include "percent", "million", "billion", and "company", which suggests it may represent business news. The most common words in topic 2 include "president", "government", and "soviet", suggeting that this topic represents political news.
+
+One important observation about the words in each topic is that some words, such as "new" and "people", are common within both topics. This is an advantage of topic modeling as opposed to "hard clustering" methods: topics used in natural language often have some overlap.
+
+As an alternative visualization, we could consider the terms that had the *greatest difference* between topic 1 and topic 2. This can be estimated based on the log ratio of the two: $\log_2(\frac{\beta_2}{\beta_1})$. (To constrain it to a set of especially relevant words, we can filter for relatively common words, such as those that have a $\beta$ greater than 1/1000 in at least one topic).
+
+```{r beta_spread}
+beta_spread <- ap_lda_td %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  spread(topic, beta) %>%
+  filter(topic1 > .001 | topic2 > .001) %>%
+  mutate(log_ratio = log2(topic2 / topic1))
+
+beta_spread
+```
+
+The words with the greatest difference are visualized in Figure \ref{fig:topiccompare}.
+
+```{r topiccompare, dependson = "beta_spread", fig.cap = "Words with the greatest difference in 'beta' between topic 2 and topic 1"}
+# Find the top 10 words in each direction with the greatest log ratio
+beta_spread %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(10, abs(log_ratio)) %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio)) +
+  geom_col() +
+  labs(y = "Log2 ratio of beta in topic 2 / topic 1") +
+  coord_flip()
+```
+
+TODO: more on gamma
+
+```{r}
+ap_gamma <- tidy(ap_lda, matrix = "gamma")
+
+ap_gamma
+```
+
+## Example: the great library heist
+
+When examining a statistical method, it can be useful to try it on a very simple case where you know the "right answer". For example, we could collect a set of documents that definitely relate to four separate topics, then perform topic modeling to see whether the algorithm can correctly distinguish the four groups. This lets us double-check that the method is useful, and gain a sense of how and when it can go wrong.
 
 Suppose a vandal has broken into your study and torn apart four of your books:
 
@@ -25,7 +122,7 @@ Suppose a vandal has broken into your study and torn apart four of your books:
 * *Twenty Thousand Leagues Under the Sea* by Jules Verne
 * *Pride and Prejudice* by Jane Austen
 
-This vandal has torn the books into individual chapters, and left them in one large pile. How can we restore these disorganized chapters to their original books? This is a challenging problem since the individual chapters are **unlabeled**: we don't know what words might distinguish them into groups. We'll thus use topic modeling to discover how chapters cluster into distinct topics, each of them representing one of the words.
+This vandal has torn the books into individual chapters, and left them in one large pile. How can we restore these disorganized chapters to their original books? This is a challenging problem since the individual chapters are **unlabeled**: we don't know what words might distinguish them into groups. We'll thus use topic modeling to discover how chapters cluster into distinct topics, each of them representing one of the books.
 
 We'll retrieve the text of these four books using the gutenbergr package introduced in Chapter \ref{tfidf}.
 
@@ -77,14 +174,7 @@ word_counts
 
 ### Latent Dirichlet allocation with the topicmodels package
 
-Latent Dirichlet allocation is one of the most common algorithms for topic modeling. Without diving into the math behind the model, we can understand it using two principles.
-
-* **Every topic is a mixture of words.** for example, we could imagine a two-topic model of American news, with one topic for "politics" and one for "entertainment." The most common words in the politics topic might be "President", "Congress", and "government", while the entertainment topic may be made up of words such as "movies", "television", and "actor". Importantly, words can be shared between topics- a word like "budget" might appear in both equally.
-* **Every document is a mixture of topics.** for example, in a two-topic model we could say "Document 1 is 90% topic A and 10% topic B, while Document 2 is 30% topic A and 70% topic B."
-
-LDA is a mathematical method for estimating both of these at the same time: finding the mixture of words that is associated with each topic, while also determining the mixture of topics that describes each word. It has a number of existing implementations, and we'll explore one of them.
-
-Right now our data frame `word_counts`, is in a tidy form, with one-term-per-document-per-row. However, the topicmodels package requires a `DocumentTermMatrix` (from the tm package). As described in Chapter \ref{dtm}, we can cast a one-token-per-row table into a `DocumentTermMatrix` with tidytext's `cast_dtm()`.
+Right now our data frame `word_counts` is in a tidy form, with one-term-per-document-per-row. However, the topicmodels package requires a `DocumentTermMatrix` (from the tm package). As described in Chapter \ref{dtm}, we can cast a one-token-per-row table into a `DocumentTermMatrix` with tidytext's `cast_dtm()`.
 
 ```{r chapters_dtm}
 chapters_dtm <- word_counts %>%
@@ -114,7 +204,7 @@ chapters_lda_td <- tidy(chapters_lda)
 chapters_lda_td
 ```
 
-Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes $\beta$ (), the probability of that term being generated from that topic. For example, the term "joe" has an almost zero probability of being generated from topics 1, 2, or 3, but it makes up `r percent(chapters_lda_td$beta[4])` chance of being generated from topic 4.
+Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term "joe" has an almost zero probability of being generated from topics 1, 2, or 3, but it makes up `r percent(chapters_lda_td$beta[4])` chance of being generated from topic 4.
 
 We could use dplyr's `top_n()` to find the top 5 terms within each topic:
 
@@ -267,6 +357,10 @@ TODO: this section is not complete.
 The `LDA` function in the topicmodels package is only one implementation of the latent Dirichlet allocation algorithm. For example, the [mallet](https://cran.r-project.org/package=mallet) package implements a wrapper around the [MALLET](http://mallet.cs.umass.edu/) package for text classification tools.
 
 The way an algorithm is run with this algorithm is very different from LDA: it takes non-tokenized documents and performs the tokenization itself, and requires a separate file of stopwords.
+
+```{r cache = FALSE, echo = FALSE}
+library(dplyr)
+```
 
 ```{r mallet_model, results = "hide", cache = FALSE}
 library(mallet)
