@@ -18,7 +18,7 @@ We thus define the tidy text format as being **a table with one-term-per-row.** 
 
 Tidy data sets allow manipulation with a standard set of "tidy" tools, including popular packages such as dplyr [@R-dplyr], tidyr [@R-tidyr], ggplot2 [@R-ggplot2], and broom [@R-broom]. By keeping the input and output in tidy tables, users can transition fluidly between these tools. We've found these tidy tools extend naturally to many text analyses and explorations. 
 
-At the same time, the tidytext package doesn't expect a user to keep text data in a tidy form at all times during an analysis. The package includes functions to `tidy` objects (see the broom package [@R-broom]) from popular text mining R packages such as tm [@tm] and quanteda [@R-quanteda]. This allows, for example, a workflow with easy reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications. The models can then be re-converted into a tidy form for interpretation and visualization with ggplot2.
+At the same time, the tidytext package doesn't expect a user to keep text data in a tidy form at all times during an analysis. The package includes functions to `tidy()` objects (see the broom package [@R-broom]) from popular text mining R packages such as tm [@tm] and quanteda [@R-quanteda]. This allows, for example, a workflow with easy reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications. The models can then be re-converted into a tidy form for interpretation and visualization with ggplot2.
 
 ## About this book
 
@@ -32,15 +32,15 @@ We do assume that the reader is at least slightly familiar with dplyr, ggplot2, 
 
 We start by introducing the tidy text format, and some of the ways dplyr, tidyr, and tidytext allow informative analyses of this structure.
 
-* **Chapter 2** outlines the tidy text format and the `unnest_tokens` function. It also introduces the gutenbergr and janeaustenr packages, which provide useful literary text datasets that we'll use throughout this book.
-* **Chapter 3** shows how to perform sentiment analysis on a tidy text dataset, using the `sentiments` dataset from tidytext and `inner_join` from dplyr.
+* **Chapter 2** outlines the tidy text format and the `unnest_tokens()` function. It also introduces the gutenbergr and janeaustenr packages, which provide useful literary text datasets that we'll use throughout this book.
+* **Chapter 3** shows how to perform sentiment analysis on a tidy text dataset, using the `sentiments` dataset from tidytext and `inner_join()` from dplyr.
 * **Chapter 4** describes the tf-idf statistic (term frequency times inverse document frequency), a quantity used for identifying terms that are especially important to a particular document.
 * **Chapter 5** introduces n-grams and how to analyze word networks in text using the widyr package.
 
 Text won't be tidy at all stages of an analysis, and it is important to be able to convert back and forth from a tidy format.
 
 * **Chapter 6** introduces methods for tidying document-term matrices and corpus objects from the tm and quanteda packages, as well as for casting tidy text datasets into those formats.
-* **Chapter 7** explores the concept of topic modeling, and uses the `tidy` method for interpreting and visualizing the output of the topicmodels package. 
+* **Chapter 7** explores the concept of topic modeling, and uses the `tidy()` method for interpreting and visualizing the output of the topicmodels package. 
 
 We conclude with several tidy text analyses that bring together multiple text mining approaches we've learned.
 

@@ -36,9 +36,9 @@ David and Julia tweet at about the same rate currently and joined Twitter about 
 
 ## Word frequencies
 
-Let's use `unnest_tokens` to make a tidy dataframe of all the words in our tweets, and remove the common English stop words. There are certain conventions in how people use text on Twitter, so we will do a bit more work with our text here than, for example, we did with the narrative text from Project Gutenberg. 
+Let's use `unnest_tokens()` to make a tidy data frame of all the words in our tweets, and remove the common English stop words. There are certain conventions in how people use text on Twitter, so we will do a bit more work with our text here than, for example, we did with the narrative text from Project Gutenberg. 
 
-First, we will remove tweets from this dataset that are retweets so that we only have tweets that we wrote ourselves. Next, the `mutate` line removes links and cleans out some characters that we don't want like ampersands and such. In the call to `unnest_tokens`, we unnest using a regex pattern, instead of just looking for single unigrams (words). This regex pattern is very useful for dealing with Twitter text; it retains hashtags and mentions of usernames with the `@` symbol. Because we have kept these types of symbols in the text, we can't use a simple `anti_join` to remove stop words. Instead, we can take the approach shown in the `filter` line that uses `str_detect` from the stringr library.
+First, we will remove tweets from this dataset that are retweets so that we only have tweets that we wrote ourselves. Next, the `mutate()` line removes links and cleans out some characters that we don't want like ampersands and such. In the call to `unnest_tokens()`, we unnest using a regex pattern, instead of just looking for single unigrams (words). This regex pattern is very useful for dealing with Twitter text; it retains hashtags and mentions of usernames with the `@` symbol. Because we have kept these types of symbols in the text, we can't use a simple `anti_join()` to remove stop words. Instead, we can take the approach shown in the `filter()` line that uses `str_detect()` from the stringr library.
 
 ```{r tidytweets, dependson = "setup"}
 library(tidytext)
@@ -53,7 +53,7 @@ tidy_tweets <- tweets %>%
          str_detect(word, "[a-z]"))
 ```
 
-Now we can calculate word frequencies for each person. First, we group by person and count how many times each person used each word. Then we use `left_join` to add a column of the total number of words used by each person. (This is higher for Julia than David since she has more tweets than David.) Finally, we calculate a frequency for each person and word.
+Now we can calculate word frequencies for each person. First, we group by person and count how many times each person used each word. Then we use `left_join()` to add a column of the total number of words used by each person. (This is higher for Julia than David since she has more tweets than David.) Finally, we calculate a frequency for each person and word.
 
 ```{r frequency, dependson = "tidytweets"}
 frequency <- tidy_tweets %>% 
@@ -67,7 +67,7 @@ frequency <- tidy_tweets %>%
 frequency
 ```
 
-This is a nice and tidy data frame but we would actually like to plot those frequencies on the x- and y-axes of a plot, so we will need to use `spread` from tidyr make a differently shaped dataframe.
+This is a nice and tidy data frame but we would actually like to plot those frequencies on the x- and y-axes of a plot, so we will need to use `spread()` from tidyr make a differently shaped data frame.
 
 ```{r spread, dependson = "frequency"}
 library(tidyr)
@@ -80,7 +80,7 @@ frequency <- frequency %>%
 frequency
 ```
 
-Now this is ready for us to plot. Let's use `geom_jitter` so that we don't see the discreteness at the low end of frequency as much.
+Now this is ready for us to plot. Let's use `geom_jitter()` so that we don't see the discreteness at the low end of frequency as much.
 
 ```{r spreadplot, dependson = "spread", fig.height=7, fig.width=7, fig.cap= "Comparing the frequency of words used by Julia and David"}
 library(scales)
@@ -108,7 +108,7 @@ tidy_tweets <- tidy_tweets %>%
          timestamp < as.Date("2017-01-01"))
 ```
 
-Next, let's use `str_detect` to remove Twitter usernames from the `word` column, because otherwise, the results here are dominated only by people who Julia or David know and the other does not. After removing these, we count how many times each person uses each word and keep only the words used more than 10 times. After a `spread` operation, we can calculate the log odds ratio for each word, using
+Next, let's use `str_detect()` to remove Twitter usernames from the `word` column, because otherwise, the results here are dominated only by people who Julia or David know and the other does not. After removing these, we count how many times each person uses each word and keep only the words used more than 10 times. After a `spread()` operation, we can calculate the log odds ratio for each word, using
 
 
 $$\text{log odds ratio} = \ln{\left(\frac{\left[\frac{n+1}{\text{total}+1}\right]_\text{David}}{\left[\frac{n+1}{\text{total}+1}\right]_\text{Julia}}\right)}$$
@@ -155,9 +155,9 @@ So David has tweeted about specific conferences he has gone to, genes, Stack Ove
 
 ## Changes in word use
 
-The section above looked at overall word use, but now let's ask a different question. Which words' frequencies have changed the fastest in our Twitter feeds? Or to state this another way, which words have we tweeted about at a higher or lower rate as time has passed? To do this, we will define a new time variable in the dataframe that defines which unit of time each tweet was posted in. We can use `floor_date()` from lubridate to do this, with a unit of our choosing; using 1 month seems to work well for this year of tweets from both of us.
+The section above looked at overall word use, but now let's ask a different question. Which words' frequencies have changed the fastest in our Twitter feeds? Or to state this another way, which words have we tweeted about at a higher or lower rate as time has passed? To do this, we will define a new time variable in the data frame that defines which unit of time each tweet was posted in. We can use `floor_date()` from lubridate to do this, with a unit of our choosing; using 1 month seems to work well for this year of tweets from both of us.
 
-After we have the time bins defined, we count how many times each of us used each word in each time bin. After that, we add columns to the dataframe for the total number of words used in each time bin by each person and the total number of times each word was used by each person. We can then `filter` to only keep words used at least some minimum number of times (30, in this case).
+After we have the time bins defined, we count how many times each of us used each word in each time bin. After that, we add columns to the data frame for the total number of words used in each time bin by each person and the total number of times each word was used by each person. We can then `filter()` to only keep words used at least some minimum number of times (30, in this case).
 
 ```{r words_by_time, dependson = "tidy_tweets"}
 words_by_time <- tidy_tweets %>%
@@ -176,9 +176,9 @@ words_by_time <- tidy_tweets %>%
 words_by_time
 ```
 
-Each row in this dataframe corresponds to one person using one word in a given time bin. The `count` column tells us how many times that person used that word in that time bin, the `time_total` column tells us how many words that person used during that time bin, and the `word_total` column tells us how many times that person used that word over the whole year. This is the data set we can use for modeling. 
+Each row in this data frame corresponds to one person using one word in a given time bin. The `count` column tells us how many times that person used that word in that time bin, the `time_total` column tells us how many words that person used during that time bin, and the `word_total` column tells us how many times that person used that word over the whole year. This is the data set we can use for modeling. 
 
-We can use `nest` from tidyr to make a data frame with a list column that contains little miniature data frames for each word. Let's do that now and take a look at the resulting structure.
+We can use `nest()` from tidyr to make a data frame with a list column that contains little miniature data frames for each word. Let's do that now and take a look at the resulting structure.
 
 ```{r nest, dependson = "words_by_time"}
 nested_data <- words_by_time %>%
@@ -187,7 +187,7 @@ nested_data <- words_by_time %>%
 nested_data
 ```
 
-This data frame has one row for each person-word combination; the `data` column is a list column that contains data frames, one for each combination of person and word. Let's use `map` from the purrr library to apply our modeling procedure to each of those little data frames inside our big data frame. This is count data so let’s use `glm` with `family = "binomial"` for modeling. We can think about this modeling procedure answering a question like, "Was a given word mentioned in a given time bin? Yes or no? How does the count of word mentions depend on time?"
+This data frame has one row for each person-word combination; the `data` column is a list column that contains data frames, one for each combination of person and word. Let's use `map()` from the purrr library to apply our modeling procedure to each of those little data frames inside our big data frame. This is count data so let’s use `glm()` with `family = "binomial"` for modeling. We can think about this modeling procedure answering a question like, "Was a given word mentioned in a given time bin? Yes or no? How does the count of word mentions depend on time?"
 
 ```{r nested_models, dependson = "nest"}
 library(purrr)
@@ -199,7 +199,7 @@ nested_models <- nested_data %>%
 nested_models
 ```
 
-Now notice that we have a new column for the modeling results; it is another list column and contains `glm` objects. The next step is to use `map` and `tidy` from the broom package to pull out the slopes for each of these models and find the important ones. We are comparing many slopes here and some of them are not statistically significant, so let's apply an adjustment to the p-values for multiple comparisons.
+Now notice that we have a new column for the modeling results; it is another list column and contains `glm` objects. The next step is to use `map()` and `tidy()` from the broom package to pull out the slopes for each of these models and find the important ones. We are comparing many slopes here and some of them are not statistically significant, so let's apply an adjustment to the p-values for multiple comparisons.
 
 ```{r slopes, dependson = "nested_models"}
 library(broom)
@@ -262,7 +262,7 @@ tweets <- bind_rows(tweets_julia %>%
   mutate(created_at = ymd_hms(created_at))
 ```
 
-Now that we have this second, smaller set of only recent tweets, let's use `unnest_tokens` to transform these tweets to a tidy data set. Let's remove all retweets and replies from this data set so we only look at regular tweets that David and Julia have posted directly.
+Now that we have this second, smaller set of only recent tweets, let's use `unnest_tokens()` to transform these tweets to a tidy data set. Let's remove all retweets and replies from this data set so we only look at regular tweets that David and Julia have posted directly.
 
 ```{r tidy_tweets2, dependson = "setup2"}
 tidy_tweets <- tweets %>% 
@@ -286,7 +286,7 @@ totals <- tidy_tweets %>%
 totals
 ```
 
-Now let's find the median number of retweets for each word and person. We probably want to count each tweet/word combination only once, so we will use `group_by` and `summarise` twice, one right after the other. In the second `summarise` statement, we can also count the number of times each word was used ever and keep that in `uses`. Next, we can join this to the data frame of retweet totals. Let's `filter` to only keep words mentioned at least 5 times.
+Now let's find the median number of retweets for each word and person. We probably want to count each tweet/word combination only once, so we will use `group_by()` and `summarise()` twice, one right after the other. In the second `summarise()` statement, we can also count the number of times each word was used ever and keep that in `uses`. Next, we can join this to the data frame of retweet totals. Let's `filter()` to only keep words mentioned at least 5 times.
 
 ```{r word_by_rts, dependson = c("rt_totals", "tidy_tweets2")}
 word_by_rts <- tidy_tweets %>% 
@@ -342,7 +342,7 @@ word_by_favs <- tidy_tweets %>%
   ungroup()
 ```
 
-We have built the dataframes we need. Now let's make our visualization.
+We have built the data frames we need. Now let's make our visualization.
 
 ```{r plotfavs, dependson = "word_by_favs", fig.width=10, fig.height=5, fig.cap="Words with highest median favorites"}
 word_by_favs %>%
