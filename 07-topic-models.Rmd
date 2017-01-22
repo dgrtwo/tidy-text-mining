@@ -25,10 +25,12 @@ Latent Dirichlet allocation is one of the most common algorithms for topic model
 
 LDA is a mathematical method for estimating both of these at the same time: finding the mixture of words that is associated with each topic, while also determining the mixture of topics that describes each word. It has a number of existing implementations, and we'll explore one of them.
 
-In Chapter \ref{dtm} we briefly introduced the `AssociatedPress` dataset provided by the topicmodels package, as an example of a DocumentTermMatrix. This is a collection of 2246 news articles related to 
+In Chapter \ref{dtm} we briefly introduced the `AssociatedPress` dataset provided by the topicmodels package, as an example of a DocumentTermMatrix. This is a collection of 2246 news articles from an American news syndication service.
 
 ```{r}
 library(topicmodels)
+
+data("AssociatedPress")
 AssociatedPress
 ```
 
