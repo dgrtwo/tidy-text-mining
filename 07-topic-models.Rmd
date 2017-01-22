@@ -25,21 +25,27 @@ Latent Dirichlet allocation is one of the most common algorithms for topic model
 
 LDA is a mathematical method for estimating both of these at the same time: finding the mixture of words that is associated with each topic, while also determining the mixture of topics that describes each word. It has a number of existing implementations, and we'll explore one of them.
 
-In Chapter \ref{dtm} we briefly introduced the `AssociatedPress` dataset provided by the topicmodels package, as an example of a DocumentTermMatrix. This is a collection of 2246 news articles 
+In Chapter \ref{dtm} we briefly introduced the `AssociatedPress` dataset provided by the topicmodels package, as an example of a DocumentTermMatrix. This is a collection of 2246 news articles related to 
 
 ```{r}
 library(topicmodels)
 AssociatedPress
 ```
 
+We're now ready to use the [topicmodels](https://cran.r-project.org/package=topicmodels) package, specifically the `LDA()` function, to create a four-topic Latent Dirichlet allocation model.
+
+This step fits an LDA model, and returns an object containing the full details of the fit, such as how words are associated with topics and how topics are associated with documents. Fitting the model was the "easy part": the remainder of the analysis will involve exploring and interpreting the model using tidying functions.
+
 ```{r ap_lda}
 ap_lda <- LDA(AssociatedPress, k = 2, control = list(seed = 1234))
 ap_lda
 ```
 
+### Word-topic probabilities
+
 In Chapter \ref{dtm} we introduced the `tidy()` method, originally from the [broom package](https://github.com/dgrtwo/broom), for tidying model objects. The tidytext package provides this method for extracting the per-topic-per-word probabilities, called $\beta$ ("beta"), from the model.
 
-```{r chapters_lda_td}
+```{r ap_lda_td}
 library(tidytext)
 
 ap_lda_td <- tidy(ap_lda)
@@ -50,14 +56,14 @@ Notice that this has turned the model into a one-topic-per-term-per-row format. 
 
 We could use dplyr's `top_n()` to find the top 10 terms within each topic:
 
-```{r top_terms}
-top_terms <- ap_lda_td %>%
+```{r ap_top_terms, dependson = "ap_lda_td"}
+ap_top_terms <- ap_lda_td %>%
   group_by(topic) %>%
   top_n(10, beta) %>%
   ungroup() %>%
   arrange(topic, -beta)
 
-top_terms
+ap_top_terms
 ```
 
 As a tidy data frame, this lends itself well to a ggplot2 visualization (Figure \ref{fig:aptoptermsplot}).
@@ -65,7 +71,7 @@ As a tidy data frame, this lends itself well to a ggplot2 visualization (Figure 
 ```{r aptoptermsplot, fig.height=6, fig.width=7, fig.cap = "The terms that are most common within each topic"}
 library(ggplot2)
 
-top_terms %>%
+ap_top_terms %>%
   mutate(term = reorder(term, beta)) %>%
   ggplot(aes(term, beta, fill = factor(topic))) +
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
@@ -73,11 +79,9 @@ top_terms %>%
   coord_flip()
 ```
 
-This visualization lets us understand the two topics that were extracted from the articles. The most common words in topic 1 include "percent", "million", "billion", and "company", which suggests it may represent business news. The most common words in topic 2 include "president", "government", and "soviet", suggeting that this topic represents political news.
+This visualization lets us understand the two topics that were extracted from the articles. The most common words in topic 1 include "percent", "million", "billion", and "company", which suggests it may represent business news. Those most common in topic 2 include "president", "government", and "soviet", suggeting that this topic represents political news. One important observation about the words in each topic is that some words, such as "new" and "people", are common within both topics. This is an advantage of topic modeling as opposed to "hard clustering" methods: topics used in natural language often have some overlap.
 
-One important observation about the words in each topic is that some words, such as "new" and "people", are common within both topics. This is an advantage of topic modeling as opposed to "hard clustering" methods: topics used in natural language often have some overlap.
-
-As an alternative visualization, we could consider the terms that had the *greatest difference* between topic 1 and topic 2. This can be estimated based on the log ratio of the two: $\log_2(\frac{\beta_2}{\beta_1})$. (To constrain it to a set of especially relevant words, we can filter for relatively common words, such as those that have a $\beta$ greater than 1/1000 in at least one topic).
+As an alternative, we could consider the terms that had the *greatest difference* between topic 1 and topic 2. This can be estimated based on the log ratio of the two: $\log_2(\frac{\beta_2}{\beta_1})$. (To constrain it to a set of especially relevant words, we can filter for relatively common words, such as those that have a $\beta$ greater than 1/1000 in at least one topic).
 
 ```{r beta_spread}
 beta_spread <- ap_lda_td %>%
@@ -89,10 +93,9 @@ beta_spread <- ap_lda_td %>%
 beta_spread
 ```
 
-The words with the greatest difference are visualized in Figure \ref{fig:topiccompare}.
+The words with the greatest differences between the two topics are visualized in Figure \ref{fig:topiccompare}.
 
 ```{r topiccompare, dependson = "beta_spread", fig.cap = "Words with the greatest difference in 'beta' between topic 2 and topic 1"}
-# Find the top 10 words in each direction with the greatest log ratio
 beta_spread %>%
   group_by(direction = log_ratio > 0) %>%
   top_n(10, abs(log_ratio)) %>%
@@ -103,13 +106,28 @@ beta_spread %>%
   coord_flip()
 ```
 
-TODO: more on gamma
+We can see that the words more common in topic 2 include political parties such as "democratic" and "republican", as well as politician's names such as "dukakis" and "gorbachev". Topic 1 was more characterized by currencies like "yen" and "dollar", as well as financial terms such as "index", "prices" and "rates". This helps confirm that the two topics the algorithm identified were political and financial news.
 
-```{r}
-ap_gamma <- tidy(ap_lda, matrix = "gamma")
+### Document-topic probabilities
 
+Besides estimating each topic as a mixture of words, LDA also models each document as a mixture of topics We can examine the per-document-per-topic probabilities, called $$\gamma$$ ("gamma"), with the `matrix = "gamma"` argument to `tidy()`.
+
+```{r ap_gamma}
+ap_gamma <- tidy(chapters_lda, matrix = "gamma")
 ap_gamma
 ```
+
+Each of these values is an estimated proportion of words from that document that are generated from that topic. For example, the model estimates that each word in the `r chapters_lda_gamma$document[1]` document has only a `r percent(chapters_lda_gamma$gamma[1])` probability of coming from topic 1.
+
+We can see that many of these documents were drawn from a mix of the two topics, but that document 6 was drawn almost entirely from topic 2, having a `gamma` of only `r round(ap_gamma$gamma[6], 5)` from topic 1. To check this answer, we could see what the most common words in that document were.
+
+```{r ap_document_6}
+tidy(AssociatedPress) %>%
+  filter(document == 6) %>%
+  arrange(desc(count))
+```
+
+Based on the most common words, this appears to be an article about the relationship between the American government and Panamanian dictator Manuel Noriega, which means the algorithm was right to place it in topic 2 (as political/national news).
 
 ## Example: the great library heist
 
@@ -172,7 +190,7 @@ word_counts <- by_chapter_word %>%
 word_counts
 ```
 
-### Latent Dirichlet allocation with the topicmodels package
+### LDA on chapters
 
 Right now our data frame `word_counts` is in a tidy form, with one-term-per-document-per-row. However, the topicmodels package requires a `DocumentTermMatrix` (from the tm package). As described in Chapter \ref{dtm}, we can cast a one-token-per-row table into a `DocumentTermMatrix` with tidytext's `cast_dtm()`.
 
@@ -183,7 +201,7 @@ chapters_dtm <- word_counts %>%
 chapters_dtm
 ```
 
-We're now ready to use the [topicmodels](https://cran.r-project.org/package=topicmodels) package, specifically the `LDA()` function, to create a four-topic Latent Dirichlet allocation model. (In this case we know there are four topics because there are four books: in other problems we may need to try a few different values of `k`).
+We can then use the `LDA()` function to create a four-topic model. In this case we know we're looking for four topics because there are four books: in other problems we may need to try a few different values of `k`.
 
 ```{r chapters_lda}
 library(topicmodels)
@@ -193,11 +211,7 @@ chapters_lda <- LDA(chapters_dtm, k = 4, control = list(seed = 1234))
 chapters_lda
 ```
 
-This step fits an LDA model, and returns an object containing the full details of the fit, such as how words are associated with topics and how topics are associated with documents. Fitting the model was the "easy part": the remainder of the analysis will involve exploring and interpreting the model using tidying functions.
-
-### Tidying an LDA model
-
-In Chapter \ref{dtm} we introduced the `tidy()` method, originally from the [broom package](https://github.com/dgrtwo/broom), for tidying model objects. The tidytext package provides this method for extracting the per-topic-per-word probabilities, called $\beta$ ("beta"), from the model.
+Much as we did, per-topic-per-word probabilities:
 
 ```{r chapters_lda_td}
 chapters_lda_td <- tidy(chapters_lda)
@@ -237,9 +251,7 @@ We also notice that there can be words in common between multiple topics, such a
 
 ## Per-document classification
 
-Each chapter was a "document" in this analysis. Thus, we may want to know which topics are associated with each document. Can we put the chapters back together in the correct books?
-
-We already examined the per-word-per-topic probabilities returned by `tidy()`. But we can also examine the per-document-per-topic probabilities, called $$\gamma$$ ("gamma"), using the `matrix = "gamma"` argument.
+Each chapter was a "document" in this analysis. Thus, we may want to know which topics are associated with each document. Can we put the chapters back together in the correct books? We can find this by examining the 
 
 ```{r chapters_lda_gamma_raw}
 chapters_lda_gamma <- tidy(chapters_lda, matrix = "gamma")
