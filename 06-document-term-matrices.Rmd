@@ -94,8 +94,8 @@ Other text mining packages provide alternative implementations of document-term 
 ```{r inaug_dfm, message = FALSE, results = "hide"}
 library(methods)
 
-data("inaugCorpus", package = "quanteda")
-inaug_dfm <- quanteda::dfm(inaugCorpus)
+data("data_corpus_inaugural", package = "quanteda")
+inaug_dfm <- quanteda::dfm(data_corpus_inaugural)
 ```
 
 ```{r dependson = "inaug_dfm"}

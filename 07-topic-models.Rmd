@@ -81,6 +81,8 @@ This visualization lets us understand the two topics that were extracted from th
 As an alternative, we could consider the terms that had the *greatest difference* between topic 1 and topic 2. This can be estimated based on the log ratio of the two: $\log_2(\frac{\beta_2}{\beta_1})$. (To constrain it to a set of especially relevant words, we can filter for relatively common words, such as those that have a $\beta$ greater than 1/1000 in at least one topic).
 
 ```{r beta_spread}
+library(tidyr)
+
 beta_spread <- ap_lda_td %>%
   mutate(topic = paste0("topic", topic)) %>%
   spread(topic, beta) %>%
@@ -358,17 +360,18 @@ word_counts %>%
 
 The algorithm is stochastic and iterative, and it can accidentally land on a topic that spans multiple books.
 
-## Alternative LDA implementations
+### Alternative LDA implementations
 
-TODO: this section is not complete.
+The `LDA` function in the topicmodels package is only one implementation of the latent Dirichlet allocation algorithm. For example, the [mallet](https://cran.r-project.org/package=mallet) package implements a wrapper around the [MALLET](http://mallet.cs.umass.edu/) Java package for text classification tools, and the tidytext package provides tidiers for this model output as well.
 
-The `LDA` function in the topicmodels package is only one implementation of the latent Dirichlet allocation algorithm. For example, the [mallet](https://cran.r-project.org/package=mallet) package implements a wrapper around the [MALLET](http://mallet.cs.umass.edu/) package for text classification tools.
-
-The way an algorithm is run with this algorithm is very different from LDA: it takes non-tokenized documents and performs the tokenization itself, and requires a separate file of stopwords.
+The mallet package takes a somewhat different approach to the input format. For instance, it takes non-tokenized documents and performs the tokenization itself, and requires a separate file of stopwords. This means we have to collapse the text into one string for each document before perfomring LDA.
 
 ```{r cache = FALSE, echo = FALSE}
 library(dplyr)
 library(tidytext)
+
+library(ggplot2)
+theme_set(theme_light())
 ```
 
 ```{r mallet_model, results = "hide", cache = FALSE}
@@ -381,8 +384,6 @@ collapsed <- by_chapter_word %>%
   group_by(document) %>%
   summarize(text = paste(word, collapse = " "))
 
-# The mallet package requires a file of stopwords
-# Since we've already filtered them, we can give it an empty file
 file.create(empty_file <- tempfile())
 docs <- mallet.import(collapsed$document, collapsed$text, empty_file)
 
@@ -391,7 +392,7 @@ mallet_model$loadDocuments(docs)
 mallet_model$train(100)
 ```
 
-Once the model is created, however, are almost identical to the tidiers described in this rest of this chapter.
+Once the model is created, however, we can use the `tidy()` and `augment()` functions described in the rest of the chapter in an almost identical way. This includes extracting the probabilities of words within each topic or topics within each document.
 
 ```{r cache = FALSE}
 # word-topic pairs
@@ -404,3 +405,5 @@ tidy(mallet_model, matrix = "gamma")
 term_counts <- rename(word_counts, term = word)
 augment(mallet_model, term_counts)
 ```
+
+We could use ggplot2 to explore and visualize the model in the same way we did the LDA output. This is one of the advantages of the tidy approach to model exploration: the challenges of different output formats are handled by the tidying functions, and we can explore model results using the same set of tools.
