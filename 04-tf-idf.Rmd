@@ -54,7 +54,7 @@ There are very long tails to the right for these novels (those extremely common 
 
 ## Zipf's law
 
-Distributions like those shown in Figure \@ref(fig:plottf) are typical in language. In fact, they are so common in any given corpus of natural language (like a book, or a lot of text from a website, or spoken words) that the relationship between the frequency that a word is used and its rank has been the subject of study; a classic version of this relationship is called Zipf's law, after George Zipf, a 20th century American linguist. Zipf's law states that the frequency of a word is inversely proportional to its rank. Since we have the data frame we used to plot term frequency, we can examine Zipf's law for Jane Austen's novels with just a few lines of dplyr functions.
+Distributions like those shown in Figure \@ref(fig:plottf) are typical in language. In fact, those types of long-tailed distributions are so common in any given corpus of natural language (like a book, or a lot of text from a website, or spoken words) that the relationship between the frequency that a word is used and its rank has been the subject of study; a classic version of this relationship is called Zipf's law, after George Zipf, a 20th century American linguist. Zipf's law states that the frequency of a word is inversely proportional to its rank. Since we have the data frame we used to plot term frequency, we can examine Zipf's law for Jane Austen's novels with just a few lines of dplyr functions.
 
 ```{r freq_by_rank, dependson = book_words}
 freq_by_rank <- book_words %>% 
@@ -65,7 +65,7 @@ freq_by_rank <- book_words %>%
 freq_by_rank
 ```
 
-The `rank` column here tells us the rank of each word within the frequency table; the table was already ordered by `n` so we could use `row_number()` to find the rank. Then, we can calculate the term frequency in the same way we did before. Zipf's law is often visualized by plotting rank on the x-axis and term frequency on the y-axis, on a logarithmic scale. Plotting this way, an inversely proportional relationship will have a constant, negative slope.
+The `rank` column here tells us the rank of each word within the frequency table; the table was already ordered by `n` so we could use `row_number()` to find the rank. Then, we can calculate the term frequency in the same way we did before. Zipf's law is often visualized by plotting rank on the x-axis and term frequency on the y-axis, on logarithmic scales. Plotting this way, an inversely proportional relationship will have a constant, negative slope.
 
 ```{r zipf, dependson = "freq_by_rank", fig.width=7, fig.height=5, fig.cap="Zipf's law for Jane Austen's novels"}
 freq_by_rank %>% 
@@ -75,7 +75,7 @@ freq_by_rank %>%
   scale_y_log10()
 ```
 
-Notice that this plot is in log-log coordinates. We see that all six of Jane Austen's novels are similar to each other, and that the relationship between rank and frequency does have negative slope. It is not constant, though; perhaps we could view this as a broken [power law](https://en.wikipedia.org/wiki/Power_law). Let's see what the exponent of the power law is for the middle section of the rank range.
+Notice that this plot is in log-log coordinates. We see that all six of Jane Austen's novels are similar to each other, and that the relationship between rank and frequency does have negative slope. It is not quite constant, though; perhaps we could view this as a broken [power law](https://en.wikipedia.org/wiki/Power_law) with, say, three sections. Let's see what the exponent of the power law is for the middle section of the rank range.
 
 ```{r lower_rank, dependson = "freq_by_rank"}
 rank_subset <- freq_by_rank %>% 
@@ -88,7 +88,7 @@ lm(log10(`term frequency`) ~ log10(rank), data = rank_subset)
 Classic versions of Zipf's law have
 
 $$\text{frequency} \propto \frac{1}{\text{rank}}$$
-and we have gotten a slope close to -1 here. Let's plot this fitted power law with the data to see how it looks.
+and we have in fact gotten a slope close to -1 here. Let's plot this fitted power law with the data to see how it looks.
 
 ```{r zipffit, dependson = "freq_by_rank", fig.width=7, fig.height=5, fig.cap="Fitting an exponent for Zipf's law with Jane Austen's novels"}
 freq_by_rank %>% 
@@ -99,7 +99,7 @@ freq_by_rank %>%
   scale_y_log10()
 ```
 
-We have found a result close to the classic version of Zipf's law for the corpus of Jane Austen's novels. The deviations we see here at high rank are not uncommon for many kinds of language; a corpus of language often contains fewer rare words than predicted by the power law. The deviations at low rank are more unusual. Jane Austen uses a lower percentage of the most common words than many collections of language. This kind of analysis could be extended to compare authors or to compare any other collections of text, and it can be implemented simply using tidy data principles.
+We have found a result close to the classic version of Zipf's law for the corpus of Jane Austen's novels. The deviations we see here at high rank are not uncommon for many kinds of language; a corpus of language often contains fewer rare words than predicted by a single power law. The deviations at low rank are more unusual. Jane Austen uses a lower percentage of the most common words than many collections of language. This kind of analysis could be extended to compare authors, or to compare any other collections of text; it can be implemented simply using tidy data principles.
 
 ## The `bind_tf_idf` function
 

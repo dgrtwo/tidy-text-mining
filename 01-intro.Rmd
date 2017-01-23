@@ -52,7 +52,8 @@ We conclude with several tidy text analyses that bring together multiple text mi
 
 This book serves as an introduction to a framework along with a collection of examples, but it is far from a complete exploration of natural language processing. The [CRAN Task View on Natural Language Processing](https://cran.r-project.org/web/views/NaturalLanguageProcessing.html) provides details on more ways to use R for computational linguistics. There are several areas that you may want to explore in more detail according to your needs.
 
-* **Supervised classification and prediction:** Machine learning on text is a vast topic that could easily fill its own volume. We introduce one method of unsupervised clustering (topic modeling through latent Dirichlet allocation) in [Chapter 7](#topicmodeling) but many more machine learning algorithms can be used in dealing with text.
+* **Clustering, classification, and prediction:** Machine learning on text is a vast topic that could easily fill its own volume. We introduce one method of unsupervised clustering (topic modeling) in [Chapter 7](#topicmodeling) but many more machine learning algorithms can be used in dealing with text.
+* **Word embedding:** Words can be mapped to vectors, and such vector representations of words can generate linguistic relationships about meanings of words or how words are used. Such representations of words are not tidy in the sense that we consider here, but can boost performance of machine learning algorithms.
 * **More complex tokenization:** We hand tokenization off to the tokenizers package [@R-tokenizers], which itself wraps a variety of tokenizers with a consistent interface, but many others exist for specific applications.
 * **Languages other than English:** Some of our users have had success applying tidytext to their text mining needs for languages other than English but we are not covering those issues in this book.
 
