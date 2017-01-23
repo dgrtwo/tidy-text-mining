@@ -8,25 +8,24 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-In our final chapter, we'll use what we've learned in this book to perform a start-to-finish analysis of a set of 20,000 messages sent to 20 Usenet bulletin boards in 1993. The Usenet bulletin boards in this data set include boards for topics like politics, autos, "for sale", atheism, etc. This data set is [publicly available](http://qwone.com/~jason/20Newsgroups/) and has become popular for testing and exercises in text analysis and machine learning.
+In our final chapter, we'll use what we've learned in this book to perform a start-to-finish analysis of a set of 20,000 messages sent to 20 Usenet bulletin boards in 1993. The Usenet bulletin boards in this data set include boards for topics like politics, autos, "for sale", atheism, etc. This data set is publicly available at [http://qwone.com/~jason/20Newsgroups/](http://qwone.com/~jason/20Newsgroups/) and has become popular for testing and exercises in text analysis and machine learning.
 
-## Wrangling the data
+## Pre-processing
 
-We'll start by reading in all the messages. (Note that this step takes several minutes).
+We'll start by reading in all the messages, which are organized in sub-folders, with one file for each message. Note that this step takes several minutes to read all the documents.
 
 ```{r}
 library(dplyr)
 library(tidyr)
 library(purrr)
 library(readr)
-library(stringr)
 ```
 
 ```{r eval = FALSE}
 training_folder <- "data/20news-bydate/20news-bydate-train/"
 
 read_folder <- function(infolder) {
-  print(infolder)
+  message(infolder)
   data_frame(file = dir(infolder, full.names = TRUE)) %>%
     mutate(text = map(file, read_lines)) %>%
     transmute(id = basename(file), text) %>%
@@ -35,31 +34,53 @@ read_folder <- function(infolder) {
 
 raw_text <- data_frame(folder = dir(training_folder, full.names = TRUE)) %>%
   unnest(map(folder, read_folder)) %>%
-  transmute(board = basename(folder), id, text)
+  transmute(newsgroup = basename(folder), id, text)
 ```
 
 ```{r raw_text, echo = FALSE}
 load("data/raw_text.rda")
-# save(raw_text, file = "data/raw_text.rda")
 ```
 
-Each email has structure we need to remove. For starters:
-
-* Every email has one or more headers (e.g. "from:", "in_reply_to:")
-* Many have signatures, which (since they're constant for each user) we wouldn't want to examine alongside the content
-
-We need to remove headers and signatures.
-
 ```{r dependson = "raw_text"}
-# remove headers and signatures
+raw_text
+```
+
+Notice the `id` column, which identifies a unique message, and the `newsgroup` column, which describes which of the 20 newsgroups each message comes from. What newsgroups are included, and how many messages were posted in each (Figure \ref{fig:messagecounts})?
+
+```{r messagecounts, fig.cap = "Number of messages from each newsgroup"}
+library(ggplot2)
+
+raw_text %>%
+  group_by(newsgroup) %>%
+  summarize(messages = n_distinct(id)) %>%
+  ggplot(aes(newsgroup, messages)) +
+  geom_col() +
+  coord_flip()
+```
+
+We can see that Usenet newsgroup names is classified hierarchically, starting with a main topic such as "talk", "sci", or "rec", followed by more specific topics.
+
+### Pre-processing text
+
+Most of the datasets we've examined in this book were pre-processed, meaning we didn't have to remove, for example, copyright notices from the Jane Austen novels. Here, each message has some structure and extra text that we don't want to include in our analysis. For example, every message has a header, containing field such as "from:" or "in_reply_to:" that describe the message. Some also have automated email signatures, which occur after a line like `--`.
+
+This kind of pre-processing can be done within the dplyr package, using combination of `cumsum()` (cumulative sum) and `str_detect()` from stringr.
+
+```{r cleaned_text1, dependson = "raw_text"}
+library(stringr)
+
+# must occur after the first occurrence of an empty line,
+# and before the first occurrence of a line starting with --
 cleaned_text <- raw_text %>%
-  group_by(id) %>%
+  group_by(newsgroup, id) %>%
   filter(cumsum(text == "") > 0,
          cumsum(str_detect(text, "^--")) == 0) %>%
   ungroup()
+```
 
-# remove nested text (starting with ">") and lines that note the author
-# of those
+Many lines also have nested text representing quotes from other users, typically starting with a line like "so-and-so writes..." These can be removed with a few regular expressions. (We also choose to manually remove two messages that contained a large amount of non-text content).
+
+```{r cleaned_text2, dependson = "cleaned_text1"}
 cleaned_text <- cleaned_text %>%
   filter(str_detect(text, "^[^>]+[A-Za-z\\d]") | text == "",
          !str_detect(text, "writes(:|\\.\\.\\.)$"),
@@ -67,123 +88,110 @@ cleaned_text <- cleaned_text %>%
          !id %in% c(9704, 9985))
 ```
 
-Now it is time to use `unnest_tokens` to identify the words in this data set.
+At that point, we're ready to use `unnest_tokens` to identify the words in this data set, specifying that we wanto 
 
-```{r cleaned_text}
+```{r usenet_words, dependson = "cleaned_text2"}
 library(tidytext)
 
 usenet_words <- cleaned_text %>%
   unnest_tokens(word, text) %>%
-  filter(str_detect(word, "^[a-z]"),
-         str_detect(word, "[a-z]$"),
+  filter(str_detect(word, "[a-z']$"),
          !word %in% stop_words$word)
 ```
 
-What are the most common words?
+## Analyses
 
-```{r}
+Now that we've removed the headers, signatures, and formatting, we can start exploring common words. For starters, we could find the most common words in the entire dataset, or within particular newsgroups.
+
+```{r words_by_newsgroup, dependson = "usenet_words"}
 usenet_words %>%
   count(word, sort = TRUE)
-```
 
-Or perhaps more sensibly, we could examine the most common words by board.
-
-```{r words_by_board, dependson = "cleaned_text"}
-words_by_board <- usenet_words %>%
-  count(board, word) %>%
+words_by_newsgroup <- usenet_words %>%
+  count(newsgroup, word, sort = TRUE) %>%
   ungroup()
+
+words_by_newsgroup
 ```
 
-```{r dependson = "words_by_board"}
-words_by_board %>%
-  group_by(board) %>%
-  top_n(3)
-```
+### Term frequency and inverse document frequency: tf-idf
 
-These look sensible and illuminating so far; let's move on to some more sophisticated analysis!
+We'd expect the newsgroups to differ in terms of topic and content, and therefore for the frequency of words to differ between them. Let's try quantifying this using the tf-idf metric we learned about in Chapter \ref{tfidf}.
 
-## Term frequency and inverse document frequency: tf-idf
-
-Some words are likely to be more common on particular boards. Let's try quantifying this using the tf-idf metric we learned in [Chapter 4](#tfidf).
-
-```{r tf_idf, dependson = "words_by_board"}
-tf_idf <- words_by_board %>%
-  bind_tf_idf(word, board, n) %>%
+```{r tf_idf, dependson = "words_by_usergroup"}
+tf_idf <- words_by_newsgroup %>%
+  bind_tf_idf(word, newsgroup, n) %>%
   arrange(desc(tf_idf))
 
 tf_idf
 ```
 
-We can visualize this for a few select boards. First, let's look at all the `sci.` boards.
+We can examine the top tf-idf for a few selected groups to extract words specific to those topics. For example, we could look at all the `sci.` boards, visualized in Figure \ref{fig:scitfidf}.
 
-```{r, dependson = "tf_idf", fig.width=9, fig.height=8}
+```{r scitfidf, dependson = "tf_idf", fig.width=9, fig.height=8, fig.cap = "The 12 terms with the highest tf-idf within each of the science-related newsgroups"}
 library(ggplot2)
 
 tf_idf %>%
-  filter(str_detect(board, "^sci\\.")) %>%
-  group_by(board) %>%
+  filter(str_detect(newsgroup, "^sci\\.")) %>%
+  group_by(newsgroup) %>%
   top_n(12, tf_idf) %>%
   mutate(word = reorder(word, tf_idf)) %>%
-  ggplot(aes(word, tf_idf, fill = board)) +
+  ggplot(aes(word, tf_idf, fill = newsgroup)) +
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
-  facet_wrap(~ board, scales = "free") +
+  facet_wrap(~ newsgroup, scales = "free") +
   ylab("tf-idf") +
   coord_flip()
 ```
 
-We could use almost the same code (not shown) to compare the "rec." (recreation) or "talk." boards:
+We see lots of characteristic words specific to particular words, such as "wiring" and "circuit" on the sci.electronics topic and "orbit" and "lunar" for the space newsgroup. You could use this same code to explore other topics.
 
-```{r, dependson = "tf_idf", echo = FALSE, fig.width=9, fig.height=8}
+```{r, dependson = "tf_idf", echo = FALSE, fig.width=9, fig.height=8, eval = FALSE, echo = FALSE}
 plot_tf_idf <- function(d) {
   d %>%
-    group_by(board) %>%
+    group_by(newsgroup) %>%
     top_n(10, tf_idf) %>%
     mutate(word = reorder(word, tf_idf)) %>%
-    ggplot(aes(word, tf_idf, fill = board)) +
+    ggplot(aes(word, tf_idf, fill = newsgroup)) +
     geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
-    facet_wrap(~ board, scales = "free") +
+    facet_wrap(~ newsgroup, scales = "free") +
     ylab("tf-idf") +
     coord_flip()
 }
 
 tf_idf %>%
-  filter(str_detect(board, "^rec\\.")) %>%
-  plot_tf_idf()
-
-tf_idf %>%
-  filter(str_detect(board, "^talk\\.")) %>%
+  filter(str_detect(newsgroup, "^rec\\.")) %>%
   plot_tf_idf()
 ```
 
-We see lots of characteristic words for these boards, from "pitching" and "hitter" for the baseball board to "firearm" and "militia" on the guns board. Notice how high tf-idf is for words like "Stephanopoulos" or "Armenian"; this means that these words are very unique among the documents as a whole and important to those particular boards.
-
 ## Sentiment analysis
 
-We can use the sentiment analysis techniques we explored in [Chapter 3](#sentiment) to examine how positive and negative words were used in these Usenet posts. Which boards used the most positive and negative words?
+We can use the sentiment analysis techniques we explored in Chapter \ref{sentiment} to examine how positive and negative words were used in these Usenet posts. Which newsgroups appeared the most positive or negative overall?
 
-```{r board_sentiments, dependson = "words_by_board", fig.width=7, fig.height=6}
+We'll use the AFINN sentiment lexicon, with numeric scores for each word, and visualize it with a bar plot (Figure \ref{fig:newsgroupsentiments}).
+
+```{r newsgroupsentiments, dependson = "words_by_newsgroup", fig.width=7, fig.height=6, fig.cap = "Average AFINN score for posts within each newsgroup"}
 AFINN <- get_sentiments("afinn")
 
-word_board_sentiments <- words_by_board %>%
-  inner_join(AFINN, by = "word")
-
-board_sentiments <- word_board_sentiments %>%
-  group_by(board) %>%
+newsgroup_sentiments <- words_by_newsgroup %>%
+  inner_join(AFINN, by = "word") %>%
+  group_by(newsgroup) %>%
   summarize(score = sum(score * n) / sum(n))
 
-board_sentiments %>%
-  mutate(board = reorder(board, score)) %>%
-  ggplot(aes(board, score, fill = score > 0)) +
+newsgroup_sentiments %>%
+  mutate(newsgroup = reorder(newsgroup, score)) %>%
+  ggplot(aes(newsgroup, score, fill = score > 0)) +
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   coord_flip() +
   ylab("Average sentiment score")
 ```
 
-## Sentiment analysis by word
+According to this analysis, the "misc.forsale" newsgroup was the most positive. This was most likely because 
 
-It's worth looking deeper to understand *why* some boards ended up more positive than others. For that, we can examine the total positive and negative contributions of each word.
+### Sentiment analysis by word
 
-```{r contributions, dependson = "cleaned_text"}
+It's worth looking deeper to understand *why* some newsgroups ended up more positive or negative than others. For that, we can examine the total positive and negative contributions of each word.
+
+```{r contributions, dependson = "newsgroup_sentiments"}
 contributions <- usenet_words %>%
   inner_join(AFINN, by = "word") %>%
   group_by(word) %>%
@@ -193,9 +201,9 @@ contributions <- usenet_words %>%
 contributions
 ```
 
-Which words had the most effect?
+Which words had the most effect on sentiment scores (Figure \ref{usenetcontributions})? 
 
-```{r, dependson = "contributions", fig.width=6, fig.height=6}
+```{r usenetcontributions, dependson = "contributions", fig.width=6, fig.height=6, fig.cap = "Words with the greatest contributions to positive/negative sentiment scores in the Usenet text"}
 contributions %>%
   top_n(25, abs(contribution)) %>%
   mutate(word = reorder(word, contribution)) %>%
@@ -206,130 +214,123 @@ contributions %>%
 
 These words look generally reasonable as indicators of each message's sentiment, but we can spot possible problems with the approach. "True" could just as easily be a part of "not true" or a similar negative expression, and the words "God" and "Jesus" are apparently very common on Usenet but could easily be used in many contexts, positive or negative.
 
-The important point is that we may also care about which words contributed the most *within each board*. We can calculate each word's contribution to each board's sentiment score from our `word_board_sentiments` variable:
+We may also care about which words contributed the most *within each newsgroup*, so that we can see which newsgroups might be incorrectly estimated. We can calculate each word's contribution to each newsgroup's sentiment scorem and visualize the top few from each (Figure \ref{fig:newsgroupsentiment}).
 
-```{r top_sentiment_words, dependson = "word_board_sentiments", fig.height = 10, fig.width = 10}
-top_sentiment_words <- word_board_sentiments %>%
+```{r top_sentiment_words, dependson = "words_by_newsgroup"}
+top_sentiment_words <- words_by_newsgroup %>%
+  inner_join(AFINN, by = "word") %>%
   mutate(contribution = score * n / sum(n))
 
+top_sentiment_words
+```
+
+```{r newsgroupsentiment, fig.height = 10, fig.width = 10, dependson = "top_sentiment_words", echo = FALSE}
 top_sentiment_words %>%
-  group_by(board) %>%
-  top_n(8, abs(contribution)) %>%
+  filter(str_detect(newsgroup, "^talk|soc|alt")) %>%
+  group_by(newsgroup) %>%
+  top_n(12, abs(contribution)) %>%
   ungroup() %>%
-  mutate(board = reorder(board, contribution),
-         word = reorder(word, contribution)) %>%
+  mutate(newsgroup = reorder(newsgroup, contribution),
+         word = reorder(paste(word, newsgroup, sep = "__"), contribution)) %>%
   ggplot(aes(word, contribution, fill = contribution > 0)) +
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
-  facet_wrap(~ board, scales = "free") +
+  scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
+  facet_wrap(~ newsgroup, scales = "free") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-We can see here how much sentiment is confounded with topic in this particular approach. An atheism board is likely to discuss "god" in detail even in a negative context, and we can see it makes the board look more positive. Similarly, the negative contribution of the word "gun" to the "talk.politics.guns" board would occur even if the board members were discussing guns positively.
+We can see here how much sentiment is confounded with topic in this particular approach. An atheism newsgroup is likely to discuss "god" in detail even in a negative context, and we can see that it makes the newsgroup look more positive. Similarly, the negative contribution of the word "gun" to the "talk.politics.guns" group will occur even when the members are discussing guns positively. This helps remind us that sentiment analysis can be confounded by topic, and that we should always examine the influential words before interpreting it too deeply.
 
-## Sentiment analysis by message
+### Sentiment analysis by message
 
-We can also try finding the most positive and negative *messages*.
+We can also try finding the most positive and negative individual messages, by grouping and summarizing by `id` rather than `newsgroup`.
 
 ```{r}
 sentiment_messages <- usenet_words %>%
   inner_join(AFINN, by = "word") %>%
-  group_by(board, id) %>%
+  group_by(newsgroup, id) %>%
   summarize(sentiment = mean(score),
             words = n()) %>%
   ungroup() %>%
   filter(words >= 5)
 ```
 
-As a simple measure to reduce the role of randomness, we filtered out messages that had fewer than five words that contributed to sentiment.
-
-What were the most positive messages?
+As a simple measure to reduce the role of randomness, we filtered out messages that had fewer than five words that contributed to sentiment. What were the most positive messages?
 
 ```{r}
 sentiment_messages %>%
   arrange(desc(sentiment))
 ```
 
-Let's check this by looking at the most positive message in the whole data set.
+Let's check this by looking at the most positive message in the whole dataset. We may want to write a short function for printing a message given its ID.
 
 ```{r print_message, dependson = "cleaned_text"}
-print_message <- function(message_id) {
+print_message <- function(group, message_id) {
   cleaned_text %>%
-    filter(id == message_id) %>%
+    filter(newsgroup == group, id == message_id) %>%
     filter(text != "") %>%
     .$text %>%
     cat(sep = "\n")
 }
 
-print_message(53560)
+print_message("rec.sport.hockey", 53560)
 ```
 
-Looks like it's because the message uses the word "winner" a lot! How about the most negative message? Turns out it's also from the hockey site, but has a very different attitude.
+It looks like this message was chosen because it uses the word "winner" many, many times! How about the most negative message? Turns out it's also from the hockey site, but has a very different attitude.
 
 ```{r dependson = "sentiment_messages"}
 sentiment_messages %>%
   arrange(sentiment)
 
-print_message(53907)
+print_message("rec.sport.hockey", 53907)
 ```
 
-Well then.
+Well, we can confidently say that the sentiment analysis worked.
 
-## N-grams
+### N-gram analysis
 
-We can also examine the effect of words that are used in negation, like we did in [Chapter 5](#ngrams). Let's start by finding all the bigrams in the Usenet posts.
+In Chapter \ref{ngrams}, we considered the effect of words such as "not" and "no" on sentiment analysis, such as phrases like "don't like". This is a much larger dataset of modern text, so we may be interested in.
 
-```{r usenet_2grams, dependson = "cleaned_text"}
+Let's start by finding and counting all the bigrams in the Usenet posts.
+
+```{r usenet_bigrams, dependson = "cleaned_text"}
 usenet_bigrams <- cleaned_text %>%
   unnest_tokens(bigram, text, token = "ngrams", n = 2)
-
-usenet_bigrams
 ```
 
-Now let's count how many of these bigrams are used in each board.
-
-```{r usenet_bigram_counts, dependson = "usenet_2grams"}
+```{r usenet_bigram_counts, dependson = "usenet_bigrams"}
 usenet_bigram_counts <- usenet_bigrams %>%
-  count(board, bigram)
-
-usenet_bigram_counts %>% 
-  arrange(desc(n))
+  count(newsgroup, bigram, sort = TRUE) %>%
+  ungroup() %>%
+  separate(bigram, c("word1", "word2"), sep = " ")
 ```
 
-Next, we can calculate tf-idf for the bigrams to find the ones that are important for each board.
-
-```{r bigram_tf_idf, dependson = "usenet_bigram_counts"}
-bigram_tf_idf <- usenet_bigram_counts %>%
-  bind_tf_idf(bigram, board, n)
-
-bigram_tf_idf %>%
-  arrange(desc(tf_idf))
-```
-
-Now we come back to the words used in negation that we are interested in examining. Let's define a vector of words that we suspect are used in negation, and use the same joining and counting approach from [Chapter 5](#ngrams) to examine all of them at once.
+Let's define a vector of six words that we suspect are used in negation, and use the same joining and counting approach from Ch to examine all of them at once.
 
 ```{r negate_words, dependson = "usenet_bigram_counts", fig.width=8, fig.height=10}
 negate_words <- c("not", "without", "no", "can't", "don't", "won't")
 
 usenet_bigram_counts %>%
-  ungroup() %>%
-  separate(bigram, c("word1", "word2"), sep = " ") %>%
   filter(word1 %in% negate_words) %>%
   count(word1, word2, wt = n, sort = TRUE) %>%
   inner_join(AFINN, by = c(word2 = "word")) %>%
   mutate(contribution = score * nn) %>%
   top_n(10, abs(contribution)) %>%
   ungroup() %>%
-  mutate(word2 = reorder(word2, contribution)) %>%
+  mutate(word2 = reorder(paste(word2, word1, sep = "__"), contribution)) %>%
   ggplot(aes(word2, contribution, fill = contribution > 0)) +
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   facet_wrap(~ word1, scales = "free", nrow = 3) +
+  scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
   xlab("Words preceded by negation") +
   ylab("Sentiment score * # of occurrences") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip()
 ```
 
-These words are the ones that contribute the most to the sentiment scores in the wrong direction, because they are being used with negation words before them. Phrases like "no problem" and "don't want" are important sources of misidentification.
+These words are the ones that contribute the most to the sentiment scores in the wrong direction, because they are being used with negation words before them. It looks like the largest sources of misidentifying a word as positive come from "dont want/like/care", and the most common in the other direction is "no problem".
 
+Todo: a bit more conclusion
 
 ```{r eval = FALSE, echo = FALSE}
 # we're not going to use this one
@@ -343,4 +344,12 @@ metadata <- raw_text %>%
   mutate(header = str_replace_all(str_to_lower(header), "-", "_")) %>%
   distinct(id, header, .keep_all = TRUE) %>%
   spread(header, content)
+```
+
+```{r bigram_tf_idf, dependson = "usenet_bigram_counts", echo = FALSE, eval = FALSE}
+bigram_tf_idf <- usenet_bigram_counts %>%
+  bind_tf_idf(bigram, newsgroup, n)
+
+bigram_tf_idf %>%
+  arrange(desc(tf_idf))
 ```
