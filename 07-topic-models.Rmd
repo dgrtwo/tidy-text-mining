@@ -115,11 +115,11 @@ We can see that the words more common in topic 2 include political parties such 
 Besides estimating each topic as a mixture of words, LDA also models each document as a mixture of topics We can examine the per-document-per-topic probabilities, called $$\gamma$$ ("gamma"), with the `matrix = "gamma"` argument to `tidy()`.
 
 ```{r ap_gamma}
-ap_gamma <- tidy(chapters_lda, matrix = "gamma")
+ap_gamma <- tidy(ap_lda, matrix = "gamma")
 ap_gamma
 ```
 
-Each of these values is an estimated proportion of words from that document that are generated from that topic. For example, the model estimates that each word in the `r chapters_lda_gamma$document[1]` document has only a `r percent(chapters_lda_gamma$gamma[1])` probability of coming from topic 1.
+Each of these values is an estimated proportion of words from that document that are generated from that topic. For example, the model estimates that each word in the `r ap_gamma$document[1]` document has only a `r percent(ap_gamma$gamma[1])` probability of coming from topic 1.
 
 We can see that many of these documents were drawn from a mix of the two topics, but that document 6 was drawn almost entirely from topic 2, having a `gamma` of only `r round(ap_gamma$gamma[6], 5)` from topic 1. To check this answer, we could see what the most common words in that document were.
 
