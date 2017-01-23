@@ -369,6 +369,7 @@ The mallet package takes a somewhat different approach to the input format. For 
 ```{r cache = FALSE, echo = FALSE}
 library(dplyr)
 library(tidytext)
+library(stringr)
 
 library(ggplot2)
 theme_set(theme_light())
