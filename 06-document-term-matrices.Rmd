@@ -16,7 +16,7 @@ However, most of the existing R tools for natural language processing, besides t
 
 Computer scientist Hal Abelson has observed that "No matter how complex and polished the individual operations are, it is often the quality of the glue that most directly determines the power of the system." In that spirit, this chapter will discuss the "glue" that connects the tidy text format with other important packages and data structures, allowing you to rely on both existing text mining packages and the suite of tidy tools to perform your analysis. In particular, we'll examine the process of tidying document-term matrices, as well as casting a tidy data frame into a sparse matrix.
 
-## Tidying a document-term matrix
+## Tidying a document-term matrix {#tidy-dtm}
 
 One of the most common structures that text mining packages work with is the [document-term matrix](https://en.wikipedia.org/wiki/Document-term_matrix) (or DTM). This is a matrix where:
 
@@ -166,7 +166,7 @@ year_term_counts %>%
 
 These examples show how you can use tidytext, and the related suite of tidy tools, to analyze sources even if their origin was not in a tidy format.
 
-## Casting tidy text data into a matrix
+## Casting tidy text data into a matrix {#cast-dtm}
 
 Just as some existing text mining packages provide document-term matrices as sample data or output, some algorithms expect such matrices as input. Therefore, tidytext provides `cast_` verbs for converting from a tidy form to these matrices.
 
