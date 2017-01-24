@@ -8,7 +8,7 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-In our final chapter, we'll use what we've learned in this book to perform a start-to-finish analysis of a set of 20,000 messages sent to 20 Usenet bulletin boards in 1993. The Usenet bulletin boards in this data set include boards for topics like politics, autos, "for sale", atheism, etc. This data set is publicly available at [http://qwone.com/~jason/20Newsgroups/](http://qwone.com/~jason/20Newsgroups/) and has become popular for testing and exercises in text analysis and machine learning.
+In our final chapter, we'll use what we've learned in this book to perform a start-to-finish analysis of a set of 20,000 messages sent to 20 Usenet bulletin boards in 1993. The Usenet bulletin boards in this data set include newsgroups for topics like politics, religion, cars, sports, and cryptography, and offer a rich set of text written by a variety of users. This data set is publicly available at [http://qwone.com/~jason/20Newsgroups/](http://qwone.com/~jason/20Newsgroups/) and has become popular for testing and exercises in text analysis and machine learning.
 
 ## Pre-processing
 
@@ -213,7 +213,12 @@ word_compare %>%
 
 ### Topic modeling
 
-```{r}
+In Chapter \ref{topicmodels}, we used the latent Dirichlet allocation (LDA) algorithm to cluster a set of chapters into the books they originally came from. Could LDA do the same to sort out Usenet messages from different newsgroups?
+
+Let's let it divide up the four science-related newsgroups. We first process it into a document-term matrix with `cast_dtm`, then fit the model with the `LDA()` function from the topicmodels package.
+
+```{r sci_dtm}
+# include only words that occur at least 50 times
 word_sci_topics <- usenet_words %>%
   filter(str_detect(newsgroup, "^sci")) %>%
   group_by(word) %>%
@@ -221,20 +226,52 @@ word_sci_topics <- usenet_words %>%
   ungroup() %>%
   filter(word_total > 50)
 
+# convert into a document-term matrix
 sci_dtm <- word_sci_topics %>%
   unite(document, newsgroup, id) %>%
   count(document, word) %>%
   cast_dtm(document, word, n)
 ```
 
-```{r}
+```{r sci_lda, dependson = "sci_dtm"}
 library(topicmodels)
-sci_lda <- LDA(sci_dtm, k = 4)
+sci_lda <- LDA(sci_dtm, k = 4, control = list(seed = 2016))
 ```
 
-```{r}
-sci_lda
+What four topics did it extract, and did they match the four newsgroups? This approach will look familiar from Chapter \ref{topicmodels}: we visualize each topic based on the most frequent terms within it (Figure \ref{fig:usenettopicterms}).
+
+```{r usenettopicterms, dependson = "sci_lda", fig.cap = "The top 8 words from each topic fit by LDA on the science-related newsgroups"}
+sci_lda %>%
+  tidy() %>%
+  group_by(topic) %>%
+  top_n(8, beta) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta)) +
+  geom_col() +
+  facet_wrap(~ topic, scales = "free_y") +
+  coord_flip()
 ```
+
+From the top words, we can start to suspect which topics may capture which newsgroups. Topic 1 certainly represents the sci.space newsgroup (thus the most common word being "space"), and topic 2 is likely drawn from cryptography. We can confirm this by seeing how many documents from each newsgroup appeared to be drawn from which topics (Figure \ref{fig:usenetassignments}).
+
+```{r usenetassignments, dependson = "sci_lda", fig.cap = ""}
+sci_lda %>%
+  tidy(matrix = "gamma") %>%
+  separate(document, c("newsgroup", "id"), sep = "_") %>%
+  group_by(newsgroup, id) %>%
+  top_n(1, gamma) %>%
+  ungroup() %>%
+  mutate(newsgroup = reorder(newsgroup, topic)) %>%
+  count(newsgroup, topic) %>%
+  ggplot(aes(topic, n)) +
+  geom_col() +
+  facet_wrap(~ newsgroup) +
+  labs(x = "Topic",
+       y = "# of messages where this was the highest % topic")
+```
+
+Much as we saw in the literature analysis, topic modeling was able to discover the distinct topics present in the text without needing to consult the labels.
 
 ## Sentiment analysis
 
@@ -403,6 +440,7 @@ usenet_bigram_counts %>%
 
 The words shown are the ones that contributed the most to the sentiment scores in the wrong direction. It looks like the largest sources of misidentifying a word as positive come from "dont want/like/care", and the most common in the other direction is "no problem".
 
+In this analysis of Usenet messages we've incorporated almost every method described in this book, ranging from tf-idf to topic modeling, and from sentiment analysis to n-gram tokenization. Throughout the chapter, and indeed through all of our case studies, we've been able to rely on a small list of common tools for exploration and visualization. We hope that these examples show much all tidy text analyses have in common with each other, and indeed with all tidy data analyses.
 
 ```{r}
 knitr::knit_exit()
