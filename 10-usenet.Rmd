@@ -58,7 +58,7 @@ raw_text %>%
   coord_flip()
 ```
 
-We can see that Usenet newsgroup names is classified hierarchically, starting with a main topic such as "talk", "sci", or "rec", followed by more specific topics.
+We can see that Usenet newsgroup names are named hierarchically, starting with a main topic such as "talk", "sci", or "rec", followed by further specifications.
 
 ### Pre-processing text
 
@@ -88,7 +88,7 @@ cleaned_text <- cleaned_text %>%
          !id %in% c(9704, 9985))
 ```
 
-At that point, we're ready to use `unnest_tokens` to identify the words in this data set, specifying that we wanto 
+At that point, we're ready to use `unnest_tokens` to split the dataset into tokens, while removing stop-words.
 
 ```{r usenet_words, dependson = "cleaned_text2"}
 library(tidytext)
@@ -99,7 +99,7 @@ usenet_words <- cleaned_text %>%
          !word %in% stop_words$word)
 ```
 
-## Analyses
+## Words within newsgroups
 
 Now that we've removed the headers, signatures, and formatting, we can start exploring common words. For starters, we could find the most common words in the entire dataset, or within particular newsgroups.
 
@@ -143,7 +143,7 @@ tf_idf %>%
   coord_flip()
 ```
 
-We see lots of characteristic words specific to particular words, such as "wiring" and "circuit" on the sci.electronics topic and "orbit" and "lunar" for the space newsgroup. You could use this same code to explore other topics.
+We see lots of characteristic words specific to particular newsgroup, such as "wiring" and "circuit" on the sci.electronics topic and "orbit" and "lunar" for the space newsgroup. You could use this same code to explore other topics.
 
 ```{r, dependson = "tf_idf", echo = FALSE, fig.width=9, fig.height=8, eval = FALSE, echo = FALSE}
 plot_tf_idf <- function(d) {
@@ -163,11 +163,84 @@ tf_idf %>%
   plot_tf_idf()
 ```
 
+What newsgroups tended to be similar to each other in text content? We could discover this by 
+
+```{r}
+library(widyr)
+
+newsgroup_cors <- words_by_newsgroup %>%
+  pairwise_cor(newsgroup, word, n, sort = TRUE)
+
+newsgroup_cors
+```
+
+```{r newsgroupcorsnetwork, fig.width = 8, fig.height = 8, fig.cap = "A network of Usenet groups based on the correlation of word counts between them, including only connections with a correlation greater than .4"}
+library(ggraph)
+library(igraph)
+set.seed(2017)
+
+newsgroup_cors %>%
+  filter(correlation > .4) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(alpha = correlation, width = correlation)) +
+  geom_node_point(size = 6, color = "lightblue") +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  theme_void()
+```
+
+It looks like there were four main clusters of newsgroups: computers/electronics, politics/religion, motor vehicles, and sports. This certainly makes sense in terms of clustering of topics. We could 
+
+```{r eval = FALSE, echo = FALSE}
+word_compare <- words_by_newsgroup %>%
+  separate(newsgroup, c("category", "rest"), "\\.", extra = "merge") %>%
+  filter(category %in% c("comp", "talk")) %>%
+  count(category, word, wt = n) %>%
+  spread(category, nn, fill = 0) %>%
+  mutate(total = comp + talk)
+
+word_compare %>%
+  filter(total > 100) %>%
+  mutate_each(funs((. + 1) / sum(. + 1)), comp, talk) %>%
+  mutate(logratio = log2(talk / comp)) %>%
+  arrange(desc(logratio)) %>%
+  filter(abs(logratio) > 7) %>%
+  mutate(word = reorder(word, logratio)) %>%
+  ggplot(aes(word, logratio)) +
+  geom_col() +
+  coord_flip()
+```
+
+### Topic modeling
+
+```{r}
+word_sci_topics <- usenet_words %>%
+  filter(str_detect(newsgroup, "^sci")) %>%
+  group_by(word) %>%
+  mutate(word_total = n()) %>%
+  ungroup() %>%
+  filter(word_total > 50)
+
+sci_dtm <- word_sci_topics %>%
+  unite(document, newsgroup, id) %>%
+  count(document, word) %>%
+  cast_dtm(document, word, n)
+```
+
+```{r}
+library(topicmodels)
+sci_lda <- LDA(sci_dtm, k = 4)
+```
+
+```{r}
+sci_lda
+```
+
 ## Sentiment analysis
 
-We can use the sentiment analysis techniques we explored in Chapter \ref{sentiment} to examine how positive and negative words were used in these Usenet posts. Which newsgroups appeared the most positive or negative overall?
+We can use the sentiment analysis techniques we explored in Chapter \ref{sentiment} to examine how positive and negative words occurred in these Usenet posts. Which newsgroups appeared the most positive or negative overall?
 
-We'll use the AFINN sentiment lexicon, with numeric scores for each word, and visualize it with a bar plot (Figure \ref{fig:newsgroupsentiments}).
+We'll focus on the AFINN sentiment lexicon, which provides numeric positivity scores for each word, and visualize it with a bar plot (Figure \ref{fig:newsgroupsentiments}).
 
 ```{r newsgroupsentiments, dependson = "words_by_newsgroup", fig.width=7, fig.height=6, fig.cap = "Average AFINN score for posts within each newsgroup"}
 AFINN <- get_sentiments("afinn")
@@ -289,9 +362,9 @@ Well, we can confidently say that the sentiment analysis worked.
 
 ### N-gram analysis
 
-In Chapter \ref{ngrams}, we considered the effect of words such as "not" and "no" on sentiment analysis, such as phrases like "don't like". This is a much larger dataset of modern text, so we may be interested in.
+In Chapter \ref{ngrams}, we considered the effect of words such as "not" and "no" on sentiment analysis of Jane Austen novels, such as considering whether a phrase like "don't like" led to passages incorrectly being labeled as positive. The Usenet dataset is is a much larger corpus of more modern text, so we may be interested in how sentiment analysis may be reversed in this text.
 
-Let's start by finding and counting all the bigrams in the Usenet posts.
+We'd start by finding and counting all the bigrams in the Usenet posts.
 
 ```{r usenet_bigrams, dependson = "cleaned_text"}
 usenet_bigrams <- cleaned_text %>%
@@ -305,9 +378,9 @@ usenet_bigram_counts <- usenet_bigrams %>%
   separate(bigram, c("word1", "word2"), sep = " ")
 ```
 
-Let's define a vector of six words that we suspect are used in negation, and use the same joining and counting approach from Ch to examine all of them at once.
+We could define a list of six words that we suspect are used in negation, such as "no", "not", and "without", and consider which words most often followed them (Figure \ref{fig:negatewords}).
 
-```{r negate_words, dependson = "usenet_bigram_counts", fig.width=8, fig.height=10}
+```{r negatewords, dependson = "usenet_bigram_counts", fig.width=8, fig.height=10, fig.cap = ""}
 negate_words <- c("not", "without", "no", "can't", "don't", "won't")
 
 usenet_bigram_counts %>%
@@ -322,15 +395,18 @@ usenet_bigram_counts %>%
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   facet_wrap(~ word1, scales = "free", nrow = 3) +
   scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
-  xlab("Words preceded by negation") +
+  xlab("Words preceded by a negation") +
   ylab("Sentiment score * # of occurrences") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   coord_flip()
 ```
 
-These words are the ones that contribute the most to the sentiment scores in the wrong direction, because they are being used with negation words before them. It looks like the largest sources of misidentifying a word as positive come from "dont want/like/care", and the most common in the other direction is "no problem".
+The words shown are the ones that contributed the most to the sentiment scores in the wrong direction. It looks like the largest sources of misidentifying a word as positive come from "dont want/like/care", and the most common in the other direction is "no problem".
 
-Todo: a bit more conclusion
+
+```{r}
+knitr::knit_exit()
+```
 
 ```{r eval = FALSE, echo = FALSE}
 # we're not going to use this one
@@ -352,4 +428,29 @@ bigram_tf_idf <- usenet_bigram_counts %>%
 
 bigram_tf_idf %>%
   arrange(desc(tf_idf))
+```
+
+```{r}
+library(igraph)
+library(ggraph)
+
+visualize_bigrams <- function(bigrams) {
+  set.seed(2016)
+  a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+  
+  bigrams %>%
+    graph_from_data_frame() %>%
+    ggraph(layout = "fr") +
+    geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
+    geom_node_point(color = "lightblue", size = 5) +
+    geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+    theme_void()
+}
+
+usenet_bigram_counts %>%
+  select(word1, word2, n) %>%
+  filter(!word1 %in% stop_words$word,
+         !word2 %in% stop_words$word) %>%
+  filter(n >= 25) %>%
+  visualize_bigrams()
 ```
