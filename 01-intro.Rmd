@@ -24,9 +24,11 @@ At the same time, the tidytext package doesn't expect a user to keep text data i
 
 This book is focused on practical software examples and data explorations. There are few equations, but a great deal of code. We especially focus on generating real insights from the literature, news, and social media that we analyze.
 
-We don't assume any previous knowledge of text mining; professional linguists and text analysts will likely find our examples elementary, though we are confident they can build on the framework for their own analyses.
+We don't assume any previous knowledge of text mining. Professional linguists and text analysts will likely find our examples elementary, though we are confident they can build on the framework for their own analyses.
 
 We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `%>%` "pipe" operator in R, and is interested in applying these tools to text data. For users who don't have this background, we recommend books such as [R for Data Science](http://r4ds.had.co.nz/). We believe that with a basic background and interest in tidy data, even a user early in their R career can understand and apply our examples.
+
+While we show the code behind the vast majority of the analyses, in the interest of space we sometimes choose not to show the code generating a particular visualization if we've already provided the code for several similar graphs. We trust the user can learn from and build on our examples, and of the code used to generate the book can be found in our [public GitHub repository](https://github.com/dgrtwo/tidy-text-mining).
 
 ## Outline
 
