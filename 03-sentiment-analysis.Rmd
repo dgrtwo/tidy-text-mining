@@ -100,7 +100,7 @@ Now we can plot these sentiment scores across the plot trajectory of each novel.
 library(ggplot2)
 
 ggplot(janeaustensentiment, aes(index, sentiment, fill = book)) +
-  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
   facet_wrap(~book, ncol = 2, scales = "free_x")
 ```
 
@@ -149,7 +149,7 @@ We now have an estimate of the net sentiment (positive - negative) in each chunk
 bind_rows(afinn, 
           bing_and_nrc) %>%
   ggplot(aes(index, sentiment, fill = method)) +
-  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
   facet_wrap(~method, ncol = 1, scales = "free_y")
 ```
 
@@ -191,7 +191,7 @@ bing_word_counts %>%
   top_n(10) %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(word, n, fill = sentiment)) +
-  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
   facet_wrap(~sentiment, scales = "free_y") +
   labs(y = "Contribution to sentiment",
        x = NULL) +
