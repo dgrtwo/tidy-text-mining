@@ -20,7 +20,7 @@ description: "A guide to text analysis within the tidy data framework, using the
 ```{r include=FALSE}
 # automatically create a bib database for R packages
 knitr::write_bib(c(
-  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+  .packages(), 'bookdown', 'knitr', 'rmarkdown', 'rmallet'
 ), 'packages.bib')
 ```
 
