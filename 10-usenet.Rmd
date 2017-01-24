@@ -442,7 +442,7 @@ The words shown are the ones that contributed the most to the sentiment scores i
 
 In this analysis of Usenet messages we've incorporated almost every method described in this book, ranging from tf-idf to topic modeling, and from sentiment analysis to n-gram tokenization. Throughout the chapter, and indeed through all of our case studies, we've been able to rely on a small list of common tools for exploration and visualization. We hope that these examples show much all tidy text analyses have in common with each other, and indeed with all tidy data analyses.
 
-```{r}
+```{r echo = FALSE}
 knitr::knit_exit()
 ```
 
