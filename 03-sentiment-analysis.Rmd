@@ -145,7 +145,7 @@ We now have an estimate of the net sentiment (positive - negative) in each chunk
 
 (ref:comparecap) Comparing three sentiment lexicons using *Pride and Prejudice*
 
-```{r compareplot, dependson = "comparesentiment", fig.width=9, fig.height=7.5, fig.cap="(ref:comparecap) "}
+```{r compareplot, dependson = "comparesentiment", fig.width=9, fig.height=7.5, fig.cap="(ref:comparecap)"}
 bind_rows(afinn, 
           bing_and_nrc) %>%
   ggplot(aes(index, sentiment, fill = method)) +

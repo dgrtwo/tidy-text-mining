@@ -82,7 +82,7 @@ ap_sentiments %>%
   mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
   mutate(term = reorder(term, n)) %>%
   ggplot(aes(term, n, fill = sentiment)) +
-  geom_bar(alpha = 0.8, stat = "identity") +
+  geom_bar(stat = "identity") +
   ylab("Contribution to sentiment") +
   coord_flip()
 ```
@@ -121,7 +121,7 @@ inaug_tf_idf
 
 We could use this data to pick four notable inaugural addresses (from Presidents Lincoln, Roosevelt, Kennedy, and Obama), and visualize the words most specific to each speech, as shown in Figure \@ref(fig:presidentspeeches).
 
-```{r presidentspeeches, dependson = "presidents", echo = FALSE, fig.cap = "The terms with the highest tf-idf from each of four selected inaugural addresses."}
+```{r presidentspeeches, dependson = "presidents", echo = FALSE, fig.cap = "The terms with the highest tf-idf from each of four selected inaugural addresses", fig.height=7, fig.width=6}
 speeches <- c("1933-Roosevelt", "1861-Lincoln",
               "1961-Kennedy", "2009-Obama")
 
@@ -153,7 +153,7 @@ year_term_counts <- inaug_td %>%
 
 This lets us pick several words and visualize how they changed in frequency over time, as shown in \@ref(fig:yearterm). We can see that over time, American presidents became less likely to refer to the country as the "Union" and more likely to refer to "America". They also became less likely to talk about the "constitution" and foreign" countries, and more likely to mention "freedom" and "God".
 
-```{r yearterm, dependson = "year_term_counts", fig.cap = "Changes in word frequency over time within Presidential inaugural addresses, for four selected terms."}
+```{r yearterm, dependson = "year_term_counts", fig.cap = "Changes in word frequency over time within Presidential inaugural addresses, for four selected terms"}
 year_term_counts %>%
   filter(term %in% c("god", "america", "foreign", "union", "constitution", "freedom")) %>%
   ggplot(aes(year, count / year_total)) +
@@ -310,7 +310,7 @@ stock_tf_idf <- stock_tokens %>%
 
 The top terms for each are visualized in Figure \@ref(fig:stocktfidf). As we'd expect the company's name and is typically included, but so are several of their product offerings and executives, as well as companies they are making deals with (such as Disney with Netflix).
 
-```{r stocktfidf, dependson = "stock_tf_idf", echo = FALSE, fig.cap = "The 8 words with the highest tf-idf in recent articles specific to each company.", fig.height = 8, fig.width = 8}
+```{r stocktfidf, dependson = "stock_tf_idf", echo = FALSE, fig.cap = "The 8 words with the highest tf-idf in recent articles specific to each company", fig.height = 8, fig.width = 8}
 stock_tf_idf %>%
   group_by(company) %>%
   top_n(8, tf_idf) %>%
@@ -375,7 +375,7 @@ stock_sentiment_count
 
 It might be interesting to examine which company has the most news with "litigious" or "uncertain" terms. But the simplest measure, much as it was for most analysis in Chapter \@ref(sentiment), is to see whether the news is more positive or negative. As a general quantitative measure of sentiment, we'll use "(positive - negative) / (positive + negative)" (Figure \@ref(fig:stockpositivity)).
 
-```{r stockpositivity, fig.cap = "'Positivity' of the news coverage around each stock in January 2017, calculated as (positive - negative) / (positive + negative), based on uses of positive and negative words in 20 recent news articles about each company."}
+```{r stockpositivity, fig.cap = "'Positivity' of the news coverage around each stock in January 2017, calculated as (positive - negative) / (positive + negative), based on uses of positive and negative words in 20 recent news articles about each company"}
 stock_sentiment_count %>%
   mutate(score = (positive - negative) / (positive + negative)) %>%
   mutate(company = reorder(company, score)) %>%
