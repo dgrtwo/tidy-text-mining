@@ -9,7 +9,9 @@ output: bookdown::gitbook
 documentclass: book
 bibliography: [book.bib, packages.bib]
 biblio-style: apalike
-link-citations: yes
+link-citations: true
+links-as-notes: true
+colorlinks: true
 github-repo: dgrtwo/tidy-text-mining
 cover-image: images/cover.png
 description: "A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools"
