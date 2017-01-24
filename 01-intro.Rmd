@@ -28,7 +28,7 @@ We don't assume any previous knowledge of text mining. Professional linguists an
 
 We do assume that the reader is at least slightly familiar with dplyr, ggplot2, and the `%>%` "pipe" operator in R, and is interested in applying these tools to text data. For users who don't have this background, we recommend books such as [R for Data Science](http://r4ds.had.co.nz/). We believe that with a basic background and interest in tidy data, even a user early in their R career can understand and apply our examples.
 
-While we show the code behind the vast majority of the analyses, in the interest of space we sometimes choose not to show the code generating a particular visualization if we've already provided the code for several similar graphs. We trust the user can learn from and build on our examples, and of the code used to generate the book can be found in our [public GitHub repository](https://github.com/dgrtwo/tidy-text-mining).
+While we show the code behind the vast majority of the analyses, in the interest of space we sometimes choose not to show the code generating a particular visualization if we've already provided the code for several similar graphs. We trust the reader can learn from and build on our examples, and of the code used to generate the book can be found in our [public GitHub repository](https://github.com/dgrtwo/tidy-text-mining).
 
 ## Outline
 
