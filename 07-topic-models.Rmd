@@ -25,7 +25,7 @@ Latent Dirichlet allocation is one of the most common algorithms for topic model
 
 LDA is a mathematical method for estimating both of these at the same time: finding the mixture of words that is associated with each topic, while also determining the mixture of topics that describes each word. It has a number of existing implementations, and we'll explore one of them.
 
-In Chapter \ref{dtm} we briefly introduced the `AssociatedPress` dataset provided by the topicmodels package, as an example of a DocumentTermMatrix. This is a collection of 2246 news articles from an American news agency, mostly published around 1988.
+In Chapter \@ref(dtm) we briefly introduced the `AssociatedPress` dataset provided by the topicmodels package, as an example of a DocumentTermMatrix. This is a collection of 2246 news articles from an American news agency, mostly published around 1988.
 
 ```{r}
 library(topicmodels)
@@ -46,7 +46,7 @@ Fitting the model was the "easy part": the remainder of the analysis will involv
 
 ### Word-topic probabilities
 
-In Chapter \ref{dtm} we introduced the `tidy()` method, originally from the [broom package](https://github.com/dgrtwo/broom), for tidying model objects. The tidytext package provides this method for extracting the per-topic-per-word probabilities, called $\beta$ ("beta"), from the model.
+In Chapter \@ref(dtm) we introduced the `tidy()` method, originally from the [broom package](https://github.com/dgrtwo/broom), for tidying model objects. The tidytext package provides this method for extracting the per-topic-per-word probabilities, called $\beta$ ("beta"), from the model.
 
 ```{r ap_lda_td}
 library(tidytext)
@@ -57,7 +57,7 @@ ap_lda_td
 
 Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term 
 
-We could use dplyr's `top_n()` to find the top 10 terms within each topic.As a tidy data frame, this lends itself well to a ggplot2 visualization (Figure \ref{fig:aptoptermsplot}).
+We could use dplyr's `top_n()` to find the top 10 terms within each topic. As a tidy data frame, this lends itself well to a ggplot2 visualization (Figure \@ref(fig:aptoptermsplot)).
 
 ```{r aptoptermsplot, dependson = "ap_lda_td", fig.height=6, fig.width=7, fig.cap = "The terms that are most common within each topic"}
 library(ggplot2)
@@ -93,7 +93,7 @@ beta_spread <- ap_lda_td %>%
 beta_spread
 ```
 
-The words with the greatest differences between the two topics are visualized in Figure \ref{fig:topiccompare}.
+The words with the greatest differences between the two topics are visualized in Figure \@ref(fig:topiccompare).
 
 ```{r topiccompare, dependson = "beta_spread", fig.cap = "Words with the greatest difference in 'beta' between topic 2 and topic 1"}
 beta_spread %>%
@@ -142,7 +142,7 @@ Suppose a vandal has broken into your study and torn apart four of your books:
 
 This vandal has torn the books into individual chapters, and left them in one large pile. How can we restore these disorganized chapters to their original books? This is a challenging problem since the individual chapters are **unlabeled**: we don't know what words might distinguish them into groups. We'll thus use topic modeling to discover how chapters cluster into distinct topics, each of them representing one of the books.
 
-We'll retrieve the text of these four books using the gutenbergr package introduced in Chapter \ref{tfidf}.
+We'll retrieve the text of these four books using the gutenbergr package introduced in Chapter \@ref(tfidf).
 
 ```{r titles}
 library(dplyr)
@@ -192,7 +192,7 @@ word_counts
 
 ### LDA on chapters
 
-Right now our data frame `word_counts` is in a tidy form, with one-term-per-document-per-row. However, the topicmodels package requires a `DocumentTermMatrix` (from the tm package). As described in Chapter \ref{dtm}, we can cast a one-token-per-row table into a `DocumentTermMatrix` with tidytext's `cast_dtm()`.
+Right now our data frame `word_counts` is in a tidy form, with one-term-per-document-per-row. However, the topicmodels package requires a `DocumentTermMatrix` (from the tm package). As described in Chapter \@ref(dtm), we can cast a one-token-per-row table into a `DocumentTermMatrix` with tidytext's `cast_dtm()`.
 
 ```{r chapters_dtm}
 chapters_dtm <- word_counts %>%
@@ -231,7 +231,7 @@ top_terms <- chapters_lda_td %>%
 top_terms
 ```
 
-This output lends itself well to a ggplot2 visualization (Figure \ref{toptermsplot}).
+This output lends itself well to a ggplot2 visualization (Figure \@ref(toptermsplot)).
 
 ```{r toptermsplot, fig.height=6, fig.width=7, fig.cap = "The terms that are most common within each topic"}
 library(ggplot2)
@@ -261,7 +261,7 @@ Each of these values is an estimated proportion of words from that document that
 
 Now that we have these document classifiations, we can see how well our unsupervised learning did at distinguishing the four books. We'd expect that chapters within a book would be found to be mostly (or entirely), generated from the corresponding topic.
 
-First we re-separate the document name into title and chapter, after which we can visualize the per-document-per-topic probability for each (Figure \ref{fig:chaptersldagamma}). 
+First we re-separate the document name into title and chapter, after which we can visualize the per-document-per-topic probability for each (Figure \@ref(fig:chaptersldagamma).
 
 ```{r chapters_lda_gamma}
 chapters_lda_gamma <- chapters_lda_gamma %>%
@@ -376,7 +376,7 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-```{r mallet_model, results = "hide", cache = FALSE}
+```{r mallet_model, results = "hide", cache = FALSE, eval = FALSE}
 library(mallet)
 
 # Create a vector with one string per chapter
@@ -396,7 +396,7 @@ mallet_model$train(100)
 
 Once the model is created, however, we can use the `tidy()` and `augment()` functions described in the rest of the chapter in an almost identical way. This includes extracting the probabilities of words within each topic or topics within each document.
 
-```{r cache = FALSE}
+```{r cache = FALSE, eval = FALSE}
 # word-topic pairs
 tidy(mallet_model)
 

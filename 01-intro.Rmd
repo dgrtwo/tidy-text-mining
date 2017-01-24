@@ -32,21 +32,21 @@ We do assume that the reader is at least slightly familiar with dplyr, ggplot2, 
 
 We start by introducing the tidy text format, and some of the ways dplyr, tidyr, and tidytext allow informative analyses of this structure.
 
-* **Chapter 2** outlines the tidy text format and the `unnest_tokens()` function. It also introduces the gutenbergr and janeaustenr packages, which provide useful literary text datasets that we'll use throughout this book.
-* **Chapter 3** shows how to perform sentiment analysis on a tidy text dataset, using the `sentiments` dataset from tidytext and `inner_join()` from dplyr.
-* **Chapter 4** describes the tf-idf statistic (term frequency times inverse document frequency), a quantity used for identifying terms that are especially important to a particular document.
-* **Chapter 5** introduces n-grams and how to analyze word networks in text using the widyr package.
+* **Chapter \@ref(tidytext)** outlines the tidy text format and the `unnest_tokens()` function. It also introduces the gutenbergr and janeaustenr packages, which provide useful literary text datasets that we'll use throughout this book.
+* **Chapter \@ref(sentiment)** shows how to perform sentiment analysis on a tidy text dataset, using the `sentiments` dataset from tidytext and `inner_join()` from dplyr.
+* **Chapter \@ref(tfidf)** describes the tf-idf statistic (term frequency times inverse document frequency), a quantity used for identifying terms that are especially important to a particular document.
+* **Chapter \@ref(ngrams)** introduces n-grams and how to analyze word networks in text using the widyr package.
 
 Text won't be tidy at all stages of an analysis, and it is important to be able to convert back and forth from a tidy format.
 
-* **Chapter 6** introduces methods for tidying document-term matrices and corpus objects from the tm and quanteda packages, as well as for casting tidy text datasets into those formats.
-* **Chapter 7** explores the concept of topic modeling, and uses the `tidy()` method for interpreting and visualizing the output of the topicmodels package. 
+* **Chapter \@ref(dtm)** introduces methods for tidying document-term matrices and corpus objects from the tm and quanteda packages, as well as for casting tidy text datasets into those formats.
+* **Chapter \@ref(topicmodeling)** explores the concept of topic modeling, and uses the `tidy()` method for interpreting and visualizing the output of the topicmodels package. 
 
-We conclude with several tidy text analyses that bring together multiple text mining approaches we've learned.
+We conclude with several case studies that bring together multiple tidy text mining approaches we've learned.
 
-* **Chapter 8** demonstrates an application of a tidy text analysis by analyzing the authors' own Twitter archives. How do Dave's and Julia's tweeting habits compare?
-* **Chapter 9** explores metadata from over 32,000 NASA datasets by looking at how keywords from the datasets are connected to title and description fields.
-* **Chapter 10** analyzes a dataset of Usenet messages from a diverse set of newsgroups (focused on topics like politics, hockey, technology, atheism, and more) to understand patterns across the groups.
+* **Chapter \@ref(twitter)** demonstrates an application of a tidy text analysis by analyzing the authors' own Twitter archives. How do Dave's and Julia's tweeting habits compare?
+* **Chapter \@ref(nasa)** explores metadata from over 32,000 NASA datasets by looking at how keywords from the datasets are connected to title and description fields.
+* **Chapter \@ref(usenet)** analyzes a dataset of Usenet messages from a diverse set of newsgroups (focused on topics like politics, hockey, technology, atheism, and more) to understand patterns across the groups.
 
 ## Topics this book does not cover
 
