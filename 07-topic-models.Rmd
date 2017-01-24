@@ -55,7 +55,7 @@ ap_lda_td <- tidy(ap_lda)
 ap_lda_td
 ```
 
-Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term "aaron" has a `r ap_lda_td$beta[1]` probability of being generated from topic 1, but a `r ap_lda_td$beta[2]` probability of being generated from topic 2.
+Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term "aaron" has a $`r ap_lda_td$beta[1]`$ probability of being generated from topic 1, but a $`r ap_lda_td$beta[2]`$ probability of being generated from topic 2.
 
 We could use dplyr's `top_n()` to find the 10 terms that are most common within each topic. As a tidy data frame, this lends itself well to a ggplot2 visualization (Figure \@ref(fig:aptoptermsplot)).
 
@@ -131,7 +131,7 @@ tidy(AssociatedPress) %>%
 
 Based on the most common words, this appears to be an article about the relationship between the American government and Panamanian dictator Manuel Noriega, which means the algorithm was right to place it in topic 2 (as political/national news).
 
-## Example: the great library heist
+## Example: the great library heist {#library-heist}
 
 When examining a statistical method, it can be useful to try it on a very simple case where you know the "right answer". For example, we could collect a set of documents that definitely relate to four separate topics, then perform topic modeling to see whether the algorithm can correctly distinguish the four groups. This lets us double-check that the method is useful, and gain a sense of how and when it can go wrong. We'll try this with some data from classic literature.
 
@@ -248,7 +248,7 @@ top_terms %>%
 
 These topics are pretty clearly associated with the four books! There's no question that the topic of "captain", "nautilus", "sea", and "nemo" belongs to *Twenty Thousand Leagues Under the Sea*, and that "jane", "darcy", and "elizabeth" belongs to *Pride and Prejudice*. We see "pip" and "joe" from *Great Expectations* and "martians", "black", and "night" from *The War of the Worlds*. We also notice that, in line with LDA being a "fuzzy clustering" method, there can be words in common between multiple topics, such as "miss" in topics 1 and 4, and "time" in topics 3 and 4.
 
-### Per-document classification
+### Per-document classification {#per-document}
 
 Each document in this analysis represented a single chapter. Thus, we may want to know which topics are associated with each document. Can we put the chapters back together in the correct books? We can find this by examining the per-document-per-topic probabilities, $\gamma$ ("gamma").
 
@@ -379,7 +379,7 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-```{r mallet_model, results = "hide", cache = FALSE}
+```{r mallet_model, results = "hide", cache = FALSE, eval = FALSE}
 library(mallet)
 
 # create a vector with one string per chapter
@@ -399,7 +399,7 @@ mallet_model$train(100)
 
 Once the model is created, however, we can use the `tidy()` and `augment()` functions described in the rest of the chapter in an almost identical way. This includes extracting the probabilities of words within each topic or topics within each document.
 
-```{r cache = FALSE}
+```{r cache = FALSE, eval = FALSE}
 # word-topic pairs
 tidy(mallet_model)
 
