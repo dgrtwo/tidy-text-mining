@@ -379,7 +379,7 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-```{r mallet_model, results = "hide", cache = FALSE, eval = FALSE}
+```{r mallet_model, results = "hide", cache = FALSE}
 library(mallet)
 
 # create a vector with one string per chapter
@@ -399,7 +399,7 @@ mallet_model$train(100)
 
 Once the model is created, however, we can use the `tidy()` and `augment()` functions described in the rest of the chapter in an almost identical way. This includes extracting the probabilities of words within each topic or topics within each document.
 
-```{r cache = FALSE, eval = FALSE}
+```{r cache = FALSE}
 # word-topic pairs
 tidy(mallet_model)
 
