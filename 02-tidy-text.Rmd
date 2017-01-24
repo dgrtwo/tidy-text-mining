@@ -12,9 +12,9 @@ We define the tidy text format as being a table with **one-term-per-row.** Struc
 
 * **Raw string**: Text can, of course, be stored as raw strings within R, and often text data is first read into memory in this form.
 * **Corpus**: These types of objects typically annotate the raw string content with additional metadata and details.
-* **Document-term matrix**: This is a sparse matrix describing a collection (i.e., a corpus) of documents with one row for each document and one column for each term. The value in the matrix is typically word count or tf-idf (see [Chapter 4](#tfidf)).
+* **Document-term matrix**: This is a sparse matrix describing a collection (i.e., a corpus) of documents with one row for each document and one column for each term. The value in the matrix is typically word count or tf-idf (see Chapter \@ref(tfidf)).
 
-Let's hold off on exploring structures like a document-term matrix until [Chapter 6](#dtm), and get down to the basics of converting text to a tidy format.
+Let's hold off on exploring structures like a document-term matrix until Chapter \@ref(dtm), and get down to the basics of converting text to a tidy format.
 
 ## The `unnest_tokens` function
 

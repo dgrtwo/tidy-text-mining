@@ -61,7 +61,7 @@ ap_td
 
 Notice that we now have a tidy three-column `tbl_df`, with variables `document`, `term`, and `count`. This tidying operation is similar to the `melt` function from the reshape2 package [@R-reshape2] for non-sparse matrices. Notice that only the non-zero values are included: document 1 includes terms such as "adding" and "adult", but not "aaron" or "abandon", and thus the tidied version has no rows where `count` is zero.
 
-As we've seen in previous chapters, this form is convenient for analysis with the dplyr, tidytext and ggplot2 packages. For example, you can perform sentiment analysis on these newspaper articles with the approach described in Chapter \ref{sentiment}.
+As we've seen in previous chapters, this form is convenient for analysis with the dplyr, tidytext and ggplot2 packages. For example, you can perform sentiment analysis on these newspaper articles with the approach described in Chapter \@ref(sentiment).
 
 ```{r ap_sentiments, dependson = "ap_td"}
 ap_sentiments <- ap_td %>%
@@ -70,7 +70,7 @@ ap_sentiments <- ap_td %>%
 ap_sentiments
 ```
 
-This would let us visualize which words from the AP articles most often contributed to positive or negative sentiment, seen in Figure \ref{fig:apsentiments}. We can see that the most common positive words include "like", "work", "support", and "good", while the most negative words include "killed", "death", and "vice". (The inclusion of "vice" as a negative term is probably a mistake on the algorithm's part, since it likely usually refers to "vice president").
+This would let us visualize which words from the AP articles most often contributed to positive or negative sentiment, seen in Figure \@ref(fig:apsentiments). We can see that the most common positive words include "like", "work", "support", and "good", while the most negative words include "killed", "death", and "vice". (The inclusion of "vice" as a negative term is probably a mistake on the algorithm's part, since it likely usually refers to "vice president").
 
 ```{r apsentiments, dependson = "apsentiments", fig.height = 6, fig.width = 7, fig.cap = "Words from AP articles with the greatest contribution to positive or negative sentiments, computed as the product of the word's AFINN sentiment score and its frequency."}
 library(ggplot2)
@@ -109,7 +109,7 @@ inaug_td <- tidy(inaug_dfm)
 inaug_td
 ```
 
-We may be interested in finding the words most specific to each inaugural speeches. This could be quantified by calculating the TF-IDF of each term-speech pair using the `bind_tf_idf` function, as described in Chapter \ref{tfidf}.
+We may be interested in finding the words most specific to each inaugural speeches. This could be quantified by calculating the TF-IDF of each term-speech pair using the `bind_tf_idf` function, as described in Chapter \@ref(tfidf).
 
 ```{r presidents, dependson = "inaug_td", fig.width = 8, fig.height = 8}
 inaug_tf_idf <- inaug_td %>%
@@ -119,7 +119,7 @@ inaug_tf_idf <- inaug_td %>%
 inaug_tf_idf
 ```
 
-We could use this data to pick four notable inaugural addresses (from Presidents Lincoln, Roosevelt, Kennedy, and Obama), and visualize the words most specific to each speech, as shown in Figure \ref{fig:presidentspeeches}.
+We could use this data to pick four notable inaugural addresses (from Presidents Lincoln, Roosevelt, Kennedy, and Obama), and visualize the words most specific to each speech, as shown in Figure \@ref(fig:presidentspeeches).
 
 ```{r presidentspeeches, dependson = "presidents", echo = FALSE, fig.cap = "The terms with the highest TF-IDF from each of four selected inaugural addresses."}
 speeches <- c("1933-Roosevelt", "1861-Lincoln",
@@ -151,7 +151,7 @@ year_term_counts <- inaug_td %>%
   mutate(year_total = sum(count))
 ```
 
-This lets us pick several words and visualize how they changed in frequency over time, as shown in \ref{fig:yearterm}. We can see that over time, American presidents became less likely to refer to the country as the "Union" and more likely to refer to "America". They also became less likely to talk about the "constitution" and foreign" countries, and more likely to mention "freedom" and "God".
+This lets us pick several words and visualize how they changed in frequency over time, as shown in \@ref(fig:yearterm). We can see that over time, American presidents became less likely to refer to the country as the "Union" and more likely to refer to "America". They also became less likely to talk about the "constitution" and foreign" countries, and more likely to mention "freedom" and "God".
 
 ```{r yearterm, dependson = "year_term_counts", fig.cap = "Changes in word frequency over time within Presidential inaugural addresses, for four selected terms."}
 year_term_counts %>%
@@ -210,7 +210,7 @@ austen_dtm <- austen_books() %>%
 austen_dtm
 ```
 
-This casting process allows for reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications. In Chapter \ref{topicmodeling}, we'll examine some examples where a tidy-text dataset has to be converted into a DocumentTermMatrix for processing.
+This casting process allows for reading, filtering, and processing to be done using dplyr and other tidy tools, after which the data can be converted into a document-term matrix for machine learning applications. In Chapter \@ref(topicmodeling), we'll examine some examples where a tidy-text dataset has to be converted into a DocumentTermMatrix for processing.
 
 ## Tidying corpus objects with metadata
 
@@ -254,7 +254,7 @@ acq_tokens %>%
   arrange(desc(tf_idf))
 ```
 
-### Example: mining financial articles
+### Example: mining financial articles {#financial}
 
 `Corpus` objects are a common output format for data ingesting packages, which means the `tidy()` function gives us access to a wide variety of text data. One example is [tm.plugin.webmining](https://cran.r-project.org/package=tm.plugin.webmining), which connects to online feeds to retrieve news articles based on a keyword. For instance, performing `WebCorpus(GoogleFinanceSource("NASDAQ:MSFT")))` allows us to retrieve the 20 most recent articles related to the Microsoft (MSFT) stock.
 
@@ -308,7 +308,7 @@ stock_tf_idf <- stock_tokens %>%
   arrange(-tf_idf)
 ```
 
-The top terms for each are visualized in Figure \ref{fig:stocktfidf}. As we'd expect the company's name and is typically included, but so are several of their product offerings and executives, as well as companies they are making deals with (such as Disney with Netflix).
+The top terms for each are visualized in Figure \@ref(fig:stocktfidf). As we'd expect the company's name and is typically included, but so are several of their product offerings and executives, as well as companies they are making deals with (such as Disney with Netflix).
 
 ```{r stocktfidf, dependson = "stock_tf_idf", echo = FALSE, fig.cap = "The 8 words with the highest TF-IDF in recent articles specific to each company.", fig.height = 8, fig.width = 8}
 stock_tf_idf %>%
@@ -323,7 +323,7 @@ stock_tf_idf %>%
        y = "TF-IDF")
 ```
 
-If we were interested in using recent news to analyze the market and make investment decisions, we'd likely want to use sentiment analysis to determine whether the news coverage was positive or negative. Before we run such an analysis, we should look at what words would contribute the most to positive and negative sentiments, as was shown in Chapter \ref{most-positive-negative}. For example, we could examine this within the AFINN lexicon (Figure \ref{fig:stockafinn}).
+If we were interested in using recent news to analyze the market and make investment decisions, we'd likely want to use sentiment analysis to determine whether the news coverage was positive or negative. Before we run such an analysis, we should look at what words would contribute the most to positive and negative sentiments, as was shown in Chapter \@ref(most-positive-negative). For example, we could examine this within the AFINN lexicon (Figure \@ref(fig:stockafinn)).
 
 ```{r stockafinn, dependson = "stock_articles", fig.cap = "The words with the largest contribution to sentiment scores in recent financial articles, according to the AFINN dictionary. The 'contribution' is the product of the word and the sentiment score."}
 stock_tokens %>%
@@ -360,7 +360,7 @@ stock_tokens %>%
   ylab("Frequency of this word in the recent financial articles")
 ```
 
-These assignments (Figure \ref{fig:stockloughransentiments}) of words to sentiments look more reasonable: common positive words include "strong" and "better", but not "shares" or "growth", while negative words include "volatility" but not "fool". The other sentiments look reasonable as well: the most common "uncertainty" terms include "could" and "may".
+These assignments (Figure \@ref(fig:stockloughransentiments)) of words to sentiments look more reasonable: common positive words include "strong" and "better", but not "shares" or "growth", while negative words include "volatility" but not "fool". The other sentiments look reasonable as well: the most common "uncertainty" terms include "could" and "may".
 
 Now that we know we can trust the dictionary to approximate the articles' sentiments, we can use our typical methods for counting the number of uses of each sentiment-associated word in each corpus.
 
@@ -373,7 +373,7 @@ stock_sentiment_count <- stock_tokens %>%
 stock_sentiment_count
 ```
 
-It might be interesting to examine which company has the most news with "litigious" or "uncertain" terms. But the simplest measure, much as it was for most analysis in Chapter \ref{sentiment}, is to see whether the news is more positive or negative. As a general quantitative measure of sentiment, we'll use "(positive - negative) / (positive + negative)" (Figure \ref{fig:stockpositivity}).
+It might be interesting to examine which company has the most news with "litigious" or "uncertain" terms. But the simplest measure, much as it was for most analysis in Chapter \@ref(sentiment), is to see whether the news is more positive or negative. As a general quantitative measure of sentiment, we'll use "(positive - negative) / (positive + negative)" (Figure \@ref(fig:stockpositivity)).
 
 ```{r stockpositivity, fig.cap = "'Positivity' of the news coverage around each stock in January 2017, calculated as (positive - negative) / (positive + negative), based on uses of positive and negative words in 20 recent news articles about each company."}
 stock_sentiment_count %>%
