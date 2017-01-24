@@ -194,7 +194,7 @@ It looks like there were four main clusters of newsgroups: computers/electronics
 
 ### Topic modeling
 
-In Chapter \@ref(topicmodels), we used the latent Dirichlet allocation (LDA) algorithm to divide a set of chapters into the books they originally came from. Could LDA do the same to sort out Usenet messages that came from different newsgroups?
+In Chapter \@ref(topicmodeling), we used the latent Dirichlet allocation (LDA) algorithm to divide a set of chapters into the books they originally came from. Could LDA do the same to sort out Usenet messages that came from different newsgroups?
 
 Let's try dividing up messages from the four science-related newsgroups. We first process these into a document-term matrix with `cast_dtm()` (Chapter \@ref(cast-dtm)), then fit the model with the `LDA()` function from the topicmodels package.
 
@@ -220,7 +220,7 @@ library(topicmodels)
 sci_lda <- LDA(sci_dtm, k = 4, control = list(seed = 2016))
 ```
 
-What four topics did this model extract, and did they match the four newsgroups? This approach will look familiar from Chapter \@ref(topicmodels): we visualize each topic based on the most frequent terms within it (Figure \@ref(fig:usenettopicterms)).
+What four topics did this model extract, and did they match the four newsgroups? This approach will look familiar from Chapter \@ref(topicmodeling): we visualize each topic based on the most frequent terms within it (Figure \@ref(fig:usenettopicterms)).
 
 ```{r usenettopicterms, dependson = "sci_lda", fig.cap = "The top 8 words from each topic fit by LDA on the science-related newsgroups"}
 sci_lda %>%
@@ -237,7 +237,7 @@ sci_lda %>%
 
 From the top words, we can start to suspect which topics may capture which newsgroups. Topic 1 certainly represents the sci.space newsgroup (thus the most common word being "space"), and topic 2 is likely drawn from cryptography, with terms such as "key" and "encryption". Just as we did in Chapter \@ref(per-document), we can confirm this by seeing how documents from each newsgroup have higher "gamma" for each topic (Figure \@ref(fig:usenetassignments)).
 
-```{r usenetassignments, dependson = "sci_lda", fig.cap = ""}
+```{r usenetassignments, dependson = "sci_lda", fig.cap = "Distribution of gamma for each topic within each Usenet newsgroup"}
 sci_lda %>%
   tidy(matrix = "gamma") %>%
   separate(document, c("newsgroup", "id"), sep = "_") %>%
@@ -289,7 +289,7 @@ contributions <- usenet_words %>%
 contributions
 ```
 
-Which words had the most effect on sentiment scores overall (Figure \@ref(usenetcontributions))? 
+Which words had the most effect on sentiment scores overall (Figure \@ref(fig:usenetcontributions))? 
 
 ```{r usenetcontributions, dependson = "contributions", fig.width=6, fig.height=6, fig.cap = "Words with the greatest contributions to positive/negative sentiment scores in the Usenet text"}
 contributions %>%
@@ -312,7 +312,7 @@ top_sentiment_words <- words_by_newsgroup %>%
 top_sentiment_words
 ```
 
-```{r newsgroupsentiment, fig.height = 10, fig.width = 10, dependson = "top_sentiment_words", echo = FALSE}
+```{r newsgroupsentiment, fig.height = 10, fig.width = 10, dependson = "top_sentiment_words", echo = FALSE, fig.cap = "The 12 words that contributed the most to sentiment scores within each of six newsgroups"}
 top_sentiment_words %>%
   filter(str_detect(newsgroup, "^(talk|alt|misc)")) %>%
   group_by(newsgroup) %>%
@@ -324,7 +324,9 @@ top_sentiment_words %>%
   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
   scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
   facet_wrap(~ newsgroup, scales = "free") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  coord_flip() +
+  labs(x = "",
+       y = "Sentiment score * # of occurrences")
 ```
 
 This confirms our hypothesis about the "misc.forsale" newsgroup: most of the sentiment was driven by positive adjectives such as "excellent" and "perfect". We can also see how much sentiment is confounded with topic. An atheism newsgroup is likely to discuss "god" in detail even in a negative context, and we can see that it makes the newsgroup look more positive. Similarly, the negative contribution of the word "gun" to the "talk.politics.guns" group will occur even when the members are discussing guns positively.
