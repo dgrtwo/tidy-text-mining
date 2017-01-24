@@ -14,7 +14,7 @@ In our final chapter, we'll use what we've learned in this book to perform a sta
 
 We'll start by reading in all the messages, which are organized in sub-folders, with one file for each message. Note that this step takes several minutes to read all the documents.
 
-```{r}
+```{r libraries}
 library(dplyr)
 library(tidyr)
 library(purrr)
@@ -37,7 +37,7 @@ raw_text <- data_frame(folder = dir(training_folder, full.names = TRUE)) %>%
   transmute(newsgroup = basename(folder), id, text)
 ```
 
-```{r raw_text, echo = FALSE}
+```{r raw_text, depends = "libraries", echo = FALSE}
 load("data/raw_text.rda")
 ```
 
@@ -47,7 +47,7 @@ raw_text
 
 Notice the `id` column, which identifies a unique message, and the `newsgroup` column, which describes which of the 20 newsgroups each message comes from. What newsgroups are included, and how many messages were posted in each (Figure \ref{fig:messagecounts})?
 
-```{r messagecounts, fig.cap = "Number of messages from each newsgroup"}
+```{r messagecounts, dependson="raw_text", fig.cap = "Number of messages from each newsgroup"}
 library(ggplot2)
 
 raw_text %>%

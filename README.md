@@ -1,4 +1,4 @@
-This is a draft of the book [**Tidy Text Mining with R**](http://tidytextmining.com/), by Julia Silge and David Robinson.
+This is a draft of the book [**Text Mining with R: A Tidy Approach**](http://tidytextmining.com/), by Julia Silge and David Robinson.
 
 [![Travis-CI Build Status](https://travis-ci.org/dgrtwo/tidy-text-mining.svg?branch=master)](https://travis-ci.org/dgrtwo/tidy-text-mining)
 
