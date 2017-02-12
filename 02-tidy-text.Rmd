@@ -104,7 +104,7 @@ tidy_books %>%
   count(word, sort = TRUE) 
 ```
 
-Because we've been using tidy tools, our word counts are stored in a tidy data frame. This allows us to pipe this directly the ggplot2 package, for example to create a visualization of the most common words (Figure \@ref(#plotcount)).
+Because we've been using tidy tools, our word counts are stored in a tidy data frame. This allows us to pipe this directly to the ggplot2 package, for example to create a visualization of the most common words (Figure \@ref(fig:plotcount)).
 
 ```{r plotcount, dependson = "tidy_books", fig.width=6, fig.height=5, fig.cap="The most common words in Jane Austen's novels"}
 library(ggplot2)
