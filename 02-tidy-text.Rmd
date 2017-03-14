@@ -49,7 +49,7 @@ text_df %>%
   unnest_tokens(word, text)
 ```
 
-The two basic arguments to `unnest_tokens` used here are column names, first the output column name that the text will be unnested into (`word`, in this case) and then the input column that the text comes from (`text`, in this case). After using `unnest_tokens`, we've split each row so that there is one token (word) in each row of the new data frame; the default tokenization in `unnest_tokens()` is for single words, as shown here. Also notice:
+The two basic arguments to `unnest_tokens` used here are column names. First we have the output column name that will be created as the text is unnested into it (`word`, in this case), and then the input column that the text comes from (`text`, in this case). After using `unnest_tokens`, we've split each row so that there is one token (word) in each row of the new data frame; the default tokenization in `unnest_tokens()` is for single words, as shown here. Also notice:
 
 * Other columns, such as the line number each word came from, are retained.
 * Punctuation has been stripped.
