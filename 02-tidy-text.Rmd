@@ -8,9 +8,9 @@ library(ggplot2)
 theme_set(theme_light())
 ```
 
-We define the tidy text format as being a table with **one-term-per-row.** Structuring text data in this way means that it conforms to tidy data principles and can be manipulated with a set of consistent tools. This is worth contrasting with the ways text is often stored in text mining approaches.
+We define the tidy text format as being a table with **one-token-per-row.** Structuring text data in this way means that it conforms to tidy data principles and can be manipulated with a set of consistent tools. This is worth contrasting with the ways text is often stored in text mining approaches.
 
-* **Raw string**: Text can, of course, be stored as raw strings within R, and often text data is first read into memory in this form.
+* **String**: Text can, of course, be stored as strings, i.e., character vectors, within R, and often text data is first read into memory in this form.
 * **Corpus**: These types of objects typically contain raw strings annotated with additional metadata and details.
 * **Document-term matrix**: This is a sparse matrix describing a collection (i.e., a corpus) of documents with one row for each document and one column for each term. The value in the matrix is typically word count or tf-idf (see Chapter \@ref(tfidf)).
 
@@ -86,7 +86,7 @@ tidy_books <- original_books %>%
 tidy_books
 ```
 
-This function uses the [tokenizers](https://github.com/ropensci/tokenizers) package [@R-tokenizers] to separate each line of text in the original data frame into tokens. The default tokenizing is for words, but other options include characters, n-grams, sentences, lines, paragraphs, or separation around a regex pattern.
+This function uses the [tokenizers](https://github.com/ropensci/tokenizers) package to separate each line of text in the original data frame into tokens. The default tokenizing is for words, but other options include characters, n-grams, sentences, lines, paragraphs, or separation around a regex pattern.
 
 Now that the data is in one-word-per-row format, we can manipulate it with tidy tools like dplyr. We can remove stop words (kept in the tidytext dataset `stop_words`) with an `anti_join()`.
 
@@ -114,7 +114,7 @@ tidy_books %>%
   filter(n > 600) %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(word, n)) +
-  geom_bar(stat = "identity") +
+  geom_col() +
   xlab(NULL) +
   coord_flip()
 ```
@@ -177,24 +177,20 @@ tidy_bronte %>%
 
 Interesting that "time", "eyes", and "hand" are in the top 10 for both H.G. Wells and the Brontë sisters.
 
-Now, let's calculate the frequency for each word for the works of Jane Austen, the Brontë sisters, and H.G. Wells.
+Now, let's calculate the frequency for each word for the works of Jane Austen, the Brontë sisters, and H.G. Wells. We can use `spread` and `gather` from tidyr to reshape our dataframe so that it is just what we need for plotting and comparing the three sets of novels.
 
 ```{r frequency, dependson = c("tidy_bronte", "tidy_hgwells", "tidy_books")}
-tidy_both <- bind_rows(
-  mutate(tidy_bronte, author = "Brontë Sisters"),
-  mutate(tidy_hgwells, author = "H.G. Wells"))
+library(tidyr)
 
-austen_percent <- tidy_books %>%
-  mutate(word = str_extract(word, "[a-z']+")) %>%
-  count(word) %>%
-  transmute(word, austen = n / sum(n))
-
-frequency <- tidy_both %>%
+frequency <- bind_rows(mutate(tidy_bronte, author = "Brontë Sisters"),
+                       mutate(tidy_hgwells, author = "H.G. Wells"), 
+                       mutate(tidy_books, author = "Jane Austen")) %>% 
   mutate(word = str_extract(word, "[a-z']+")) %>%
   count(author, word) %>%
-  mutate(other = n / sum(n)) %>%
-  left_join(austen_percent) %>%
-  ungroup()
+  mutate(proportion = n / sum(n)) %>% 
+  select(-n) %>% 
+  spread(author, proportion) %>% 
+  gather(author, proportion, `Brontë Sisters`:`H.G. Wells`)
 ```
 
 We use `str_extract()` here because the UTF-8 encoded texts from Project Gutenberg have some examples of words with underscores around them to indicate emphasis (like italics). The tokenizer treated these as words, but we don't want to count "\_any\_" separately from "any". Now let's plot (Figure \@ref(fig:plotcompare)).
@@ -202,7 +198,7 @@ We use `str_extract()` here because the UTF-8 encoded texts from Project Gutenbe
 ```{r plotcompare, dependson = "frequency", fig.width=10, fig.height=5.5, fig.cap="Comparing the word frequencies of Jane Austen, the Brontë sisters, and H.G. Wells"}
 library(scales)
 
-ggplot(frequency, aes(x = other, y = austen, color = abs(austen - other))) +
+ggplot(frequency, aes(x = proportion, y = `Jane Austen`, color = abs(`Jane Austen` - proportion))) +
   geom_abline(color = "gray40", lty = 2) +
   geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
   geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
@@ -222,9 +218,13 @@ Let's quantify how similar and different these sets of word frequencies are usin
 
 ```{r cor_test, dependson = "frequency"}
 cor.test(data = frequency[frequency$author == "Brontë Sisters",],
-         ~ other + austen)
+         ~ proportion + `Jane Austen`)
 cor.test(data = frequency[frequency$author == "H.G. Wells",], 
-         ~ other + austen)
+         ~ proportion + `Jane Austen`)
 ```
 
 Just as we saw in the plots, the word frequencies are more correlated between the Austen and Brontë novels than between Austen and H.G. Wells.
+
+## Conclusion
+
+In this chapter, we explored what we mean by tidy data when it comes to text, and how tidy data principles can be applied to natural language processing. When text is organized in a format with one token per row, tasks like removing stop words or calculating word frequencies are natural applications of familiar operations within the tidy tool ecosystem. The one-token-per-row framework can be extended from single words to n-grams and other meaningful units of text, as well as to many more analysis priorities.

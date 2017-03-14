@@ -308,7 +308,7 @@ desc_tf_idf %>%
   ungroup() %>%
   mutate(word = factor(word, levels = rev(unique(word)))) %>%
   ggplot(aes(word, tf_idf, fill = keyword)) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
+  geom_col(show.legend = FALSE) +
   facet_wrap(~keyword, ncol = 3, scales = "free") +
   coord_flip() +
   labs(title = "Highest tf-idf words in NASA metadata description fields",
@@ -410,7 +410,7 @@ top_terms %>%
   ungroup() %>%
   mutate(term = factor(paste(term, topic, sep = "__"), levels = rev(paste(term, topic, sep = "__")))) %>%
   ggplot(aes(term, beta, fill = as.factor(topic))) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
+  geom_col(show.legend = FALSE) +
   coord_flip() +
   scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
   labs(title = "Top 10 terms in each LDA topic",
@@ -475,7 +475,7 @@ top_keywords %>%
   mutate(keyword = factor(paste(keyword, topic, sep = "__"), 
                           levels = rev(paste(keyword, topic, sep = "__")))) %>%
   ggplot(aes(keyword, n, fill = as.factor(topic))) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
+  geom_col(show.legend = FALSE) +
   labs(title = "Top keywords for each LDA topic",
        x = NULL, y = "Number of documents") +
   coord_flip() +
