@@ -14,6 +14,7 @@ Imports:
   gutenbergr,
   jsonlite,
   igraph,
+  ggraph,
   readr,
   tm,
   Matrix,
@@ -27,5 +28,4 @@ Imports:
   mallet
 Remotes:
   juliasilge/tidytext,
-  dgrtwo/widyr,
-  thomasp85/ggraph
+  dgrtwo/widyr
