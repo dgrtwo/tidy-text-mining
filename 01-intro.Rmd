@@ -14,7 +14,7 @@ As described by Hadley Wickham [@tidydata], tidy data has a specific structure:
 * Each observation is a row
 * Each type of observational unit is a table
 
-We thus define the tidy text format as being **a table with one-token-per-row.** This is in contrast to the ways text is often stored in current analyses, as raw strings, in a structured "corpus" object, or in a document-term matrix. For tidy text mining, the **token** that is stored in each row is most often a single word, but can also be an n-gram, sentence, or paragraph. In the tidytext package, we provide functionality to tokenize by commonly used units of text like these and convert to a one-term-per-row format.
+We thus define the tidy text format as being **a table with one-token-per-row.** A token is a meaningful unit of text, such as a word, that we are interested in using for analysis, and tokenization is the process of splitting text into tokens. This one-token-per-row structure is in contrast to the ways text is often stored in current analyses, as strings, in a structured "corpus" object, or in a document-term matrix. For tidy text mining, the **token** that is stored in each row is most often a single word, but can also be an n-gram, sentence, or paragraph. In the tidytext package, we provide functionality to tokenize by commonly used units of text like these and convert to a one-term-per-row format.
 
 Tidy data sets allow manipulation with a standard set of "tidy" tools, including popular packages such as dplyr [@R-dplyr], tidyr [@R-tidyr], ggplot2 [@R-ggplot2], and broom [@R-broom]. By keeping the input and output in tidy tables, users can transition fluidly between these packages. We've found these tidy tools extend naturally to many text analyses and explorations. 
 
@@ -47,7 +47,7 @@ Text won't be tidy at all stages of an analysis, and it is important to be able 
 We conclude with several case studies that bring together multiple tidy text mining approaches we've learned.
 
 * **Chapter \@ref(twitter)** demonstrates an application of a tidy text analysis by analyzing the authors' own Twitter archives. How do Dave's and Julia's tweeting habits compare?
-* **Chapter \@ref(nasa)** explores metadata from over 32,000 NASA datasets by looking at how keywords from the datasets are connected to title and description fields.
+* **Chapter \@ref(nasa)** explores metadata from over 32,000 NASA datasets (available in JSON) by looking at how keywords from the datasets are connected to title and description fields.
 * **Chapter \@ref(usenet)** analyzes a dataset of Usenet messages from a diverse set of newsgroups (focused on topics like politics, hockey, technology, atheism, and more) to understand patterns across the groups.
 
 ## Topics this book does not cover
@@ -63,4 +63,11 @@ We feel that the tidy data philosphy is a powerful tool to make handling data ea
 
 ## Acknowledgements
 
-We are so thankful for the contributions, help, and perspective of people who have moved us forward in this project. There are several people and organizations we would like to thank in particular. We would like to thank Gabriela de Queiroz for her contributions to the package while we were at the unconference where we began work on the tidytext package, Lincoln Mullen for his work on [tokenizers](https://github.com/ropensci/tokenizers), Kenneth Benoit for his work on the [quanteda](https://github.com/kbenoit/quanteda) package, Thomas Pedersen for his work on [ggraph](https://github.com/thomasp85/ggraph), and Hadley Wickham for his work in framing tidy data principles and building tidy tools. We would also like to thank [rOpenSci](https://ropensci.org/), which hosted us at the unconference where we began work, and the [NASA Datanauts](https://open.nasa.gov/explore/datanauts/) program, for the opportunities and support they have provided Julia during her time with them. 
+We are so thankful for the contributions, help, and perspective of people who have moved us forward in this project. There are several people and organizations we would like to thank in particular. 
+
+We would like to thank Gabriela de Queiroz for her contributions to the package while we were at the unconference where we began work on the tidytext package, Lincoln Mullen for his work on [tokenizers](https://github.com/ropensci/tokenizers), Kenneth Benoit for his work on the [quanteda](https://github.com/kbenoit/quanteda) package, Thomas Pedersen for his work on [ggraph](https://github.com/thomasp85/ggraph), and Hadley Wickham for his work in framing tidy data principles and building tidy tools. We would also like to thank [rOpenSci](https://ropensci.org/), which hosted us at the unconference where we began work, and the [NASA Datanauts](https://open.nasa.gov/explore/datanauts/) program, for the opportunities and support they have provided Julia during her time with them. 
+
+We received thoughtful, thorough technical reviews that improved the quality of this book significantly. We would like to thank Mara Averick, Carolyn Clayton, Simon Jackson, Sean Kross, and Lincoln Mullen for their investment of time and energy in these technical reviews.
+
+This book was written in the open, and several people contributed via pull requests or issues. Special thanks goes to those who contributed via GitHub: @ainilaha, Brian G. Barkley, Jon Calder, @eijoac, Marc Ferradou, Jonathan Gilligan, Matthew Henderson, Simon Jackson, @jedgore, @kanishkamisra, Josiah Parry, @suyi19890508, Stephen Turner, and Yihui Xie.
+

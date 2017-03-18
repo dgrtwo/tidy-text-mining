@@ -269,7 +269,9 @@ Now that we have this second, smaller set of only recent tweets, let's use `unne
 ```{r tidy_tweets2, dependson = "setup2"}
 tidy_tweets <- tweets %>% 
   filter(!str_detect(text, "^(RT|@)")) %>%
-  mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https", "")) %>%
+  mutate(text = str_replace_all(text, 
+                                "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https", 
+                                "")) %>%
   unnest_tokens(word, text, token = "regex", pattern = reg) %>%
   anti_join(stop_words)
 

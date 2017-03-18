@@ -10,7 +10,7 @@ theme_set(theme_light())
 
 A central question in text mining and natural language processing is how to quantify what a document is about. Can we do this by looking at the words that make up the document? One measure of how important a word may be is its *term frequency* (tf), how frequently a word occurs in a document, as we examined in Chapter \@ref(tidytext). There are words in a document, however, that occur many times but may not be important; in English, these are probably words like "the", "is", "of", and so forth. We might take the approach of adding words like these to a list of stop words and removing them before analysis, but it is possible that some of these words might be more important in some documents than others. A list of stop words is not a very sophisticated approach to adjusting term frequency for commonly used words.
 
-Another approach is to look at a term's *inverse document frequency* (idf), which decreases the weight for commonly used words and increases the weight for words that are not used very much in a collection of documents. This can be combined with term frequency to calculate a term's *tf-idf* (the two quantities multiplied together), the frequency of a term adjusted for how rarely it is used. It is intended to measure how important a word is to a document in a collection (or corpus) of documents. It is a rule-of-thumb or heuristic quantity; while it has proved useful in text mining, search engines, etc., its theoretical foundations are considered less than firm by information theory experts. The inverse document frequency for any given term is defined as
+Another approach is to look at a term's *inverse document frequency* (idf), which decreases the weight for commonly used words and increases the weight for words that are not used very much in a collection of documents. This can be combined with term frequency to calculate a term's *tf-idf* (the two quantities multiplied together), the frequency of a term adjusted for how rarely it is used. It is intended to measure how important a word is to a document in a collection (or corpus) of documents, for example, to one novel in a collection of novels or to one website in a collection of websites. It is a rule-of-thumb or heuristic quantity; while it has proved useful in text mining, search engines, etc., its theoretical foundations are considered less than firm by information theory experts. The inverse document frequency for any given term is defined as
 
 $$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$
 
@@ -151,7 +151,7 @@ ggplot(plot_austen, aes(word, tf_idf, fill = book)) +
   coord_flip()
 ```
 
-Still all proper nouns in Figure \@ref(fig:plotseparate)! These words are, as measured by tf-idf, the most important to each novel and most readers would likely agree.
+Still all proper nouns in Figure \@ref(fig:plotseparate)! These words are, as measured by tf-idf, the most important to each novel and most readers would likely agree. What measuring tf-idf has done here is show us that Jane Austen used similar language across her six novels, and what distinguishes one novel from the rest within the collection of her works are the proper nouns, the names of people and places. This is the point of tf-idf; it identifies words that are important to one document within a collection of documents.
 
 ## A corpus of physics texts
 
@@ -218,13 +218,19 @@ ggplot(plot_physics, aes(word, tf_idf, fill = author)) +
 Very interesting indeed. One thing we see here is "gif" in the Einstein text?!
 
 ```{r dependson = "physics"}
-grep("eq\\.", physics$text, value = TRUE)[1:10]
+library(stringr)
+
+physics %>% 
+  filter(str_detect(text, "eq\\.")) %>% 
+  select(text)
 ```
 
 Some cleaning up of the text is in order. "K1" is the name of a coordinate system for Einstein:
 
 ```{r dependson = "physics"}
-grep("K1", physics$text, value = TRUE)[1]
+physics %>% 
+  filter(str_detect(text, "K1")) %>% 
+  select(text)
 ```
 
 Maybe it makes sense to keep this one. Also notice that in this line we have "co-ordinate", which explains why there are separate "co" and "ordinate" items in the high tf-idf words for the Einstein text; the `unnest_tokens()` function separates around punctuation.
@@ -232,7 +238,9 @@ Maybe it makes sense to keep this one. Also notice that in this line we have "co
 "AB", "RC", and so forth are names of rays, circles, angles, and so forth for Huygens.
 
 ```{r dependson = "physics"}
-grep("AK", physics$text, value = TRUE)[1]
+physics %>% 
+  filter(str_detect(text, "AK")) %>% 
+  select(text)
 ```
 
 Let's remove some of these less meaningful words to make a better, more meaningful plot. Notice that we make a custom list of stop words and use `anti_join()` to remove them; this is a flexible approach that can be used in many situations. We will need to go back a few steps since we are removing words from the tidy data frame.
