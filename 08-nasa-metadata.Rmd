@@ -6,12 +6,17 @@ opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE,
                cache.lazy = FALSE)
 options(width = 100, dplyr.width = 100)
 library(ggplot2)
+library(methods)
 theme_set(theme_light())
 ```
 
 There are over 32,000 datasets hosted and/or maintained by [NASA](https://www.nasa.gov/); these datasets cover topics from Earth science to aerospace engineering to management of NASA itself. We can use the metadata for these datasets to understand the connections between them. 
 
-What is metadata? Metadata is a term that refers to data that gives information about other data; in this case, the metadata informs users about what is in these numerous NASA datasets but does not include the content of the datasets themselves. The metadata includes information like the title of the dataset, a description field, what organization(s) within NASA is responsible for the dataset, keywords for the dataset that have been assigned by a human being, and so forth. NASA places a high priority on making its data open and accessible, even requiring all NASA-funded research to be [openly accessible online](https://www.nasa.gov/press-release/nasa-unveils-new-public-web-portal-for-research-results). The metadata for all its datasets is [publicly available online in JSON format](https://data.nasa.gov/data.json).
+```{block, type = "rmdnote"}
+What is metadata? Metadata is a term that refers to data that gives information about other data; in this case, the metadata informs users about what is in these numerous NASA datasets but does not include the content of the datasets themselves. 
+```
+
+The metadata includes information like the title of the dataset, a description field, what organization(s) within NASA is responsible for the dataset, keywords for the dataset that have been assigned by a human being, and so forth. NASA places a high priority on making its data open and accessible, even requiring all NASA-funded research to be [openly accessible online](https://www.nasa.gov/press-release/nasa-unveils-new-public-web-portal-for-research-results). The metadata for all its datasets is [publicly available online in JSON format](https://data.nasa.gov/data.json).
 
 In this chapter, we will treat the NASA metadata as a text dataset and show how to implement several tidy text approaches with this real-life text. We will use word co-occurrences and correlations, tf-idf, and topic modeling to explore the connections between the datasets. Can we find datasets that are related to each other? Can we find clusters of similar datasets? Since we have several text fields in the NASA metadata, most importantly the title, description, and keyword fields, we can explore the connections between the fields to better understand the complex world of data at NASA. This type of approach can be extended to any domain that deals with text, so let's take a look at this metadata and get started.
 
@@ -119,7 +124,11 @@ nasa_desc %>%
   count(word, sort = TRUE)
 ```
 
-Words like "data" and "global" are used very often in NASA titles and descriptions. We may want to remove digits and some "words" like "v1" from these data frames for many types of analyses; they are not too meaningful for most audiences. We can do this by making a list of custom stop words and using `anti_join()` to remove them from the data frame, just like we removed the default stop words that are in the tidytext package. This approach can be used in many instances and is a great tool to bear in mind.
+Words like "data" and "global" are used very often in NASA titles and descriptions. We may want to remove digits and some "words" like "v1" from these data frames for many types of analyses; they are not too meaningful for most audiences. 
+
+```{block, type = "rmdtip"}
+We can do this by making a list of custom stop words and using `anti_join()` to remove them from the data frame, just like we removed the default stop words that are in the tidytext package. This approach can be used in many instances and is a great tool to bear in mind.
+```
 
 ```{r my_stopwords, dependson = "unnest"}
 my_stopwords <- data_frame(word = c(as.character(1:10), 
@@ -154,35 +163,35 @@ As a next step, let's examine which words commonly occur together in the titles,
 
 We can use `pairwise_count()` from the widyr package to count how many times each pair of words occurs together in a title or description field.
 
-```{r title_words, dependson = "my_stopwords"}
+```{r title_word_pairs, dependson = "my_stopwords"}
 library(widyr)
 
-title_words <- nasa_title %>% 
+title_word_pairs <- nasa_title %>% 
   pairwise_count(word, id, sort = TRUE, upper = FALSE)
 
-title_words
+title_word_pairs
 ```
 
 These are the pairs of words that occur together most often in title fields. Some of these words are obviously acronyms used within NASA, and we see how often words like "project" and "system" are used.
 
-```{r desc_words, dependson = "my_stopwords"}
-desc_words <- nasa_desc %>% 
+```{r desc_word_pairs, dependson = "my_stopwords"}
+desc_word_pairs <- nasa_desc %>% 
   pairwise_count(word, id, sort = TRUE, upper = FALSE)
 
-desc_words
+desc_word_pairs
 ```
 
 These are the pairs of words that occur together most often in descripton fields. "Data" is a very common word in description fields; there is no shortage of data in the datasets at NASA!
 
 Let's plot networks of these co-occurring words so we can see these relationships better in Figure \@ref(fig:plottitle). We will again use the ggraph package for visualizing our networks.
 
-```{r plottitle, dependson = "title_words", fig.height=6, fig.width=9, fig.cap="Word network in NASA dataset titles"}
+```{r plottitle, dependson = "title_word_pairs", fig.height=6, fig.width=9, fig.cap="Word network in NASA dataset titles"}
 library(ggplot2)
 library(igraph)
 library(ggraph)
 
 set.seed(1234)
-title_words %>%
+title_word_pairs %>%
   filter(n >= 250) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
@@ -196,9 +205,9 @@ We see some clear clustering in this network of title words; words in NASA datas
 
 What about the words from the description fields?
 
-```{r plotdesc, dependson = "desc_words", fig.height=6, fig.width=9, fig.cap="Word network in NASA dataset descriptions"}
+```{r plotdesc, dependson = "desc_word_pairs", fig.height=6, fig.width=9, fig.cap="Word network in NASA dataset descriptions"}
 set.seed(1234)
-desc_words %>%
+desc_word_pairs %>%
   filter(n >= 5000) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
@@ -216,13 +225,13 @@ Figure \@ref(fig:plotdesc) shows such *strong* connections between the top dozen
 Next, let's make a network of the keywords in Figure \@ref(fig:plotcounts) to see which keywords commonly occur together in the same datasets.
 
 ```{r plotcounts, dependson = "toupper", fig.height=7, fig.width=9, fig.cap="Co-occurrence network in NASA dataset keywords"}
-keyword_counts <- nasa_keyword %>% 
+keyword_pairs <- nasa_keyword %>% 
   pairwise_count(keyword, id, sort = TRUE, upper = FALSE)
 
-keyword_counts
+keyword_pairs
 
 set.seed(1234)
-keyword_counts %>%
+keyword_pairs %>%
   filter(n >= 700) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
@@ -232,7 +241,13 @@ keyword_counts %>%
   theme_void()
 ```
 
-We definitely see clustering here, and strong connections between keywords like "OCEANS", "OCEAN OPTICS", and "OCEAN COLOR", or "PROJECT" and "COMPLETED". These are the most commonly co-occurring words, but also just the most common keywords in general. To examine the relationships among keywords in a different way, we can find the correlation among the keywords as described in Chapter \@ref(ngrams). This looks for those keywords that are more likely to occur together than with other keywords in a description field.
+We definitely see clustering here, and strong connections between keywords like "OCEANS", "OCEAN OPTICS", and "OCEAN COLOR", or "PROJECT" and "COMPLETED". 
+
+```{block, type = "rmdwarning"}
+These are the most commonly co-occurring words, but also just the most common keywords in general. 
+```
+
+To examine the relationships among keywords in a different way, we can find the correlation among the keywords as described in Chapter \@ref(ngrams). This looks for those keywords that are more likely to occur together than with other keywords in a description field.
 
 ```{r keyword_cors, dependson = "toupper"}
 keyword_cors <- nasa_keyword %>% 
@@ -283,7 +298,13 @@ desc_tf_idf %>%
   arrange(-tf_idf)
 ```
 
-These are the most important words in the description fields as measured by tf-idf, meaning they are common but not too common. Notice we have run into an issue here; both $n$ and term frequency are equal to 1 for these terms, meaning that these were description fields that only had a single word in them. If a description field only contains one word, the tf-idf algorithm will think that is a very important word. Depending on our analytic goals, it might be a good idea to throw out all description fields that have very few words.
+These are the most important words in the description fields as measured by tf-idf, meaning they are common but not too common. 
+
+```{block, type = "rmdwarning"}
+Notice we have run into an issue here; both $n$ and term frequency are equal to 1 for these terms, meaning that these were description fields that only had a single word in them. If a description field only contains one word, the tf-idf algorithm will think that is a very important word. 
+```
+
+Depending on our analytic goals, it might be a good idea to throw out all description fields that have very few words.
 
 ### Connecting description fields to keywords
 
@@ -364,6 +385,7 @@ Now let’s use the [topicmodels](https://cran.r-project.org/package=topicmodels
 ```{r, eval = FALSE}
 library(topicmodels)
 
+# be aware that running this model is time intensive
 desc_lda <- LDA(desc_dtm, k = 24, control = list(seed = 1234))
 desc_lda
 ```
@@ -429,9 +451,19 @@ lda_gamma <- tidy(desc_lda, matrix = "gamma")
 lda_gamma
 ```
 
-Notice that some of the probabilites visible at the top of the data frame are low and some are higher. Our model has assigned a probability to each description belonging to each of the topics we constructed from the sets of words. How are the probabilities distributed? Let's visualize them (Figure \@ref(fig:plotgamma)).
+Notice that some of the probabilites visible at the top of the data frame are low and some are higher. Our model has assigned a probability to each description belonging to each of the topics we constructed from the sets of words. How are the probabilities distributed? Let's visualize them (Figure \@ref(fig:plotgammaall)).
 
-```{r plotgamma, dependson = "lda_gamma", fig.width=12, fig.height=16, fig.cap="Probability distribution in topic modeling of NASA metadata description field texts"}
+```{r plotgammaall, dependson = "lda_gamma", fig.width=7, fig.height=5, fig.cap="Probability distribution in topic modeling of NASA metadata description field texts"}
+ggplot(lda_gamma, aes(gamma)) +
+  geom_histogram() +
+  scale_y_log10() +
+  labs(title = "Distribution of probabilities for all topics",
+       y = "Number of documents", x = expression(gamma))
+```
+
+First notice that the y-axis is plotted on a log scale; otherwise it is difficult to make out any detail in the plot. Next, notice that $\gamma$ runs from 0 to 1; remember that this is the probability that a given document belongs in a given topic. There are many values near zero, which means there are many documents that do not belong in each topic. Also, there are many values near $\gamma = 1$; these are the documents that *do* belong in those topics. This distribution shows that documents are being well discriminated as belonging to a topic or not. We can also look at how the probabilities are distributed within each topic, as shown in Figure \@ref(fig:plotgamma).
+
+```{r plotgamma, dependson = "lda_gamma", fig.width=12, fig.height=16, fig.cap="Probability distribution for each topic in topic modeling of NASA metadata description field texts"}
 ggplot(lda_gamma, aes(gamma, fill = as.factor(topic))) +
   geom_histogram(show.legend = FALSE) +
   facet_wrap(~ topic, ncol = 4) +
@@ -440,7 +472,7 @@ ggplot(lda_gamma, aes(gamma, fill = as.factor(topic))) +
        y = "Number of documents", x = expression(gamma))
 ```
 
-First notice that the y-axis is plotted on a log scale; otherwise it is difficult to make out any detail in the plot. Next, notice that $\gamma$ runs from 0 to 1 in each panel. Remember that this is the probability that a given document belongs in a given topic. There are many values near zero, which means there are many documents that do not belong in each topic. Also, most of these panels show a higher number of documents near $\gamma = 1$; these are the documents that *do* belong in those topics. For example, let's look specifically at topic 18 in Figure \@ref(fig:plotgamma), a topic that had documents cleanly sorted in and out of it. There are many documents with $\gamma$ close to 1; these are the documents that *do* belong to topic 18 according to the model. There are also many documents with $\gamma$ close to 0; these are the documents that do *not* belong to topic 18. Each document appears in each panel in this plot, and its $\gamma$ for that topic tells us that document's probability of belonging in that topic.
+Let's look specifically at topic 18 in Figure \@ref(fig:plotgammaall), a topic that had documents cleanly sorted in and out of it. There are many documents with $\gamma$ close to 1; these are the documents that *do* belong to topic 18 according to the model. There are also many documents with $\gamma$ close to 0; these are the documents that do *not* belong to topic 18. Each document appears in each panel in this plot, and its $\gamma$ for that topic tells us that document's probability of belonging in that topic.
 
 This plot displays the type of information we used to choose how many topics for our topic modeling procedure. When we tried options higher than 24 (such as 32 or 64), the distributions for $\gamma$ started to look very flat toward $\gamma = 1$; documents were not getting sorted into topics very well.
 
