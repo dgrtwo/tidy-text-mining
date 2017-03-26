@@ -10,7 +10,7 @@ bookdown::gitbook:
     edit:
       link: https://github.com/dgrtwo/tidy-text-mining/edit/master/%s
   includes:
-    in_header: [_includes/analytics.html,style.css]
+    in_header: _includes/analytics.html
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex
