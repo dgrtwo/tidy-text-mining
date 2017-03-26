@@ -10,7 +10,13 @@ theme_set(theme_light())
 
 A central question in text mining and natural language processing is how to quantify what a document is about. Can we do this by looking at the words that make up the document? One measure of how important a word may be is its *term frequency* (tf), how frequently a word occurs in a document, as we examined in Chapter \@ref(tidytext). There are words in a document, however, that occur many times but may not be important; in English, these are probably words like "the", "is", "of", and so forth. We might take the approach of adding words like these to a list of stop words and removing them before analysis, but it is possible that some of these words might be more important in some documents than others. A list of stop words is not a very sophisticated approach to adjusting term frequency for commonly used words.
 
-Another approach is to look at a term's *inverse document frequency* (idf), which decreases the weight for commonly used words and increases the weight for words that are not used very much in a collection of documents. This can be combined with term frequency to calculate a term's *tf-idf* (the two quantities multiplied together), the frequency of a term adjusted for how rarely it is used. It is intended to measure how important a word is to a document in a collection (or corpus) of documents, for example, to one novel in a collection of novels or to one website in a collection of websites. It is a rule-of-thumb or heuristic quantity; while it has proved useful in text mining, search engines, etc., its theoretical foundations are considered less than firm by information theory experts. The inverse document frequency for any given term is defined as
+Another approach is to look at a term's *inverse document frequency* (idf), which decreases the weight for commonly used words and increases the weight for words that are not used very much in a collection of documents. This can be combined with term frequency to calculate a term's *tf-idf* (the two quantities multiplied together), the frequency of a term adjusted for how rarely it is used. 
+
+```{block, type = "rmdnote"}
+The statistic **tf-idf** is intended to measure how important a word is to a document in a collection (or corpus) of documents, for example, to one novel in a collection of novels or to one website in a collection of websites. 
+```
+
+It is a rule-of-thumb or heuristic quantity; while it has proved useful in text mining, search engines, etc., its theoretical foundations are considered less than firm by information theory experts. The inverse document frequency for any given term is defined as
 
 $$idf(\text{term}) = \ln{\left(\frac{n_{\text{documents}}}{n_{\text{documents containing term}}}\right)}$$
 
@@ -54,7 +60,13 @@ There are very long tails to the right for these novels (those extremely common 
 
 ## Zipf's law
 
-Distributions like those shown in Figure \@ref(fig:plottf) are typical in language. In fact, those types of long-tailed distributions are so common in any given corpus of natural language (like a book, or a lot of text from a website, or spoken words) that the relationship between the frequency that a word is used and its rank has been the subject of study; a classic version of this relationship is called Zipf's law, after George Zipf, a 20th century American linguist. Zipf's law states that the frequency of a word is inversely proportional to its rank. Since we have the data frame we used to plot term frequency, we can examine Zipf's law for Jane Austen's novels with just a few lines of dplyr functions.
+Distributions like those shown in Figure \@ref(fig:plottf) are typical in language. In fact, those types of long-tailed distributions are so common in any given corpus of natural language (like a book, or a lot of text from a website, or spoken words) that the relationship between the frequency that a word is used and its rank has been the subject of study; a classic version of this relationship is called Zipf's law, after George Zipf, a 20th century American linguist. 
+
+```{block, type = "rmdnote"}
+Zipf's law states that the frequency that a word appears is inversely proportional to its rank. 
+```
+
+Since we have the data frame we used to plot term frequency, we can examine Zipf's law for Jane Austen's novels with just a few lines of dplyr functions.
 
 ```{r freq_by_rank, dependson = book_words}
 freq_by_rank <- book_words %>% 
@@ -123,7 +135,13 @@ book_words %>%
   arrange(desc(tf_idf))
 ```
 
-Here we see all proper nouns, names that are in fact important in these novels. None of them occur in all of novels, and they are important, characteristic words for each text within the corpus of Jane Austen's novels. Some of the values for idf are the same for different terms because there are 6 documents in this corpus and we are seeing the numerical value for $\ln(6/1)$, $\ln(6/2)$, etc. Let's look at a visualization for these high tf-idf words in Figure \@ref(fig:plotausten).
+Here we see all proper nouns, names that are in fact important in these novels. None of them occur in all of novels, and they are important, characteristic words for each text within the corpus of Jane Austen's novels. 
+
+```{block, type = "rmdnote"}
+Some of the values for idf are the same for different terms because there are 6 documents in this corpus and we are seeing the numerical value for $\ln(6/1)$, $\ln(6/2)$, etc. 
+```
+
+Let's look at a visualization for these high tf-idf words in Figure \@ref(fig:plotausten).
 
 ```{r plotausten, dependson = "desc_idf", fig.height=6, fig.width=9, fig.cap="Highest tf-idf words in Jane Austen's Novels"}
 plot_austen <- book_words %>%
@@ -215,7 +233,7 @@ ggplot(plot_physics, aes(word, tf_idf, fill = author)) +
   coord_flip()
 ```
 
-Very interesting indeed. One thing we see here is "gif" in the Einstein text?!
+Very interesting indeed. One thing we see here is "eq" in the Einstein text?!
 
 ```{r dependson = "physics"}
 library(stringr)
@@ -225,7 +243,7 @@ physics %>%
   select(text)
 ```
 
-Some cleaning up of the text is in order. "K1" is the name of a coordinate system for Einstein:
+Some cleaning up of the text may be in order. "K1" is the name of a coordinate system for Einstein:
 
 ```{r dependson = "physics"}
 physics %>% 
