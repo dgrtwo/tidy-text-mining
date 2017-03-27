@@ -29,7 +29,11 @@ austen_bigrams <- austen_books() %>%
 austen_bigrams
 ```
 
-This data structure is still a variation of the tidy text format. It is structured as one-token-per-row (with extra metadata, such as `book`, still preserved), but each token now represents a bigram. Notice that these bigrams overlap: "sense and" is one token, while "and sensibility" is another.
+This data structure is still a variation of the tidy text format. It is structured as one-token-per-row (with extra metadata, such as `book`, still preserved), but each token now represents a bigram.
+
+```{block, type = "rmdnote"}
+Notice that these bigrams overlap: "sense and" is one token, while "and sensibility" is another.
+```
 
 ### Counting and filtering n-grams
 
@@ -233,7 +237,7 @@ igraph has plotting functions built in, but they're not what the package is desi
 
 We can convert an igraph object into a ggraph with the `ggraph` function, after which we add layers to it, much like layers are added in ggplot2. For example, for a basic graph we need to add three layers: nodes, edges, and text.
 
-```{r bigramgraph, dependson = "bigram_graph", fig.width = 11, fig.height = 11, fig.cap = "Common bigrams in Pride and Prejudice, showing those that occurred more than 20 times and where neither word was a stop-word"}
+```{r bigramgraph, dependson = "bigram_graph", fig.width = 12, fig.height = 12, fig.cap = "Common bigrams in Pride and Prejudice, showing those that occurred more than 20 times and where neither word was a stop-word"}
 library(ggraph)
 set.seed(2017)
 
@@ -252,7 +256,7 @@ We conclude with a few polishing operations to make a better looking graph (Figu
 * We tinker with the options to the node layer to make the nodes more attractive (larger, blue points)
 * We add a theme that's useful for plotting networks, `theme_void()`
 
-```{r bigramggraphausten2, dependson = "bigram_graph", fig.width = 11, fig.height = 11, fig.cap = "Common bigrams in Pride and Prejudice, with some polishing."}
+```{r bigramggraphausten2, dependson = "bigram_graph", fig.width = 12, fig.height = 12, fig.cap = "Common bigrams in Pride and Prejudice, with some polishing."}
 set.seed(2016)
 
 a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
@@ -267,11 +271,17 @@ ggraph(bigram_graph, layout = "fr") +
 
 It may take a some experimentation with ggraph to get your networks into a presentable format like this, but the network structure is useful and flexible way to visualize relational tidy data.
 
+```{block, type = "rmdnote"}
 Note that this is a visualization of a **Markov chain**, a common model in text processing. In a Markov chain, each choice of word depends only on the previous word. In this case, a random generator following this model might spit out "dear", then "sir", then "william/walter/thomas/thomas's", by following each word to the most common words that follow it. To make the visualization interpretable, we chose to show only the most common word to word connections, but one could imagine an enormous graph representing all connections that occur in the text.
+```
 
 ### Visualizing bigrams in other texts
 
-We went to a good amount of work in cleaning and visualizing bigrams on a text dataset, so let's collect it into a function so that we easily perform it on other text datasets. To make it easy to use these functions yourself, we've also reloaded the packages necessary for them. 
+We went to a good amount of work in cleaning and visualizing bigrams on a text dataset, so let's collect it into a function so that we easily perform it on other text datasets.
+
+```{block, type = "rmdnote"}
+To make it easy to use the `count_bigrams()` and `visualize_bigrams()` yourself, we've also reloaded the packages necessary for them. 
+```
 
 ```{r visualize_bigrams}
 library(dplyr)
@@ -398,7 +408,9 @@ For example, that $n_{11}$ represents the number of documents where both word X 
 
 $$\phi=\frac{n_{11}n_{00}-n_{10}n_{01}}{\sqrt{n_{1\cdot}n_{0\cdot}n_{\cdot0}n_{\cdot1}}}$$
 
-(The phi coefficient is equivalent to the Pearson correlation, which you may have heard of elsewhere, when it is applied to binary data).
+```{block, type = "rmdnote"}
+The phi coefficient is equivalent to the Pearson correlation, which you may have heard of elsewhere, when it is applied to binary data).
+```
 
 The `pairwise_cor()` function in widyr lets us find the phi coefficient between words based on how often they appear in the same section. Its syntax is similar to `pairwise_count()`.
 
