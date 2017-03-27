@@ -176,6 +176,8 @@ newsgroup_cors <- words_by_newsgroup %>%
 newsgroup_cors
 ```
 
+We could then filter for stronger correlations among newsgroups, and visualize them in a network (Figure \ref{fig:newsgroupcorsnetwork}).
+
 ```{r newsgroupcorsnetwork, dependson = "newsgroup_cors", fig.width = 8, fig.height = 8, fig.cap = "A network of Usenet groups based on the correlation of word counts between them, including only connections with a correlation greater than .4"}
 library(ggraph)
 library(igraph)
@@ -381,7 +383,7 @@ Well, we can confidently say that the sentiment analysis worked!
 
 ### N-gram analysis
 
-In Chapter \@ref(ngrams), we considered the effect of words such as "not" and "no" on sentiment analysis of Jane Austen novels, such as considering whether a phrase like "don't like" led to passages incorrectly being labeled as positive. The Usenet dataset is is a much larger corpus of more modern text, so we may be interested in how sentiment analysis may be reversed in this text.
+In Chapter \@ref(ngrams), we considered the effect of words such as "not" and "no" on sentiment analysis of Jane Austen novels, such as considering whether a phrase like "don't like" led to passages incorrectly being labeled as positive. The Usenet dataset is a much larger corpus of more modern text, so we may be interested in how sentiment analysis may be reversed in this text.
 
 We'd start by finding and counting all the bigrams in the Usenet posts.
 
@@ -424,7 +426,7 @@ It looks like the largest sources of misidentifying a word as positive come from
 
 ## Summary
 
-In this analysis of Usenet messages we've incorporated almost every method for tidy text mining described in this book, ranging from tf-idf to topic modeling and from sentiment analysis to n-gram tokenization. Throughout the chapter, and indeed through all of our case studies, we've been able to rely on a small list of common tools for exploration and visualization. We hope that these examples show how much all tidy text analyses have in common with each other, and indeed with all tidy data analyses.
+In this analysis of Usenet messages, we've incorporated almost every method for tidy text mining described in this book, ranging from tf-idf to topic modeling and from sentiment analysis to n-gram tokenization. Throughout the chapter, and indeed through all of our case studies, we've been able to rely on a small list of common tools for exploration and visualization. We hope that these examples show how much all tidy text analyses have in common with each other, and indeed with all tidy data analyses.
 
 ```{r echo = FALSE, cache = FALSE}
 knitr::knit_exit()

@@ -1,4 +1,4 @@
-# Relationships between words {#ngrams}
+# Relationships between words: n-grams and correlations {#ngrams}
 
 ```{r echo = FALSE}
 library(knitr)
@@ -40,7 +40,7 @@ austen_bigrams %>%
   count(bigram, sort = TRUE)
 ```
 
-As one might expect, a lot of the most common bigrams are pairs of common (uninteresting) words, such as `of the` and `to be`: what we call "stop-words" (see Chapter \@ref(tidytext)). This is a useful time to use tidyr's `separate()`, which splits a column into multiple based on a delimiter. This lets us separate it into two columns, "word1" and "word2", at which we can remove cases where either is a stop-word.
+As one might expect, a lot of the most common bigrams are pairs of common (uninteresting) words, such as `of the` and `to be`: what we call "stop-words" (see Chapter \@ref(tidytext)). This is a useful time to use tidyr's `separate()`, which splits a column into multiple based on a delimiter. This lets us separate it into two columns, "word1" and "word2", at which point we can remove cases where either is a stop-word.
 
 ```{r bigram_counts, dependson = "austen_bigrams"}
 library(tidyr)
@@ -205,7 +205,7 @@ negated_words %>%
   coord_flip()
 ```
 
-### Visualizing a network of bigrams with igraph
+### Visualizing a network of bigrams with ggraph
 
 We may be interested in visualizing all of the relationships among words simultaneously, rather than just the top few at a time. As one common visualization, we can arrange the words into a network, or "graph." Here we'll be referring to a "graph" not in the sense of a visualization, but as a combination of connected nodes. A graph can be constructed from a tidy object since it has three variables:
 
@@ -233,7 +233,7 @@ igraph has plotting functions built in, but they're not what the package is desi
 
 We can convert an igraph object into a ggraph with the `ggraph` function, after which we add layers to it, much like layers are added in ggplot2. For example, for a basic graph we need to add three layers: nodes, edges, and text.
 
-```{r bigramgraph, dependson = "bigram_graph", fig.width = 10, fig.height = 10, fig.cap = "Common bigrams in Pride and Prejudice, showing those that occurred more than 20 times and where neither word was a stop-word"}
+```{r bigramgraph, dependson = "bigram_graph", fig.width = 11, fig.height = 11, fig.cap = "Common bigrams in Pride and Prejudice, showing those that occurred more than 20 times and where neither word was a stop-word"}
 library(ggraph)
 set.seed(2017)
 
@@ -252,7 +252,7 @@ We conclude with a few polishing operations to make a better looking graph (Figu
 * We tinker with the options to the node layer to make the nodes more attractive (larger, blue points)
 * We add a theme that's useful for plotting networks, `theme_void()`
 
-```{r bigramggraphausten2, dependson = "bigram_graph", fig.width = 10, fig.height = 10, fig.cap = "Common bigrams in Pride and Prejudice, with some polishing."}
+```{r bigramggraphausten2, dependson = "bigram_graph", fig.width = 11, fig.height = 11, fig.cap = "Common bigrams in Pride and Prejudice, with some polishing."}
 set.seed(2016)
 
 a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
@@ -452,4 +452,4 @@ Note that unlike the bigram analysis, the relationships here are symmetrical, ra
 
 ## Summary
 
-These network visualizations are a flexible tool for exploring relationships, and will play an important role in the case studies in later chapters. More TODO
+This chapter showed how the tidy text approach is useful not only for analyzing individual words, but also for exploring the relationships and connections between words. Such relationships include n-grams, which examine what words tend to appear after others, as well as co-occurences and correlations for words that appear in proximity to each other. The chapter also demonstrated the ggraph package for visualizing both of these types of relationships as networks. These network visualizations are a flexible tool for exploring relationships, and will play an important role in the case studies in later chapters. 

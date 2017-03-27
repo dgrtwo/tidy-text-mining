@@ -1,4 +1,4 @@
-# Tidying and casting document-term matrices and corpus objects {#dtm}
+# Converting to and from non-tidy formats {#dtm}
 
 ```{r echo = FALSE}
 library(knitr)
@@ -392,5 +392,4 @@ Based on this analysis, we'd say that in January 2017 most of the coverage of Ya
 
 ## Summary
 
-TODO
-
+Text analysis requires working with a variety of tools, many of which have inputs and outputs that aren't in a tidy form. This chapter showed how to convert between a tidy text data frame and sparse document-term matrices, as well as how to tidy a Corpus object containing document metadata. The next chapter will show another notable example of a package, topicmodels, that requires a document-term matrix as input, showing that these conversion tools are an essential part of text analysis.
