@@ -14,7 +14,7 @@ One type of text that gets plenty of attention is text shared online via Twitter
 
 An individual can download their own Twitter archive by following [directions available on Twitter's website](https://support.twitter.com/articles/20170160). We each downloaded ours and will now open them up. Let's use the lubridate package to convert the string timestamps to date-time objects and initially take a look at our tweeting patterns overall (Figure \@ref(fig:setup)).
 
-```{r setup, fig.width=7, fig.height=6, fig.cap="All tweets from our accounts"}
+```{r setup, fig.width=7, fig.height=7, fig.cap="All tweets from our accounts"}
 library(lubridate)
 library(ggplot2)
 library(dplyr)
@@ -129,8 +129,7 @@ word_ratios <- tidy_tweets %>%
   count(word, person) %>%
   filter(sum(n) >= 10) %>%
   spread(person, n, fill = 0) %>%
-  ungroup() %>%
-  mutate_each(funs((. + 1) / sum(. + 1)), -word) %>%
+  mutate_if(is.numeric, funs((. + 1) / sum(. + 1))) %>%
   mutate(logratio = log(David / Julia)) %>%
   arrange(desc(logratio))
 ```
@@ -148,8 +147,9 @@ Which words are most likely to be from Julia's account or from David's account? 
 
 ```{r plotratios, dependson = "word_ratios", fig.width=7, fig.height=6, fig.cap="Comparing the odds ratios of words from our accounts"}
 word_ratios %>%
+  mutate(abslogratio = abs(logratio)) %>%
   group_by(logratio < 0) %>%
-  top_n(15, abs(logratio)) %>%
+  top_n(15, abslogratio) %>%
   ungroup() %>%
   mutate(word = reorder(word, logratio)) %>%
   ggplot(aes(word, logratio, fill = logratio < 0)) +
