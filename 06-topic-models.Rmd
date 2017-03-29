@@ -418,4 +418,4 @@ We could use ggplot2 to explore and visualize the model in the same way we did t
 
 ## Summary
 
-This chapter introduces topic modeling for finding clusters of words within documents, and shows how the `tidy()` verb lets us explore and understand these models using dplyr and ggplot2. This is one of the advantages of the tidy approach to model exploration: the challenges of different output formats are handled by the tidying functions, and we can explore model results using a standard set of tools. In particular, we examined 
+This chapter introduces topic modeling for finding clusters of words within documents, and shows how the `tidy()` verb lets us explore and understand these models using dplyr and ggplot2. This is one of the advantages of the tidy approach to model exploration; the challenges of different output formats are handled by the tidying functions, and we can explore model results using a standard set of tools. In particular, we examined 
