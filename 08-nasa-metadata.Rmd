@@ -463,7 +463,7 @@ ggplot(lda_gamma, aes(gamma)) +
 
 First notice that the y-axis is plotted on a log scale; otherwise it is difficult to make out any detail in the plot. Next, notice that $\gamma$ runs from 0 to 1; remember that this is the probability that a given document belongs in a given topic. There are many values near zero, which means there are many documents that do not belong in each topic. Also, there are many values near $\gamma = 1$; these are the documents that *do* belong in those topics. This distribution shows that documents are being well discriminated as belonging to a topic or not. We can also look at how the probabilities are distributed within each topic, as shown in Figure \@ref(fig:plotgamma).
 
-```{r plotgamma, dependson = "lda_gamma", fig.width=12, fig.height=16, fig.cap="Probability distribution for each topic in topic modeling of NASA metadata description field texts"}
+```{r plotgamma, dependson = "lda_gamma", fig.width=10, fig.height=12, fig.cap="Probability distribution for each topic in topic modeling of NASA metadata description field texts"}
 ggplot(lda_gamma, aes(gamma, fill = as.factor(topic))) +
   geom_histogram(show.legend = FALSE) +
   facet_wrap(~ topic, ncol = 4) +
