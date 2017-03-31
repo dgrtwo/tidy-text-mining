@@ -22,3 +22,8 @@ for (f in paste0(c("02-tidy-text", "03-sentiment-analysis"), "_files")) {
   dir.create(out2, showWarnings = FALSE)
   system(paste0("cp -r _bookdown_files/", f, "/figure-docx ", out2))
 }
+
+
+
+## on 2017-03-31, this worked:
+## render_book("index.Rmd", output_format = "pdf_book",clean=FALSE)
