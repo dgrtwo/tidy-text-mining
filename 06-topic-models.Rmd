@@ -105,8 +105,9 @@ The words with the greatest differences between the two topics are visualized in
 
 ```{r topiccompare, dependson = "beta_spread", fig.cap = "(ref:topiccap)", echo = FALSE}
 beta_spread %>%
-  group_by(direction = log_ratio > 0) %>%
-  top_n(10, abs(log_ratio)) %>%
+  group_by(direction = log_ratio > 0,
+           absratio = abs(log_ratio)) %>%
+  top_n(10, absratio) %>%
   mutate(term = reorder(term, log_ratio)) %>%
   ggplot(aes(term, log_ratio)) +
   geom_col() +
@@ -334,6 +335,7 @@ This combination of the true book (`title`) and the book assigned to it (`consen
 ```{r confusionmatrix, dependson = "assignments2", fig.width = 4, fig.height = 4, fig.cap = "Confusion matrix showing where LDA assigned the words from each book. Each row of this table represents the true book each word came from, and each column represents what book it was assigned to."}
 assignments %>%
   count(title, consensus, wt = count) %>%
+  group_by(title) %>%
   mutate(percent = n / sum(n)) %>%
   ggplot(aes(consensus, title, fill = percent)) +
   geom_tile() +

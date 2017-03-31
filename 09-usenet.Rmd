@@ -304,7 +304,8 @@ Which words had the most effect on sentiment scores overall (Figure \@ref(fig:us
 
 ```{r usenetcontributions, dependson = "contributions", fig.width=6, fig.height=6, fig.cap = "Words with the greatest contributions to positive/negative sentiment scores in the Usenet text"}
 contributions %>%
-  top_n(25, abs(contribution)) %>%
+  mutate(abscontribution = abs(contribution)) %>%
+  top_n(25, abscontribution) %>%
   mutate(word = reorder(word, contribution)) %>%
   ggplot(aes(word, contribution, fill = contribution > 0)) +
   geom_col(show.legend = FALSE) +
@@ -326,8 +327,9 @@ top_sentiment_words
 ```{r newsgroupsentiment, fig.height = 10, fig.width = 10, dependson = "top_sentiment_words", echo = FALSE, fig.cap = "The 12 words that contributed the most to sentiment scores within each of six newsgroups"}
 top_sentiment_words %>%
   filter(str_detect(newsgroup, "^(talk|alt|misc)")) %>%
+  mutate(abscontribution = abs(contribution)) %>%
   group_by(newsgroup) %>%
-  top_n(12, abs(contribution)) %>%
+  top_n(12, abscontribution) %>%
   ungroup() %>%
   mutate(newsgroup = reorder(newsgroup, contribution),
          word = reorder(paste(word, newsgroup, sep = "__"), contribution)) %>%
@@ -420,8 +422,10 @@ usenet_bigram_counts %>%
   filter(word1 %in% negate_words) %>%
   count(word1, word2, wt = n, sort = TRUE) %>%
   inner_join(get_sentiments("afinn"), by = c(word2 = "word")) %>%
-  mutate(contribution = score * nn) %>%
-  top_n(10, abs(contribution)) %>%
+  mutate(contribution = score * nn,
+         abscontribution = abs(contribution)) %>%
+  group_by(word1) %>%
+  top_n(10, abscontribution) %>%
   ungroup() %>%
   mutate(word2 = reorder(paste(word2, word1, sep = "__"), contribution)) %>%
   ggplot(aes(word2, contribution, fill = contribution > 0)) +
@@ -439,75 +443,3 @@ It looks like the largest sources of misidentifying a word as positive come from
 ## Summary
 
 In this analysis of Usenet messages, we've incorporated almost every method for tidy text mining described in this book, ranging from tf-idf to topic modeling and from sentiment analysis to n-gram tokenization. Throughout the chapter, and indeed through all of our case studies, we've been able to rely on a small list of common tools for exploration and visualization. We hope that these examples show how much all tidy text analyses have in common with each other, and indeed with all tidy data analyses.
-
-```{r echo = FALSE, cache = FALSE}
-knitr::knit_exit()
-```
-
-```{r eval = FALSE, echo = FALSE}
-# we're not going to use this one
-metadata <- raw_text %>%
-  group_by(id) %>%
-  filter(cumsum(text == "") == 0) %>%
-  ungroup() %>%
-  separate(text, c("header", "content"),
-           sep = ": ", extra = "merge", fill = "right") %>%
-  filter(!is.na(content)) %>%
-  mutate(header = str_replace_all(str_to_lower(header), "-", "_")) %>%
-  distinct(id, header, .keep_all = TRUE) %>%
-  spread(header, content)
-```
-
-```{r bigram_tf_idf, dependson = "usenet_bigram_counts", echo = FALSE, eval = FALSE}
-bigram_tf_idf <- usenet_bigram_counts %>%
-  bind_tf_idf(bigram, newsgroup, n)
-
-bigram_tf_idf %>%
-  arrange(desc(tf_idf))
-```
-
-```{r}
-library(igraph)
-library(ggraph)
-
-visualize_bigrams <- function(bigrams) {
-  set.seed(2016)
-  a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
-  
-  bigrams %>%
-    graph_from_data_frame() %>%
-    ggraph(layout = "fr") +
-    geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
-    geom_node_point(color = "lightblue", size = 5) +
-    geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
-    theme_void()
-}
-
-usenet_bigram_counts %>%
-  select(word1, word2, n) %>%
-  filter(!word1 %in% stop_words$word,
-         !word2 %in% stop_words$word) %>%
-  filter(n >= 25) %>%
-  visualize_bigrams()
-```
-
-
-```{r eval = FALSE, echo = FALSE}
-word_compare <- words_by_newsgroup %>%
-  separate(newsgroup, c("category", "rest"), "\\.", extra = "merge") %>%
-  filter(category %in% c("comp", "talk")) %>%
-  count(category, word, wt = n) %>%
-  spread(category, nn, fill = 0) %>%
-  mutate(total = comp + talk)
-
-word_compare %>%
-  filter(total > 100) %>%
-  mutate_each(funs((. + 1) / sum(. + 1)), comp, talk) %>%
-  mutate(logratio = log2(talk / comp)) %>%
-  arrange(desc(logratio)) %>%
-  filter(abs(logratio) > 7) %>%
-  mutate(word = reorder(word, logratio)) %>%
-  ggplot(aes(word, logratio)) +
-  geom_col() +
-  coord_flip()
-```
