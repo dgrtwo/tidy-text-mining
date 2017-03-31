@@ -196,10 +196,11 @@ We could then visualize what the most common words to follow each particular neg
 
 ```{r negatedwords, dependson = "negated_words", fig.width=9, fig.height=9, echo = FALSE, fig.cap = "The most common positive or negative words to follow negations such as 'never', 'no', 'not', and 'without'"}
 negated_words %>%
-  mutate(contribution = n * score) %>%
-  mutate(word2 = reorder(paste(word2, word1, sep = "__"), contribution)) %>%
+  mutate(contribution = n * score,
+         abscontribution = abs(contribution),
+         word2 = reorder(paste(word2, word1, sep = "__"), contribution)) %>%
   group_by(word1) %>%
-  top_n(12, abs(contribution)) %>%
+  top_n(12, abscontribution) %>%
   ggplot(aes(word2, contribution, fill = n * score > 0)) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ word1, scales = "free") +
