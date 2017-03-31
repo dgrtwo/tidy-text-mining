@@ -14,7 +14,7 @@ In text mining, we often have collections of documents, such as blog posts or ne
 
 Latent Dirichlet allocation (LDA) is a particularly popular method for fitting a topic model. It treats each document as a mixture of topics, and each topic as a mixture of words. This allows documents to "overlap" each other in terms of content, rather than being separated into discrete groups, in a way that mirrors typical use of natural language.
 
-We can use tidy text principles to approach topic modeling with the same set of tidy tools we've used throughout this book. In this chapter, we'll learn to tidy `LDA` objects from the [topicmodels package](https://cran.r-project.org/package=topicmodels) to examine model results using ggplot2 and dplyr. We'll also explore an example of clustering chapters from several books, where we can see that a topic model "learns" to tell the difference between the four books based on the text content.
+We can use tidy text principles to approach topic modeling with the same set of tidy tools we've used throughout this book. In this chapter, we'll learn to work with `LDA` objects from the [topicmodels package](https://cran.r-project.org/package=topicmodels). As shown in Figure \@ref(fig:flowchart) in the last chapter, the LDA package produces a model object that can be tidied with tidytext to make it compatible with ggplot2 and dplyr. We'll also explore an example of clustering chapters from several books, where we can see that a topic model "learns" to tell the difference between the four books based on the text content.
 
 ## Latent Dirichlet allocation
 
@@ -34,7 +34,13 @@ data("AssociatedPress")
 AssociatedPress
 ```
 
-We can use the `LDA()` function from the topicmodels package, setting `k = 2`, to create a two-topic LDA model. (Almost any topic model in practice will use a larger `k`, but we will see in Chapter \@ref(library-heist) that this analysis approach extends to a larger number of topics). This function returns an object containing the full details of the model fit, such as how words are associated with topics and how topics are associated with documents.
+We can use the `LDA()` function from the topicmodels package, setting `k = 2`, to create a two-topic LDA model.
+
+```{block, type = "rmdnote"}
+Almost any topic model in practice will use a larger `k`, but we will soon see that this analysis approach extends to a larger number of topics
+```
+
+This function returns an object containing the full details of the model fit, such as how words are associated with topics and how topics are associated with documents.
 
 ```{r ap_lda}
 # set a seed so that the output of the model is predictable
@@ -253,7 +259,7 @@ chapters_gamma
 
 Each of these values is an estimated proportion of words from that document that are generated from that topic. For example, the model estimates that each word in the `r chapters_gamma$document[1]` document has only a `r percent(chapters_gamma$gamma[1])` probability of coming from topic 1 (Pride and Prejudice).
 
-Now that we have these topic-probabilities, we can see how well our unsupervised learning did at distinguishing the four books. We'd expect that chapters within a book would be found to be mostly (or entirely), generated from the corresponding topic.
+Now that we have these topic probabilities, we can see how well our unsupervised learning did at distinguishing the four books. We'd expect that chapters within a book would be found to be mostly (or entirely), generated from the corresponding topic.
 
 First we re-separate the document name into title and chapter, after which we can visualize the per-document-per-topic probability for each (Figure \@ref(fig:chaptersldagamma)).
 
@@ -340,7 +346,7 @@ assignments %>%
        fill = "% of assignments")
 ```
 
-We notice that almost all the words for *Pride and Prejudice*, *Twenty Thousand Leagues Under the Sea*, and *War of the Worlds* were correctly assigned, while *Great Expectations* had a fair amount of misassigned words (which, as we saw above, led to two chapters getting misclassified).
+We notice that almost all the words for *Pride and Prejudice*, *Twenty Thousand Leagues Under the Sea*, and *War of the Worlds* were correctly assigned, while *Great Expectations* had a fair number of misassigned words (which, as we saw above, led to two chapters getting misclassified).
 
 What were the most commonly mistaken words?
 
@@ -392,6 +398,7 @@ collapsed <- by_chapter_word %>%
   group_by(document) %>%
   summarize(text = paste(word, collapse = " "))
 
+# create an empty file of "stopwords"
 file.create(empty_file <- tempfile())
 docs <- mallet.import(collapsed$document, collapsed$text, empty_file)
 
@@ -418,4 +425,4 @@ We could use ggplot2 to explore and visualize the model in the same way we did t
 
 ## Summary
 
-This chapter introduces topic modeling for finding clusters of words within documents, and shows how the `tidy()` verb lets us explore and understand these models using dplyr and ggplot2. This is one of the advantages of the tidy approach to model exploration; the challenges of different output formats are handled by the tidying functions, and we can explore model results using a standard set of tools. In particular, we examined 
+This chapter introduces topic modeling for finding clusters of words that characterize a set of documents, and shows how the `tidy()` verb lets us explore and understand these models using dplyr and ggplot2. This is one of the advantages of the tidy approach to model exploration: the challenges of different output formats are handled by the tidying functions, and we can explore model results using a standard set of tools. In particular, we saw that topic modeling is able to separate and distinguish chapters from four separate books, and explored the limitations of the model by finding words and chapters that it assigned incorrectly.
