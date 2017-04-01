@@ -109,8 +109,8 @@ The words with the greatest differences between the two topics are visualized in
 
 ```{r topiccompare, dependson = "beta_spread", fig.cap = "(ref:topiccap)", echo = FALSE}
 beta_spread %>%
-  group_by(direction = log_ratio > 0,
-           absratio = abs(log_ratio)) %>%
+  mutate(absratio = abs(log_ratio)) %>%
+  group_by(direction = log_ratio > 0) %>%
   top_n(10, absratio) %>%
   ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
@@ -289,7 +289,7 @@ We notice that almost all of the chapters from *Pride and Prejudice*, *War of th
 
 It does look like some chapters from Great Expectations (which should be topic 4) were somewhat associated with other topics. Are there any cases where the topic most associated with a chapter belonged to another book? First we'd find the topic that was most associated with each chapter using `top_n()`, which is effectively the "classification" of that chapter.
 
-```{r chapter_classifications}
+```{r chapter_classifications, dependson = "chapters_gamma"}
 chapter_classifications <- chapters_gamma %>%
   group_by(title, chapter) %>%
   top_n(1, gamma) %>%
@@ -300,7 +300,7 @@ chapter_classifications
 
 We can then compare each to the "consensus" topic for each book (the most common topic among its chapters), and see which were most often misidentified.
 
-```{r book_topics}
+```{r book_topics, dependson = "chapter_classifications"}
 book_topics <- chapter_classifications %>%
   count(title, topic) %>%
   top_n(1, n) %>%
@@ -335,9 +335,9 @@ assignments <- assignments %>%
 assignments
 ```
 
-This combination of the true book (`title`) and the book assigned to it (`consensus`) is useful for further exploration. We can, for example, visualize a **confusion matrix**, showing how often words from one book were assigned to another, using dplyr's `count()` and ggplot2's `geom_tile` (Figure \@ref(fig:confusionmatrix}).
+This combination of the true book (`title`) and the book assigned to it (`consensus`) is useful for further exploration. We can, for example, visualize a **confusion matrix**, showing how often words from one book were assigned to another, using dplyr's `count()` and ggplot2's `geom_tile` (Figure \@ref(fig:confusionmatrix).
 
-```{r confusionmatrix, dependson = "assignments2", fig.width = 4, fig.height = 4, fig.cap = "Confusion matrix showing where LDA assigned the words from each book. Each row of this table represents the true book each word came from, and each column represents what book it was assigned to."}
+```{r confusionmatrix, dependson = "assignments2", fig.width = 10, fig.height = 8, fig.cap = "Confusion matrix showing where LDA assigned the words from each book. Each row of this table represents the true book each word came from, and each column represents what book it was assigned to."}
 assignments %>%
   count(title, consensus, wt = count) %>%
   group_by(title) %>%
