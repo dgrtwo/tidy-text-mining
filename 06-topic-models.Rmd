@@ -303,6 +303,7 @@ We can then compare each to the "consensus" topic for each book (the most common
 ```{r book_topics, dependson = "chapter_classifications"}
 book_topics <- chapter_classifications %>%
   count(title, topic) %>%
+  group_by(title) %>%
   top_n(1, n) %>%
   ungroup() %>%
   transmute(consensus = title, topic)
