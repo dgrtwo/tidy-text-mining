@@ -93,17 +93,17 @@ Or instead we could examine how sentiment changes throughout each novel. We can 
 Next, we count up how many positive and negative words there are in defined sections of each book. We define an `index` here to keep track of where we are in the narrative; this index (using integer division) counts up sections of 100 lines of text.
 
 ```{block, type = "rmdtip"}
-The `%/%` operator does integer division (`x %/% y` is equivalent to `floor(x/y)`) so the index keeps track of which 100-line section of text we are counting up negative and positive sentiment in. 
+The `%/%` operator does integer division (`x %/% y` is equivalent to `floor(x/y)`) so the index keeps track of which 80-line section of text we are counting up negative and positive sentiment in. 
 ```
 
-Small sections of text may not have enough words in them to get a good estimate of sentiment while really large sections can wash out narrative structure. For these books, using 100 lines works well, but this can vary depending on individual texts, how long the lines were to start with, etc. We then use `spread()` so that we have negative and positive sentiment in separate columns, and lastly calculate a net sentiment (positive - negative).
+Small sections of text may not have enough words in them to get a good estimate of sentiment while really large sections can wash out narrative structure. For these books, using 80 lines works well, but this can vary depending on individual texts, how long the lines were to start with, etc. We then use `spread()` so that we have negative and positive sentiment in separate columns, and lastly calculate a net sentiment (positive - negative).
 
 ```{r janeaustensentiment, dependson = "tidy_books"}
 library(tidyr)
 
 janeaustensentiment <- tidy_books %>%
   inner_join(get_sentiments("bing")) %>%
-  count(book, index = linenumber %/% 100, sentiment) %>%
+  count(book, index = linenumber %/% 80, sentiment) %>%
   spread(sentiment, n, fill = 0) %>%
   mutate(sentiment = positive - negative)
 ```
@@ -207,6 +207,7 @@ This can be shown visually, and we can pipe straight into ggplot2, if we like, b
 bing_word_counts %>%
   group_by(sentiment) %>%
   top_n(10) %>%
+  ungroup() %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(word, n, fill = sentiment)) +
   geom_col(show.legend = FALSE) +

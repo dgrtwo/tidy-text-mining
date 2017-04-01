@@ -145,6 +145,7 @@ tf_idf %>%
   filter(str_detect(newsgroup, "^sci\\.")) %>%
   group_by(newsgroup) %>%
   top_n(12, tf_idf) %>%
+  ungroup() %>%
   mutate(word = reorder(word, tf_idf)) %>%
   ggplot(aes(word, tf_idf, fill = newsgroup)) +
   geom_col(show.legend = FALSE) +

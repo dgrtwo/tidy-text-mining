@@ -112,6 +112,7 @@ beta_spread %>%
   group_by(direction = log_ratio > 0,
            absratio = abs(log_ratio)) %>%
   top_n(10, absratio) %>%
+  ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
   ggplot(aes(term, log_ratio)) +
   geom_col() +

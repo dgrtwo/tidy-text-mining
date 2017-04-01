@@ -336,6 +336,7 @@ The top terms for each are visualized in Figure \@ref(fig:stocktfidf). As we'd e
 stock_tf_idf %>%
   group_by(company) %>%
   top_n(8, tf_idf) %>%
+  ungroup() %>%
   mutate(word = reorder(word, tf_idf)) %>%
   ggplot(aes(word, tf_idf, fill = company)) +
   geom_col(show.legend = FALSE) +
