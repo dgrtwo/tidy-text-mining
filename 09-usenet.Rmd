@@ -305,8 +305,7 @@ Which words had the most effect on sentiment scores overall (Figure \@ref(fig:us
 
 ```{r usenetcontributions, dependson = "contributions", fig.width=6, fig.height=6, fig.cap = "Words with the greatest contributions to positive/negative sentiment scores in the Usenet text"}
 contributions %>%
-  mutate(abscontribution = abs(contribution)) %>%
-  top_n(25, abscontribution) %>%
+  top_n(25, abs(contribution)) %>%
   mutate(word = reorder(word, contribution)) %>%
   ggplot(aes(word, contribution, fill = contribution > 0)) +
   geom_col(show.legend = FALSE) +
@@ -328,9 +327,8 @@ top_sentiment_words
 ```{r newsgroupsentiment, fig.height = 10, fig.width = 10, dependson = "top_sentiment_words", echo = FALSE, fig.cap = "The 12 words that contributed the most to sentiment scores within each of six newsgroups"}
 top_sentiment_words %>%
   filter(str_detect(newsgroup, "^(talk|alt|misc)")) %>%
-  mutate(abscontribution = abs(contribution)) %>%
   group_by(newsgroup) %>%
-  top_n(12, abscontribution) %>%
+  top_n(12, abs(contribution)) %>%
   ungroup() %>%
   mutate(newsgroup = reorder(newsgroup, contribution),
          word = reorder(paste(word, newsgroup, sep = "__"), contribution)) %>%
@@ -423,10 +421,9 @@ usenet_bigram_counts %>%
   filter(word1 %in% negate_words) %>%
   count(word1, word2, wt = n, sort = TRUE) %>%
   inner_join(get_sentiments("afinn"), by = c(word2 = "word")) %>%
-  mutate(contribution = score * nn,
-         abscontribution = abs(contribution)) %>%
+  mutate(contribution = score * nn) %>%
   group_by(word1) %>%
-  top_n(10, abscontribution) %>%
+  top_n(10, abs(contribution)) %>%
   ungroup() %>%
   mutate(word2 = reorder(paste(word2, word1, sep = "__"), contribution)) %>%
   ggplot(aes(word2, contribution, fill = contribution > 0)) +

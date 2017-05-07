@@ -354,9 +354,8 @@ stock_tokens %>%
   count(word, id, sort = TRUE) %>%
   inner_join(get_sentiments("afinn"), by = "word") %>%
   group_by(word) %>%
-  summarize(contribution = sum(n * score),
-            abscontribution = abs(contribution)) %>%
-  top_n(12, abscontribution) %>%
+  summarize(contribution = sum(n * score)) %>%
+  top_n(12, abs(contribution)) %>%
   mutate(word = reorder(word, contribution)) %>%
   ggplot(aes(word, contribution)) +
   geom_col() +

@@ -109,9 +109,8 @@ The words with the greatest differences between the two topics are visualized in
 
 ```{r topiccompare, dependson = "beta_spread", fig.cap = "(ref:topiccap)", echo = FALSE}
 beta_spread %>%
-  mutate(absratio = abs(log_ratio)) %>%
   group_by(direction = log_ratio > 0) %>%
-  top_n(10, absratio) %>%
+  top_n(10, abs(log_ratio)) %>%
   ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
   ggplot(aes(term, log_ratio)) +
