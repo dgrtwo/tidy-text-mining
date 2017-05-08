@@ -372,7 +372,7 @@ The Loughran data divides words into six sentiments: "positive", "negative", "li
 ```{r stockloughransentiments, fig.cap = "The most common words in the financial news articles associated with each of the six sentiments in the Loughran and McDonald lexicon"}
 stock_tokens %>%
   count(word) %>%
-  inner_join(get_sentiments("loughran"), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>%
   group_by(sentiment) %>%
   top_n(5, n) %>%
   ungroup() %>%
@@ -390,7 +390,7 @@ Now that we know we can trust the dictionary to approximate the articles' sentim
 
 ```{r}
 stock_sentiment_count <- stock_tokens %>%
-  inner_join(get_sentiments("loughran"), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>%
   count(sentiment, company) %>%
   spread(sentiment, n, fill = 0)
 
