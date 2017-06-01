@@ -79,10 +79,10 @@ freq_by_rank
 
 The `rank` column here tells us the rank of each word within the frequency table; the table was already ordered by `n` so we could use `row_number()` to find the rank. Then, we can calculate the term frequency in the same way we did before. Zipf's law is often visualized by plotting rank on the x-axis and term frequency on the y-axis, on logarithmic scales. Plotting this way, an inversely proportional relationship will have a constant, negative slope.
 
-```{r zipf, dependson = "freq_by_rank", fig.width=7, fig.height=5, fig.cap="Zipf's law for Jane Austen's novels"}
+```{r zipf, dependson = "freq_by_rank", fig.width=6, fig.height=5, fig.cap="Zipf's law for Jane Austen's novels"}
 freq_by_rank %>% 
   ggplot(aes(rank, `term frequency`, color = book)) + 
-  geom_line(size = 1.2, alpha = 0.8) + 
+  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
   scale_x_log10() +
   scale_y_log10()
 ```
@@ -102,11 +102,11 @@ Classic versions of Zipf's law have
 $$\text{frequency} \propto \frac{1}{\text{rank}}$$
 and we have in fact gotten a slope close to -1 here. Let's plot this fitted power law with the data in Figure \@ref(fig:zipffit) to see how it looks.
 
-```{r zipffit, dependson = "freq_by_rank", fig.width=7, fig.height=5, fig.cap="Fitting an exponent for Zipf's law with Jane Austen's novels"}
+```{r zipffit, dependson = "freq_by_rank", fig.width=6, fig.height=5, fig.cap="Fitting an exponent for Zipf's law with Jane Austen's novels"}
 freq_by_rank %>% 
   ggplot(aes(rank, `term frequency`, color = book)) + 
   geom_abline(intercept = -0.62, slope = -1.1, color = "gray50", linetype = 2) +
-  geom_line(size = 1.2, alpha = 0.8) + 
+  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
   scale_x_log10() +
   scale_y_log10()
 ```
@@ -141,22 +141,7 @@ Here we see all proper nouns, names that are in fact important in these novels. 
 Some of the values for idf are the same for different terms because there are 6 documents in this corpus and we are seeing the numerical value for $\ln(6/1)$, $\ln(6/2)$, etc. 
 ```
 
-Let's look at a visualization for these high tf-idf words in Figure \@ref(fig:plotausten).
-
-```{r plotausten, dependson = "desc_idf", fig.height=6, fig.width=9, fig.cap="Highest tf-idf words in Jane Austen's Novels"}
-plot_austen <- book_words %>%
-  arrange(desc(tf_idf)) %>%
-  mutate(word = factor(word, levels = rev(unique(word))))
-
-plot_austen %>% 
-  top_n(20) %>%
-  ggplot(aes(word, tf_idf, fill = book)) +
-  geom_col() +
-  labs(x = NULL, y = "tf-idf") +
-  coord_flip()
-```
-
-Let's look at the novels individually.
+Let's look at a visualization for these high tf-idf words in Figure \@ref(fig:plotseparate).
 
 ```{r plotseparate, dependson = "plot_austen", fig.height=10, fig.width=9, fig.cap="Highest tf-idf words in each of Jane Austen's Novels"}
 plot_austen %>% 
@@ -199,29 +184,7 @@ physics_words <- physics %>%
 physics_words
 ```
 
-Here we see just the raw counts; we need to remember that these documents are all different lengths. Let's go ahead and calculate tf-idf, then visualize the high tf-id words in Figure \@ref(fig:plotphysics).
-
-```{r plotphysics, dependson = "physics_words", fig.width=9, fig.height=6, fig.cap="Highest tf-idf words in classic physics corpus"}
-physics_words <- physics_words %>%
-  bind_tf_idf(word, author, n) 
-
-plot_physics <- physics_words %>%
-  arrange(desc(tf_idf)) %>%
-  mutate(word = factor(word, levels = rev(unique(word)))) %>%
-  mutate(author = factor(author, levels = c("Galilei, Galileo",
-                                            "Huygens, Christiaan", 
-                                            "Tesla, Nikola",
-                                            "Einstein, Albert")))
-
-plot_physics %>%
-  top_n(20) %>%
-  ggplot(aes(word, tf_idf, fill = author)) +
-  geom_col() +
-  labs(x = NULL, y = "tf-idf") +
-  coord_flip()
-```
-
-Nice! Let's look at each text individually in Figure \@ref(fig:physicsseparate).
+Here we see just the raw counts; we need to remember that these documents are all different lengths. Let's go ahead and calculate tf-idf, then visualize the high tf-idf words in Figure \@ref(fig:physicsseparate).
 
 ```{r physicsseparate, dependson = "plot_physics", fig.height=7, fig.width=8, fig.cap="Highest tf-idf words in each physics texts"}
 plot_physics %>% 
