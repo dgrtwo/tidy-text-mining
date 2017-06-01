@@ -146,14 +146,14 @@ We are about equally likely to tweet about maps, email, APIs, and functions.
 
 Which words are most likely to be from Julia's account or from David's account? Let's just take the top 15 most distinctive words for each account and plot them in Figure \@ref(fig:plotratios).
 
-```{r plotratios, dependson = "word_ratios", fig.width=7, fig.height=6, fig.cap="Comparing the odds ratios of words from our accounts"}
+```{r plotratios, dependson = "word_ratios", fig.width=6.5, fig.height=6, fig.cap="Comparing the odds ratios of words from our accounts"}
 word_ratios %>%
   group_by(logratio < 0) %>%
   top_n(15, abs(logratio)) %>%
   ungroup() %>%
   mutate(word = reorder(word, logratio)) %>%
   ggplot(aes(word, logratio, fill = logratio < 0)) +
-  geom_col() +
+  geom_col(show.legend = FALSE) +
   coord_flip() +
   ylab("log odds ratio (David/Julia)") +
   scale_fill_discrete(name = "", labels = c("David", "Julia"))
