@@ -252,7 +252,7 @@ tidy_books %>%
   inner_join(get_sentiments("bing")) %>%
   count(word, sentiment, sort = TRUE) %>%
   acast(word ~ sentiment, value.var = "n", fill = 0) %>%
-  comparison.cloud(colors = c("#F8766D", "#00BFC4"),
+  comparison.cloud(colors = c("gray20", "gray80"),
                    max.words = 100)
 ```
 
