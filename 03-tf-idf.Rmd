@@ -144,7 +144,9 @@ Some of the values for idf are the same for different terms because there are 6 
 Let's look at a visualization for these high tf-idf words in Figure \@ref(fig:plotseparate).
 
 ```{r plotseparate, dependson = "plot_austen", fig.height=10, fig.width=9, fig.cap="Highest tf-idf words in each of Jane Austen's Novels"}
-plot_austen %>% 
+book_words %>%
+  arrange(desc(tf_idf)) %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>% 
   group_by(book) %>% 
   top_n(15) %>% 
   ungroup %>%
@@ -187,6 +189,15 @@ physics_words
 Here we see just the raw counts; we need to remember that these documents are all different lengths. Let's go ahead and calculate tf-idf, then visualize the high tf-idf words in Figure \@ref(fig:physicsseparate).
 
 ```{r physicsseparate, dependson = "plot_physics", fig.height=7, fig.width=8, fig.cap="Highest tf-idf words in each physics texts"}
+plot_physics <- physics_words %>%
+  bind_tf_idf(word, author, n) %>%
+  arrange(desc(tf_idf)) %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>%
+  mutate(author = factor(author, levels = c("Galilei, Galileo",
+                                            "Huygens, Christiaan", 
+                                            "Tesla, Nikola",
+                                            "Einstein, Albert")))
+
 plot_physics %>% 
   group_by(author) %>% 
   top_n(15, tf_idf) %>% 
@@ -234,6 +245,7 @@ mystopwords <- data_frame(word = c("eq", "co", "rc", "ac", "ak", "bn",
                                    "fig", "file", "cg", "cb", "cm"))
 physics_words <- anti_join(physics_words, mystopwords, by = "word")
 plot_physics <- physics_words %>%
+  bind_tf_idf(word, author, n) %>%
   arrange(desc(tf_idf)) %>%
   mutate(word = factor(word, levels = rev(unique(word)))) %>%
   group_by(author) %>% 
