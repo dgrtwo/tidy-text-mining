@@ -29,7 +29,7 @@ knitr::write_bib(c(
 <img src="images/cover.png" width="350" height="460" alt="Cover image" />
 
 
-This is the [website](http://tidytextmining.com/) for *Text Mining with R*! Visit the [GitHub repository for this site](https://github.com/dgrtwo/tidy-text-mining).
+This is the [website](http://tidytextmining.com/) for *Text Mining with R*! Visit the [GitHub repository for this site](https://github.com/dgrtwo/tidy-text-mining), find the book at [O'Reilly](http://www.jdoqocy.com/click-4428796-11290546?url=http%3A%2F%2Fshop.oreilly.com%2Fproduct%2F0636920067153.do%3Fcmp%3Daf-strata-books-video-product_cj_0636920067153_%25zp&cjsku=0636920067153), or [buy it on Amazon](http://amzn.to/2tZkmxG).
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/3.0/us/88x31.png" /></a><br />This work by [Julia Silge](http://juliasilge.com/) and [David Robinson](http://varianceexplained.org/) is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/us/">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 United States License</a>.
 
