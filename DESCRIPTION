@@ -26,6 +26,6 @@ Imports:
   lubridate,
   stringr,
   ggforce,
+  widyr,
   mallet
-Remotes:
-  dgrtwo/widyr
+
