@@ -130,7 +130,7 @@ There are advantages and disadvantages to examining the tf-idf of bigrams rather
 
 ### Using bigrams to provide context in sentiment analysis
 
-Our sentiment analysis approch in Chapter \@ref(sentiment) simply counted the appearance of positive or negative words, according to a reference lexicon. One of the problems with this approach is that a word's context can matter nearly as much as its presence. For example, the words "happy" and "like" will be counted as positive, even in a sentence like "I'm not **happy** and I don't **like** it!"
+Our sentiment analysis approach in Chapter \@ref(sentiment) simply counted the appearance of positive or negative words, according to a reference lexicon. One of the problems with this approach is that a word's context can matter nearly as much as its presence. For example, the words "happy" and "like" will be counted as positive, even in a sentence like "I'm not **happy** and I don't **like** it!"
 
 Now that we have the data organized into bigrams, it's easy to tell how often words are preceded by a word like "not":
 
