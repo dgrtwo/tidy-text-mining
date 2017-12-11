@@ -52,7 +52,7 @@ AssociatedPress
 
 We see that this dataset contains `r nrow(AssociatedPress)` documents (each of them an AP article) and `r ncol(AssociatedPress)` terms (distinct words). Notice that this DTM is 99% sparse (99% of document-word pairs are zero). We could access the terms in the document with the `Terms()` function.
 
-```{r}
+```{r terms, dependson="AssociatedPress"}
 terms <- Terms(AssociatedPress)
 head(terms)
 ```
@@ -75,16 +75,16 @@ Notice that only the non-zero values are included in the tidied output: document
 
 As we've seen in previous chapters, this form is convenient for analysis with the dplyr, tidytext and ggplot2 packages. For example, you can perform sentiment analysis on these newspaper articles with the approach described in Chapter \@ref(sentiment).
 
-```{r ap_sentiments, dependson = "ap_td"}
+```{r apsentiments, dependson = "ap_td"}
 ap_sentiments <- ap_td %>%
   inner_join(get_sentiments("bing"), by = c(term = "word"))
 
 ap_sentiments
 ```
 
-This would let us visualize which words from the AP articles most often contributed to positive or negative sentiment, seen in Figure \@ref(fig:apsentiments). We can see that the most common positive words include "like", "work", "support", and "good", while the most negative words include "killed", "death", and "vice". (The inclusion of "vice" as a negative term is probably a mistake on the algorithm's part, since it likely usually refers to "vice president").
+This would let us visualize which words from the AP articles most often contributed to positive or negative sentiment, seen in Figure \@ref(fig:apsentimentplot). We can see that the most common positive words include "like", "work", "support", and "good", while the most negative words include "killed", "death", and "vice". (The inclusion of "vice" as a negative term is probably a mistake on the algorithm's part, since it likely usually refers to "vice president").
 
-```{r apsentiments, dependson = "apsentiments", fig.height = 6, fig.width = 7, fig.cap = "Words from AP articles with the greatest contribution to positive or negative sentiments, using the Bing sentiment lexicon."}
+```{r apsentimentplot, dependson = "apsentiments", fig.height = 6, fig.width = 7, fig.cap = "Words from AP articles with the greatest contribution to positive or negative sentiments, using the Bing sentiment lexicon."}
 library(ggplot2)
 
 ap_sentiments %>%
@@ -104,8 +104,6 @@ ap_sentiments %>%
 Other text mining packages provide alternative implementations of document-term matrices, such as the `dfm` (document-feature matrix) class from the quanteda package [@R-quanteda]. For example, the quanteda package comes with a corpus of presidential inauguration speeches, which can be converted to a `dfm` using the appropriate function.
 
 ```{r inaug_dfm, message = FALSE, results = "hide"}
-library(methods)
-
 data("data_corpus_inaugural", package = "quanteda")
 inaug_dfm <- quanteda::dfm(data_corpus_inaugural, verbose = FALSE)
 ```
