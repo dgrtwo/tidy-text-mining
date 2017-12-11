@@ -1,24 +1,22 @@
 language: r
+sudo: false
 cache:
   packages: true
   directories:
-  - "$TRAVIS_BUILD_DIR/_bookdown_files"
-sudo: false
+  - _bookdown_files
+  - $HOME/.npm
 addons:
   apt:
     packages:
     - libgsl0-dev
     - libxml2-dev
     - libudunits2-dev
-before_script:
-- chmod +x ./_build.sh
-- chmod +x ./_deploy.sh
-script:
-- "./_build.sh"
-after_success:
-- test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash
-  _deploy.sh
-env:
-  global:
-  - secure: "asv5oDlJ5cREDWWk+rlawEorjIuLHb6+RYSz8h+IqhKAxJkVwuvG/tHBT9JSi2fTnIC7OSOO8mMppMPQk4SdZsKYak7RfZ0ZnjCY2fb3g+x5wgl1mTE4Qf+cC6QudlMGiJ3q9lz4K+YENu6C9Xuy6/LfI0l4Jdxyb4W8Q48D7Xf6Xkmj+RB7SX1LdFDJWTPChZdAiE7PEV5TK/+qK8O0qBBo8ka/H2hsiUNiAyypJTXtdA2UPY0MWP2JUeQjNjF1c2815BHixfZK256PKOBTGvf1ghsIDS42B87LAEdzXVj8MWSL+uCNmKvaqyl+o+YXuZ/sNNCv5yqTSGpElOUgrQutEZ6ybKPM4DoXXJagbXlycTNrC+F233iyGnaZESuAFX1sOqEzxIZlWfY54Vuc4UQ1hr2zIdJZwz0tXbS2IdFb8mCvros98SYtkzRticHa+cwDsivy28XoL0z/7wykhM1jq6daSDDyANKCICrK0CdA66D2mqAzuoxpgkG1Le1vFwSXQdUOAzI1ebhVvOxy6U8OeNysa2h+OJOET4/uOn1qXokv/JFHbHOdKrZ72hkZZv6QNZqS3koBag6ZwEPjd1nbIG9NoHXmnXNsQkTfxH7JeREiwZHNXEGMtoK3iULWYZu/CqnMdgrpANXBPAvqtBMR9yy4LsbcC7euK7zioNY="
 
+before_install:
+- npm install netlify-cli -g
+
+script:
+- Rscript -e 'bookdown::render_book("index.Rmd")'
+
+after_success:
+- netlify deploy -t $NETLIFY_PAT
