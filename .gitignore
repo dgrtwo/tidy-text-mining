@@ -7,3 +7,5 @@ _publish.R
 _book
 _main.*
 packages.bib
+packrat/lib*/
+packrat/src/
