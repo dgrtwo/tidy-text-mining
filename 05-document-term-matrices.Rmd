@@ -195,7 +195,7 @@ Similarly, we could cast the table into a `dfm` object from quanteda's dfm with 
 
 ```{r chunk1}
 ap_td %>%
-  cast_dfm(term, document, count)
+  cast_dfm(document, term, count)
 ```
 
 Some tools simply require a sparse matrix:
