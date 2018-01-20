@@ -18,5 +18,6 @@ before_install:
 script:
 - Rscript -e 'bookdown::render_book("index.Rmd")'
 
-after_success:
-- netlify deploy -t $NETLIFY_PAT
+deploy:
+  provider: script
+  script: netlify deploy -t $NETLIFY_PAT
