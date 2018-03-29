@@ -76,7 +76,7 @@ Notice that we chose the name `word` for the output column from `unnest_tokens()
 
 Now that the text is in a tidy format with one word per row, we are ready to do the sentiment analysis. First, let's use the NRC lexicon and `filter()` for the joy words. Next, let's `filter()` the data frame with the text from the books for the words from *Emma* and then use `inner_join()` to perform the sentiment analysis. What are the most common joy words in *Emma*? Let's use `count()` from dplyr.
 
-```{r nrc_joy, dependson = "tidy_books"}
+```{r nrc-joy, dependson = "tidy_books"}
 nrc_joy <- get_sentiments("nrc") %>% 
   filter(sentiment == "joy")
 
@@ -98,7 +98,7 @@ The `%/%` operator does integer division (`x %/% y` is equivalent to `floor(x/y)
 
 Small sections of text may not have enough words in them to get a good estimate of sentiment while really large sections can wash out narrative structure. For these books, using 80 lines works well, but this can vary depending on individual texts, how long the lines were to start with, etc. We then use `spread()` so that we have negative and positive sentiment in separate columns, and lastly calculate a net sentiment (positive - negative).
 
-```{r jane_austen_sentiment, dependson = "tidy_books"}
+```{r jane-austen-sentiment, dependson = "tidy_books"}
 library(tidyr)
 
 jane_austen_sentiment <- tidy_books %>%
