@@ -77,18 +77,18 @@ Notice that we chose the name `word` for the output column from `unnest_tokens()
 Now that the text is in a tidy format with one word per row, we are ready to do the sentiment analysis. First, let's use the NRC lexicon and `filter()` for the joy words. Next, let's `filter()` the data frame with the text from the books for the words from *Emma* and then use `inner_join()` to perform the sentiment analysis. What are the most common joy words in *Emma*? Let's use `count()` from dplyr.
 
 ```{r nrcjoy, dependson = "tidy_books"}
-nrcjoy <- get_sentiments("nrc") %>% 
+nrc_joy <- get_sentiments("nrc") %>% 
   filter(sentiment == "joy")
 
 tidy_books %>%
   filter(book == "Emma") %>%
-  inner_join(nrcjoy) %>%
+  inner_join(nrc_joy) %>%
   count(word, sort = TRUE)
 ```
 
-We see many positive, happy words about hope, friendship, and love here.
+We see mostly positive, happy words about hope, friendship, and love here. We also see some words that may not be used joyfully by Austen ("found", "present"); we will discuss this in more detail in Section @ref(@most-positive-negative).
 
-Or instead we could examine how sentiment changes throughout each novel. We can do this with just a handful of lines that are mostly dplyr functions. First, we find a sentiment score for each word using the Bing lexicon and `inner_join()`. 
+We can also examine how sentiment changes throughout each novel. We can do this with just a handful of lines that are mostly dplyr functions. First, we find a sentiment score for each word using the Bing lexicon and `inner_join()`. 
 
 Next, we count up how many positive and negative words there are in defined sections of each book. We define an `index` here to keep track of where we are in the narrative; this index (using integer division) counts up sections of 80 lines of text.
 
@@ -101,7 +101,7 @@ Small sections of text may not have enough words in them to get a good estimate 
 ```{r janeaustensentiment, dependson = "tidy_books"}
 library(tidyr)
 
-janeaustensentiment <- tidy_books %>%
+jane_austen_sentiment <- tidy_books %>%
   inner_join(get_sentiments("bing")) %>%
   count(book, index = linenumber %/% 80, sentiment) %>%
   spread(sentiment, n, fill = 0) %>%
@@ -113,7 +113,7 @@ Now we can plot these sentiment scores across the plot trajectory of each novel.
 ```{r sentimentplot, dependson = "janeaustensentiment", fig.width=9, fig.height=10, fig.cap="Sentiment through the narratives of Jane Austen's novels"}
 library(ggplot2)
 
-ggplot(janeaustensentiment, aes(index, sentiment, fill = book)) +
+ggplot(jane_austen_sentiment, aes(index, sentiment, fill = book)) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~book, ncol = 2, scales = "free_x")
 ```
