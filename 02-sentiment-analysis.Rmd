@@ -86,7 +86,7 @@ tidy_books %>%
   count(word, sort = TRUE)
 ```
 
-We see mostly positive, happy words about hope, friendship, and love here. We also see some words that may not be used joyfully by Austen ("found", "present"); we will discuss this in more detail in Section @ref(@most-positive-negative).
+We see mostly positive, happy words about hope, friendship, and love here. We also see some words that may not be used joyfully by Austen ("found", "present"); we will discuss this in more detail in Section \@ref(@most-positive-negative).
 
 We can also examine how sentiment changes throughout each novel. We can do this with just a handful of lines that are mostly dplyr functions. First, we find a sentiment score for each word using the Bing lexicon and `inner_join()`. 
 
