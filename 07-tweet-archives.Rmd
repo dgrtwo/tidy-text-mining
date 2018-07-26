@@ -37,27 +37,27 @@ David and Julia tweet at about the same rate currently and joined Twitter about 
 
 ## Word frequencies
 
-Let's use `unnest_tokens()` to make a tidy data frame of all the words in our tweets, and remove the common English stop words. There are certain conventions in how people use text on Twitter, so we will do a bit more work with our text here than, for example, we did with the narrative text from Project Gutenberg. 
+Let's use `unnest_tokens()` to make a tidy data frame of all the words in our tweets, and remove the common English stop words. There are certain conventions in how people use text on Twitter, so we will use a specialized tokenizer and do a bit more work with our text here than, for example, we did with the narrative text from Project Gutenberg. 
 
-First, we will remove tweets from this dataset that are retweets so that we only have tweets that we wrote ourselves. Next, the `mutate()` line removes links and cleans out some characters that we don't want like ampersands and such. 
+First, we will remove tweets from this dataset that are retweets so that we only have tweets that we wrote ourselves. Next, the `mutate()` line cleans out some characters that we don't want like ampersands and such. 
 
 ```{block, type = "rmdnote"}
-In the call to `unnest_tokens()`, we unnest using a regex pattern, instead of just looking for single unigrams (words). This regex pattern is very useful for dealing with Twitter text; it retains hashtags and mentions of usernames with the `@` symbol. 
+In the call to `unnest_tokens()`, we unnest using the specialized `"tweets"` tokenizer that is built in to the tokenizers package [@R-tokenizers]. This tool is very useful for dealing with Twitter text or other text from online forums; it retains hashtags and mentions of usernames with the `@` symbol. 
 ```
 
-Because we have kept these types of symbols in the text, we can't use a simple `anti_join()` to remove stop words. Instead, we can take the approach shown in the `filter()` line that uses `str_detect()` from the stringr package.
+Because we have kept text such as hashtags and usernames in the dataset, we can't use a simple `anti_join()` to remove stop words. Instead, we can take the approach shown in the `filter()` line that uses `str_detect()` from the stringr package.
 
 ```{r tidytweets, dependson = "setup"}
 library(tidytext)
 library(stringr)
 
-replace_reg <- "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https"
-unnest_reg <- "([^A-Za-z_\\d#@']|'(?![A-Za-z_\\d#@]))"
+remove_reg <- "&amp;|&lt;|&gt;"
 tidy_tweets <- tweets %>% 
   filter(!str_detect(text, "^RT")) %>%
-  mutate(text = str_replace_all(text, replace_reg, "")) %>%
-  unnest_tokens(word, text, token = "regex", pattern = unnest_reg) %>%
+  mutate(text = str_remove_all(text, remove_reg)) %>%
+  unnest_tokens(word, text, token = "tweets") %>%
   filter(!word %in% stop_words$word,
+         !word %in% str_remove_all(stop_words$word, "'"),
          str_detect(word, "[a-z]"))
 ```
 
@@ -127,6 +127,7 @@ where $n$ is the number of times the word in question is used by each person and
 word_ratios <- tidy_tweets %>%
   filter(!str_detect(word, "^@")) %>%
   count(word, person) %>%
+  group_by(word) %>%
   filter(sum(n) >= 10) %>%
   ungroup() %>%
   spread(person, n, fill = 0) %>%
@@ -142,7 +143,7 @@ word_ratios %>%
   arrange(abs(logratio))
 ```
 
-We are about equally likely to tweet about maps, email, APIs, and functions.
+We are about equally likely to tweet about maps, email, files, and APIs.
 
 Which words are most likely to be from Julia's account or from David's account? Let's just take the top 15 most distinctive words for each account and plot them in Figure \@ref(fig:plotratios).
 
@@ -159,7 +160,7 @@ word_ratios %>%
   scale_fill_discrete(name = "", labels = c("David", "Julia"))
 ```
 
-So David has tweeted about specific conferences he has gone to, genes, Stack Overflow, and matrices while Julia tweeted about Utah, physics, Census data, Christmas, and her family.
+So David has tweeted about specific conferences he has gone to, genes, and Stack Overflow, while Julia tweeted about Utah, Census data, and her family.
 
 ## Changes in word use
 
@@ -172,7 +173,6 @@ words_by_time <- tidy_tweets %>%
   filter(!str_detect(word, "^@")) %>%
   mutate(time_floor = floor_date(timestamp, unit = "1 month")) %>%
   count(time_floor, person, word) %>%
-  ungroup() %>%
   group_by(person, time_floor) %>%
   mutate(time_total = sum(n)) %>%
   group_by(word) %>%
@@ -195,7 +195,7 @@ nested_data <- words_by_time %>%
 nested_data
 ```
 
-This data frame has one row for each person-word combination; the `data` column is a list column that contains data frames, one for each combination of person and word. Let's use `map()` from the purrr library to apply our modeling procedure to each of those little data frames inside our big data frame. This is count data so let’s use `glm()` with `family = "binomial"` for modeling. 
+This data frame has one row for each person-word combination; the `data` column is a list column that contains data frames, one for each combination of person and word. Let's use `map()` from purrr [@R-purrr] to apply our modeling procedure to each of those little data frames inside our big data frame. This is count data so let’s use `glm()` with `family = "binomial"` for modeling. 
 
 ```{block, type = "rmdtip"}
 We can think about this modeling procedure answering a question like, "Was a given word mentioned in a given time bin? Yes or no? How does the count of word mentions depend on time?"
@@ -258,7 +258,7 @@ words_by_time %>%
   labs(x = NULL, y = "Word frequency")
 ```
 
-All the significant slopes for Julia are negative. This means she has not tweeted at a higher rate using any specific words, but instead using a variety of different words; her tweets earlier in the year contained the words shown in this plot at higher proportions. Words she uses when publicizing a new blog post like the #rstats hashtag and "post" have gone down in frequency, and she has tweeted less about reading.
+All the significant slopes for Julia are negative. This means she has not tweeted at a higher rate using any specific words, but instead using a variety of different words; her tweets earlier in the year contained the words shown in this plot at higher proportions. Words she uses when publicizing a new blog post like the #rstats hashtag and "post" have gone down in frequency, and she tweets less about reading.
 
 ## Favorites and retweets
 
@@ -274,17 +274,20 @@ tweets <- bind_rows(tweets_julia %>%
   mutate(created_at = ymd_hms(created_at))
 ```
 
-Now that we have this second, smaller set of only recent tweets, let's use `unnest_tokens()` to transform these tweets to a tidy data set. Let's remove all retweets and replies from this data set so we only look at regular tweets that David and Julia have posted directly.
+Now that we have this second, smaller set of only recent tweets, let's again use `unnest_tokens()` to transform these tweets to a tidy data set. Let's remove all retweets and replies from this data set so we only look at regular tweets that David and Julia have posted directly.
 
 ```{r tidy_tweets2, dependson = "setup2"}
 tidy_tweets <- tweets %>% 
   filter(!str_detect(text, "^(RT|@)")) %>%
-  mutate(text = str_replace_all(text, replace_reg, "")) %>%
-  unnest_tokens(word, text, token = "regex", pattern = unnest_reg) %>%
-  anti_join(stop_words)
+  mutate(text = str_remove_all(text, remove_reg)) %>%
+  unnest_tokens(word, text, token = "tweets", strip_url = TRUE) %>%
+  filter(!word %in% stop_words$word,
+         !word %in% str_remove_all(stop_words$word, "'"))
 
 tidy_tweets
 ```
+
+Notice that the `word` column contains tokenized emoji.
 
 To start with, let’s look at the number of times each of our tweets was retweeted. Let's find the total number of retweets for each person.
 
@@ -315,7 +318,7 @@ word_by_rts %>%
   arrange(desc(retweets))
 ```
 
-At the top of this sorted data frame, we see tweets from Julia and David about packages that they work on, like [gutenbergr](https://cran.r-project.org/package=gutenbergr), [gganimate](https://github.com/dgrtwo/gganimate), and [tidytext](https://cran.r-project.org/package=tidytext). Let's plot the words that have the highest median retweets for each of our accounts (Figure \@ref(fig:plotrts)).
+At the top of this sorted data frame, we see tweets from Julia and David about packages that they work on, like [gganimate](https://github.com/dgrtwo/gganimate) and [tidytext](https://cran.r-project.org/package=tidytext). Let's plot the words that have the highest median retweets for each of our accounts (Figure \@ref(fig:plotrts)).
 
 ```{r plotrts, dependson = "word_by_rts", fig.width=10, fig.height=5, fig.cap="Words with highest median retweets"}
 word_by_rts %>%
@@ -334,7 +337,7 @@ word_by_rts %>%
        y = "Median # of retweets for tweets containing each word")
 ```
 
-We see lots of word about R packages, including tidytext, a package about which you are reading right now! The "0" for David comes from tweets where he mentions version numbers of packages, like ["broom 0.4.0"](https://twitter.com/drob/status/671430703234576384) or similar.
+We see lots of word about R packages, including tidytext, a package about which you are reading right now!
 
 We can follow a similar procedure to see which words led to more favorites. Are they different than the words that lead to more retweets?
 
@@ -374,7 +377,11 @@ word_by_favs %>%
        y = "Median # of favorites for tweets containing each word")
 ```
 
-We see some minor differences between Figures \@ref(fig:plotrts) and \@ref(fig:plotfavs), especially near the bottom of the top 10 list, but these are largely the same words as for retweets. In general, the same words that lead to retweets lead to favorites. A prominent word for Julia in both plots is the hashtag for the NASA Datanauts program that she has participated in; read on to Chapter \@ref(nasa) to learn more about NASA data and what we can learn from text analysis of NASA datasets.
+We see some minor differences between Figures \@ref(fig:plotrts) and \@ref(fig:plotfavs), especially near the bottom of the top 10 list, but these are largely the same words as for retweets. In general, the same words that lead to retweets lead to favorites. A prominent word for Julia in both plots is the hashtag for the NASA Datanauts program that she has participated in; read on to Chapter \@ref(nasa) to learn more about NASA data and what we can learn from text analysis of NASA datasets. Wondering about the "=" in David's list?
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Me: You can&#39;t just add two p-values together.<br><br>Dev: The hell I can&#39;t:<br><br>newPval = pval1 + pval2;<br><br>Me: But-<br><br>Dev: Is all statistics this easy</p>&mdash; David Robinson (@drob) <a href="https://twitter.com/drob/status/714879071725993986?ref_src=twsrc%5Etfw">March 29, 2016</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 
 ## Summary
 
