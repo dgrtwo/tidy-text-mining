@@ -110,7 +110,7 @@ This may not even need to be pointed out, but David and Julia have used their Tw
 
 We just made a plot comparing raw word frequencies over our whole Twitter histories; now let's find which words are more or less likely to come from each person's account using the log odds ratio. First, let's restrict the analysis moving forward to tweets from David and Julia sent during 2016. David was consistently active on Twitter for all of 2016 and this was about when Julia transitioned into data science as a career.
 
-```{r}
+```{r tidytweetsnew, dependson = "tidytweets"}
 tidy_tweets <- tidy_tweets %>%
   filter(timestamp >= as.Date("2016-01-01"),
          timestamp < as.Date("2017-01-01"))
@@ -123,7 +123,7 @@ $$\text{log odds ratio} = \ln{\left(\frac{\left[\frac{n+1}{\text{total}+1}\right
 
 where $n$ is the number of times the word in question is used by each person and the total indicates the total words for each person.
 
-```{r word_ratios, dependson = "tidytweets"}
+```{r word_ratios, dependson = "tidytweetsnew"}
 word_ratios <- tidy_tweets %>%
   filter(!str_detect(word, "^@")) %>%
   count(word, person) %>%
@@ -168,7 +168,7 @@ The section above looked at overall word use, but now let's ask a different ques
 
 After we have the time bins defined, we count how many times each of us used each word in each time bin. After that, we add columns to the data frame for the total number of words used in each time bin by each person and the total number of times each word was used by each person. We can then `filter()` to only keep words used at least some minimum number of times (30, in this case).
 
-```{r words_by_time, dependson = "tidy_tweets"}
+```{r words_by_time, dependson = "tidytweetsnew"}
 words_by_time <- tidy_tweets %>%
   filter(!str_detect(word, "^@")) %>%
   mutate(time_floor = floor_date(timestamp, unit = "1 month")) %>%
