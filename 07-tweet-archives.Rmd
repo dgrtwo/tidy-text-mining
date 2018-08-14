@@ -131,7 +131,7 @@ word_ratios <- tidy_tweets %>%
   filter(sum(n) >= 10) %>%
   ungroup() %>%
   spread(person, n, fill = 0) %>%
-  mutate_if(is.numeric, funs((. + 1) / sum(. + 1))) %>%
+  mutate_if(is.numeric, funs((. + 1) / (sum(.) + 1))) %>%
   mutate(logratio = log(David / Julia)) %>%
   arrange(desc(logratio))
 ```
@@ -143,7 +143,7 @@ word_ratios %>%
   arrange(abs(logratio))
 ```
 
-We are about equally likely to tweet about maps, email, files, and APIs.
+We are about equally likely to tweet about words, science, ideas, and email.
 
 Which words are most likely to be from Julia's account or from David's account? Let's just take the top 15 most distinctive words for each account and plot them in Figure \@ref(fig:plotratios).
 
@@ -160,7 +160,7 @@ word_ratios %>%
   scale_fill_discrete(name = "", labels = c("David", "Julia"))
 ```
 
-So David has tweeted about specific conferences he has gone to, genes, and Stack Overflow, while Julia tweeted about Utah, Census data, and her family.
+So David has tweeted about specific conferences he has gone to and Stack Overflow, while Julia tweeted about Utah, Census data, and her family.
 
 ## Changes in word use
 
@@ -294,7 +294,7 @@ To start with, let’s look at the number of times each of our tweets was retwee
 ```{r rt_totals, dependson = "tidy_tweets2"}
 totals <- tidy_tweets %>% 
   group_by(person, id) %>% 
-  summarise(rts = sum(retweets)) %>% 
+  summarise(rts = first(retweets)) %>% 
   group_by(person) %>% 
   summarise(total_rts = sum(rts))
 
@@ -344,7 +344,7 @@ We can follow a similar procedure to see which words led to more favorites. Are 
 ```{r word_by_favs, dependson = "tidy_tweets2"}
 totals <- tidy_tweets %>% 
   group_by(person, id) %>% 
-  summarise(favs = sum(favorites)) %>% 
+  summarise(favs = first(favorites)) %>% 
   group_by(person) %>% 
   summarise(total_favs = sum(favs))
 
