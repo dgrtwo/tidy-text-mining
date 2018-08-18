@@ -175,7 +175,7 @@ words_by_time <- tidy_tweets %>%
   count(time_floor, person, word) %>%
   group_by(person, time_floor) %>%
   mutate(time_total = sum(n)) %>%
-  group_by(word) %>%
+  group_by(person, word) %>%
   mutate(word_total = sum(n)) %>%
   ungroup() %>%
   rename(count = n) %>%
@@ -226,7 +226,7 @@ Now let's find the most important slopes. Which words have changed in frequency 
 
 ```{r top_slopes2, dependson = "slopes"}
 top_slopes <- slopes %>% 
-  filter(adjusted.p.value < 0.1)
+  filter(adjusted.p.value < 0.05)
 
 top_slopes
 ```
@@ -258,7 +258,7 @@ words_by_time %>%
   labs(x = NULL, y = "Word frequency")
 ```
 
-All the significant slopes for Julia are negative. This means she has not tweeted at a higher rate using any specific words, but instead using a variety of different words; her tweets earlier in the year contained the words shown in this plot at higher proportions. Words she uses when publicizing a new blog post like the #rstats hashtag and "post" have gone down in frequency, and she tweets less about reading.
+Both the significant slopes for Julia are negative. This means she has not tweeted at a higher rate using any specific words, but instead using a variety of different words; her tweets earlier in the year contained the words shown in this plot at higher proportions. Words she uses when publicizing a new blog post like the #rstats hashtag and "post" have gone down in frequency.
 
 ## Favorites and retweets
 
