@@ -250,7 +250,7 @@ We definitely see clustering here, and strong connections between keywords like 
 These are the most commonly co-occurring words, but also just the most common keywords in general. 
 ```
 
-To examine the relationships among keywords in a different way, we can find the correlation among the keywords as described in Chapter \@ref(ngrams). This looks for those keywords that are more likely to occur together than with other keywords in a description field.
+To examine the relationships among keywords in a different way, we can find the correlation among the keywords as described in Chapter \@ref(ngrams). This looks for those keywords that are more likely to occur together than with other keywords.
 
 ```{r keyword_cors, dependson = "toupper"}
 keyword_cors <- nasa_keyword %>% 
@@ -278,7 +278,7 @@ keyword_cors %>%
   theme_void()
 ```
 
-This network in Figure \@ref(fig:plotcors) appears much different than the co-occurence network. The difference is that the co-occurrence network asks a question about which keyword pairs occur most often, and the correlation network asks a question about which keywordsoccur more often together than with other keywords. Notice here the high number of small clusters of keywords; the network structure can be extracted (for further analysis) from the `graph_from_data_frame()` function above.
+This network in Figure \@ref(fig:plotcors) appears much different than the co-occurence network. The difference is that the co-occurrence network asks a question about which keyword pairs occur most often, and the correlation network asks a question about which keywords occur more often together than with other keywords. Notice here the high number of small clusters of keywords; the network structure can be extracted (for further analysis) from the `graph_from_data_frame()` function above.
 
 ## Calculating tf-idf for the description fields
 
@@ -320,7 +320,7 @@ desc_tf_idf <- full_join(desc_tf_idf, nasa_keyword, by = "id")
 
 Let's plot some of the most important words, as measured by tf-idf, for a few example keywords used on NASA datasets. First, let's use dplyr operations to filter for the keywords we want to examine and take just the top 15 words for each keyword. Then, let's plot those words in Figure \@ref(fig:plottfidf).
 
-```{r plottfidf, dependson = "full_join", fig.width=10, fig.height=7, fig.cap="Distribution of tf-idf for words from datasets labeled with select keywords"}
+```{r plottfidf, dependson = "full_join", fig.width=10, fig.height=7, fig.cap="Distribution of tf-idf for words from datasets labeled with selected keywords"}
 desc_tf_idf %>% 
   filter(!near(tf, 1)) %>%
   filter(keyword %in% c("SOLAR ACTIVITY", "CLOUDS", 
