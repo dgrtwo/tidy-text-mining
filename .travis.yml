@@ -21,7 +21,5 @@ script:
 - Rscript -e 'bookdown::render_book("index.Rmd")'
 - Rscript -e 'xfun::optipng()'
 
-deploy:
-  provider: script
-  script: netlify deploy --prod --dir _bookdown_files
-  skip_cleanup: true
+after_success:
+- netlify deploy -t $NETLIFY_PAT
