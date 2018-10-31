@@ -5,6 +5,7 @@ cache:
   directories:
   - _bookdown_files
   - $HOME/.npm
+  
 addons:
   apt:
     packages:
@@ -20,5 +21,7 @@ script:
 - Rscript -e 'bookdown::render_book("index.Rmd")'
 - Rscript -e 'xfun::optipng()'
 
-after_success:
-- netlify deploy -t $NETLIFY_PAT
+deploy:
+  provider: script
+  script: netlify deploy --prod --dir _bookdown_files
+  skip_cleanup: true
