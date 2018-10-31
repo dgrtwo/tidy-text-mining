@@ -22,4 +22,4 @@ script:
 - Rscript -e 'xfun::optipng()'
 
 after_success:
-- netlify deploy -t $NETLIFY_PAT
+- netlify deploy
