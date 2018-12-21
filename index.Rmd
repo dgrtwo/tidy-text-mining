@@ -14,7 +14,7 @@ links-as-notes: true
 colorlinks: true
 github-repo: dgrtwo/tidy-text-mining
 cover-image: images/cover.png
-url: 'https\://www.tidytextmining.com'
+url: 'https\://www.tidytextmining.com/'
 description: "A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools"
 ---
 
