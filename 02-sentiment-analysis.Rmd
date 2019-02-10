@@ -220,7 +220,7 @@ bing_word_counts %>%
 Figure \@ref(fig:pipetoplot) lets us spot an anomaly in the sentiment analysis; the word "miss" is coded as negative but it is used as a title for young, unmarried women in Jane Austen's works. If it were appropriate for our purposes, we could easily add "miss" to a custom stop-words list using `bind_rows()`. We could implement that with a strategy such as this.
 
 ```{r}
-custom_stop_words <- bind_rows(data_frame(word = c("miss"), 
+custom_stop_words <- bind_rows(tibble(word = c("miss"), 
                                           lexicon = c("custom")), 
                                stop_words)
 
@@ -267,7 +267,7 @@ Lots of useful work can be done by tokenizing at the word level, but sometimes i
 is a sad sentence, not a happy one, because of negation. R packages included coreNLP [@R-coreNLP], cleanNLP [@R-cleanNLP], and sentimentr [@R-sentimentr] are examples of such sentiment analysis algorithms. For these, we may want to tokenize text into sentences, and it makes sense to use a new name for the output column in such a case.
 
 ```{r PandP}
-PandP_sentences <- data_frame(text = prideprejudice) %>% 
+PandP_sentences <- tibble(text = prideprejudice) %>% 
   unnest_tokens(sentence, text, token = "sentences")
 ```
 

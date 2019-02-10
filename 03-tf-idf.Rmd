@@ -241,7 +241,7 @@ physics %>%
 Let's remove some of these less meaningful words to make a better, more meaningful plot. Notice that we make a custom list of stop words and use `anti_join()` to remove them; this is a flexible approach that can be used in many situations. We will need to go back a few steps since we are removing words from the tidy data frame.
 
 ```{r mystopwords, dependson = "plot_physics", fig.height=7, fig.width=8, fig.cap="Highest tf-idf words in classic physics texts"}
-mystopwords <- data_frame(word = c("eq", "co", "rc", "ac", "ak", "bn", 
+mystopwords <- tibble(word = c("eq", "co", "rc", "ac", "ak", "bn", 
                                    "fig", "file", "cg", "cb", "cm"))
 physics_words <- anti_join(physics_words, mystopwords, by = "word")
 plot_physics <- physics_words %>%

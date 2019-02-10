@@ -290,7 +290,7 @@ download_articles <- function(symbol) {
   WebCorpus(GoogleFinanceSource(paste0("NASDAQ:", symbol)))
 }
 
-stock_articles <- data_frame(company = company,
+stock_articles <- tibble(company = company,
                              symbol = symbol) %>%
   mutate(corpus = map(symbol, download_articles))
 ```
