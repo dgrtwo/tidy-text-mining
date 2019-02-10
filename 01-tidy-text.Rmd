@@ -48,7 +48,7 @@ This is a typical character vector that we might want to analyze. In order to tu
 
 ```{r text_df, dependson = "text"}
 library(dplyr)
-text_df <- data_frame(line = 1:4, text = text)
+text_df <- tibble(line = 1:4, text = text)
 
 text_df
 ```

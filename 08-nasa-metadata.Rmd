@@ -54,7 +54,7 @@ Let's set up separate tidy data frames for title, description, and keyword, keep
 ```{r title, dependson = "download", message=FALSE}
 library(dplyr)
 
-nasa_title <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
+nasa_title <- tibble(id = metadata$dataset$`_id`$`$oid`, 
                          title = metadata$dataset$title)
 nasa_title
 ```
@@ -62,7 +62,7 @@ nasa_title
 These are just a few example titles from the datasets we will be exploring. Notice that we have the NASA-assigned ids here, and also that there are duplicate titles on separate datasets.
 
 ```{r desc, dependson = "download", dplyr.width = 150}
-nasa_desc <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
+nasa_desc <- tibble(id = metadata$dataset$`_id`$`$oid`, 
                         desc = metadata$dataset$description)
 
 nasa_desc %>% 
@@ -77,7 +77,7 @@ Now we can build the tidy data frame for the keywords. For this one, we need to 
 ```{r keyword, dependson = "download"}
 library(tidyr)
 
-nasa_keyword <- data_frame(id = metadata$dataset$`_id`$`$oid`, 
+nasa_keyword <- tibble(id = metadata$dataset$`_id`$`$oid`, 
                            keyword = metadata$dataset$keyword) %>%
   unnest(keyword)
 
@@ -131,7 +131,7 @@ We can do this by making a list of custom stop words and using `anti_join()` to 
 ```
 
 ```{r my_stopwords, dependson = "unnest"}
-my_stopwords <- data_frame(word = c(as.character(1:10), 
+my_stopwords <- tibble(word = c(as.character(1:10), 
                                     "v1", "v03", "l2", "l3", "l4", "v5.2.0", 
                                     "v003", "v004", "v005", "v006", "v7"))
 nasa_title <- nasa_title %>% 
@@ -355,7 +355,7 @@ Let’s clean up the text a bit using stop words to remove some of the nonsense 
 
 ```{r word_counts, dependson = "my_stopwords"}
 my_stop_words <- bind_rows(stop_words, 
-                           data_frame(word = c("nbsp", "amp", "gt", "lt",
+                           tibble(word = c("nbsp", "amp", "gt", "lt",
                                                "timesnewromanpsmt", "font",
                                                "td", "li", "br", "tr", "quot",
                                                "st", "img", "src", "strong",
