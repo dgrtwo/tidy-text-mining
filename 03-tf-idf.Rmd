@@ -33,8 +33,7 @@ library(tidytext)
 
 book_words <- austen_books() %>%
   unnest_tokens(word, text) %>%
-  count(book, word, sort = TRUE) %>%
-  ungroup()
+  count(book, word, sort = TRUE)
 
 total_words <- book_words %>% 
   group_by(book) %>% 
