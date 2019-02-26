@@ -156,8 +156,7 @@ We can then examine the most frequent words that were preceded by "not" and were
 not_words <- bigrams_separated %>%
   filter(word1 == "not") %>%
   inner_join(AFINN, by = c(word2 = "word")) %>%
-  count(word2, score, sort = TRUE) %>%
-  ungroup()
+  count(word2, score, sort = TRUE)
 
 not_words
 ```
@@ -192,8 +191,8 @@ negation_words <- c("not", "no", "never", "without")
 negated_words <- bigrams_separated %>%
   filter(word1 %in% negation_words) %>%
   inner_join(AFINN, by = c(word2 = "word")) %>%
-  count(word1, word2, score, sort = TRUE) %>%
-  ungroup()
+  count(word1, word2, score, sort = TRUE)
+
 ```
 
 We could then visualize what the most common words to follow each particular negation are (Figure \@ref(fig:negatedwords)). While "not like" and "not help" are still the two most common examples, we can also see pairings such as "no great" and "never loved." We could combine this with the approaches in Chapter \@ref(sentiment) to reverse the AFINN scores of each word that follows a negation. These are just a few examples of how finding consecutive words can give context to text mining methods.
