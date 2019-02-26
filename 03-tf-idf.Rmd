@@ -148,7 +148,7 @@ book_words %>%
   mutate(word = factor(word, levels = rev(unique(word)))) %>% 
   group_by(book) %>% 
   top_n(15) %>% 
-  ungroup %>%
+  ungroup() %>%
   ggplot(aes(word, tf_idf, fill = book)) +
   geom_col(show.legend = FALSE) +
   labs(x = NULL, y = "tf-idf") +
@@ -179,8 +179,7 @@ Now that we have the texts, let's use `unnest_tokens()` and `count()` to find ou
 ```{r physics_words, dependson = "physics"}
 physics_words <- physics %>%
   unnest_tokens(word, text) %>%
-  count(author, word, sort = TRUE) %>%
-  ungroup()
+  count(author, word, sort = TRUE)
 
 physics_words
 ```
@@ -249,7 +248,7 @@ plot_physics <- physics_words %>%
   mutate(word = factor(word, levels = rev(unique(word)))) %>%
   group_by(author) %>% 
   top_n(15, tf_idf) %>%
-  ungroup %>%
+  ungroup() %>%
   mutate(author = factor(author, levels = c("Galilei, Galileo",
                                             "Huygens, Christiaan",
                                             "Tesla, Nikola",
