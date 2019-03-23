@@ -408,7 +408,6 @@ usenet_bigrams <- cleaned_text %>%
 ```{r usenet_bigram_counts, dependson = "usenet_bigrams"}
 usenet_bigram_counts <- usenet_bigrams %>%
   count(newsgroup, bigram, sort = TRUE) %>%
-  ungroup() %>%
   separate(bigram, c("word1", "word2"), sep = " ")
 ```
 
@@ -421,7 +420,7 @@ usenet_bigram_counts %>%
   filter(word1 %in% negate_words) %>%
   count(word1, word2, wt = n, sort = TRUE) %>%
   inner_join(get_sentiments("afinn"), by = c(word2 = "word")) %>%
-  mutate(contribution = score * nn) %>%
+  mutate(contribution = score * n) %>%
   group_by(word1) %>%
   top_n(10, abs(contribution)) %>%
   ungroup() %>%
