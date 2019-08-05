@@ -8,6 +8,7 @@ Imports:
   bookdown,
   tidytext,
   janeaustenr,
+  textdata,
   dplyr,
   tidyr,
   ggplot2,
