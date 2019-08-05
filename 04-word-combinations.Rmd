@@ -144,11 +144,19 @@ By performing sentiment analysis on the bigram data, we can examine how often se
 
 Let's use the AFINN lexicon for sentiment analysis, which you may recall gives a numeric sentiment score for each word, with positive or negative numbers indicating the direction of the sentiment.
 
-```{r AFINN_ngrams}
+```{r eval=FALSE}
 AFINN <- get_sentiments("afinn")
 
 AFINN
 ```
+
+```{r AFINN_ngrams, echo=FALSE}
+load("data/afinn.rda")
+AFINN <- afinn
+
+AFINN
+```
+
 
 We can then examine the most frequent words that were preceded by "not" and were associated with a sentiment.
 

@@ -346,11 +346,28 @@ stock_tf_idf %>%
 
 If we were interested in using recent news to analyze the market and make investment decisions, we'd likely want to use sentiment analysis to determine whether the news coverage was positive or negative. Before we run such an analysis, we should look at what words would contribute the most to positive and negative sentiments, as was shown in Chapter \@ref(most-positive-negative). For example, we could examine this within the AFINN lexicon (Figure \@ref(fig:stockafinn)).
 
-```{r stockafinn, dependson = "stock_articles", fig.cap = "The words with the largest contribution to sentiment scores in recent financial articles, according to the AFINN dictionary. The 'contribution' is the product of the word and the sentiment score."}
+```{r eval=FALSE}
 stock_tokens %>%
   anti_join(stop_words, by = "word") %>%
   count(word, id, sort = TRUE) %>%
   inner_join(get_sentiments("afinn"), by = "word") %>%
+  group_by(word) %>%
+  summarize(contribution = sum(n * score)) %>%
+  top_n(12, abs(contribution)) %>%
+  mutate(word = reorder(word, contribution)) %>%
+  ggplot(aes(word, contribution)) +
+  geom_col() +
+  coord_flip() +
+  labs(y = "Frequency of word * AFINN score")
+```
+
+
+```{r stockafinn, dependson = "stock_articles", echo=FALSE, fig.cap = "The words with the largest contribution to sentiment scores in recent financial articles, according to the AFINN dictionary. The 'contribution' is the product of the word and the sentiment score."}
+load("data/afinn.rda")
+stock_tokens %>%
+  anti_join(stop_words, by = "word") %>%
+  count(word, id, sort = TRUE) %>%
+  inner_join(afinn, by = "word") %>%
   group_by(word) %>%
   summarize(contribution = sum(n * score)) %>%
   top_n(12, abs(contribution)) %>%
@@ -367,10 +384,27 @@ Instead, we introduce another sentiment lexicon: the Loughran and McDonald dicti
 
 The Loughran data divides words into six sentiments: "positive", "negative", "litigious", "uncertain", "constraining", and "superfluous". We could start by examining the most common words belonging to each sentiment within this text dataset.
 
-```{r stockloughransentiments, fig.cap = "The most common words in the financial news articles associated with each of the six sentiments in the Loughran and McDonald lexicon"}
+```{r eval=FALSE}
 stock_tokens %>%
   count(word) %>%
   inner_join(get_sentiments("loughran"), by = "word") %>%
+  group_by(sentiment) %>%
+  top_n(5, n) %>%
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ sentiment, scales = "free") +
+  ylab("Frequency of this word in the recent financial articles")
+```
+
+
+```{r stockloughransentiments, echo = FALSE, fig.cap = "The most common words in the financial news articles associated with each of the six sentiments in the Loughran and McDonald lexicon"}
+load("data/loughran.rda")
+stock_tokens %>%
+  count(word) %>%
+  inner_join(loughran, by = "word") %>%
   group_by(sentiment) %>%
   top_n(5, n) %>%
   ungroup() %>%
@@ -386,9 +420,18 @@ These assignments (Figure \@ref(fig:stockloughransentiments)) of words to sentim
 
 Now that we know we can trust the dictionary to approximate the articles' sentiments, we can use our typical methods for counting the number of uses of each sentiment-associated word in each corpus.
 
-```{r}
+```{r eval=FALSE}
 stock_sentiment_count <- stock_tokens %>%
   inner_join(get_sentiments("loughran"), by = "word") %>%
+  count(sentiment, company) %>%
+  spread(sentiment, n, fill = 0)
+
+stock_sentiment_count
+```
+
+```{r echo=FALSE}
+stock_sentiment_count <- stock_tokens %>%
+  inner_join(loughran, by = "word") %>%
   count(sentiment, company) %>%
   spread(sentiment, n, fill = 0)
 
