@@ -142,7 +142,7 @@ bigrams_separated %>%
 
 By performing sentiment analysis on the bigram data, we can examine how often sentiment-associated words are preceded by "not" or other negating words. We could use this to ignore or even reverse their contribution to the sentiment score.
 
-Let's use the AFINN lexicon for sentiment analysis, which you may recall gives a numeric sentiment score for each word, with positive or negative numbers indicating the direction of the sentiment.
+Let's use the AFINN lexicon for sentiment analysis, which you may recall gives a numeric sentiment value for each word, with positive or negative numbers indicating the direction of the sentiment.
 
 ```{r eval=FALSE}
 AFINN <- get_sentiments("afinn")
@@ -164,28 +164,28 @@ We can then examine the most frequent words that were preceded by "not" and were
 not_words <- bigrams_separated %>%
   filter(word1 == "not") %>%
   inner_join(AFINN, by = c(word2 = "word")) %>%
-  count(word2, score, sort = TRUE)
+  count(word2, value, sort = TRUE)
 
 not_words
 ```
 
 For example, the most common sentiment-associated word to follow "not" was "like", which would normally have a (positive) score of 2.
 
-It's worth asking which words contributed the most in the "wrong" direction. To compute that, we can multiply their score by the number of times they appear (so that a word with a score of +3 occurring 10 times has as much impact as a word with a sentiment score of +1 occurring 30 times). We visualize the result with a bar plot (Figure \@ref(fig:notwordsplot)).
+It's worth asking which words contributed the most in the "wrong" direction. To compute that, we can multiply their value by the number of times they appear (so that a word with a value of +3 occurring 10 times has as much impact as a word with a sentiment value of +1 occurring 30 times). We visualize the result with a bar plot (Figure \@ref(fig:notwordsplot)).
 
-```{r notwordsplot, dependson = "not_words", fig.width=8, fig.height=6, fig.cap = "The 20 words preceded by 'not' that had the greatest contribution to sentiment scores, in either a positive or negative direction"}
+```{r notwordsplot, dependson = "not_words", fig.width=8, fig.height=6, fig.cap = "The 20 words preceded by 'not' that had the greatest contribution to sentiment values, in either a positive or negative direction"}
 
 library(ggplot2)
 
 not_words %>%
-  mutate(contribution = n * score) %>%
+  mutate(contribution = n * value) %>%
   arrange(desc(abs(contribution))) %>%
   head(20) %>%
   mutate(word2 = reorder(word2, contribution)) %>%
-  ggplot(aes(word2, n * score, fill = n * score > 0)) +
+  ggplot(aes(word2, n * value, fill = n * value > 0)) +
   geom_col(show.legend = FALSE) +
   xlab("Words preceded by \"not\"") +
-  ylab("Sentiment score * number of occurrences") +
+  ylab("Sentiment value * number of occurrences") +
   coord_flip()
 ```
 
@@ -199,24 +199,24 @@ negation_words <- c("not", "no", "never", "without")
 negated_words <- bigrams_separated %>%
   filter(word1 %in% negation_words) %>%
   inner_join(AFINN, by = c(word2 = "word")) %>%
-  count(word1, word2, score, sort = TRUE)
+  count(word1, word2, value, sort = TRUE)
 
 ```
 
-We could then visualize what the most common words to follow each particular negation are (Figure \@ref(fig:negatedwords)). While "not like" and "not help" are still the two most common examples, we can also see pairings such as "no great" and "never loved." We could combine this with the approaches in Chapter \@ref(sentiment) to reverse the AFINN scores of each word that follows a negation. These are just a few examples of how finding consecutive words can give context to text mining methods.
+We could then visualize what the most common words to follow each particular negation are (Figure \@ref(fig:negatedwords)). While "not like" and "not help" are still the two most common examples, we can also see pairings such as "no great" and "never loved." We could combine this with the approaches in Chapter \@ref(sentiment) to reverse the AFINN values of each word that follows a negation. These are just a few examples of how finding consecutive words can give context to text mining methods.
 
 ```{r negatedwords, dependson = "negated_words", fig.width=9, fig.height=9, echo = FALSE, fig.cap = "The most common positive or negative words to follow negations such as 'never', 'no', 'not', and 'without'"}
 negated_words %>%
-  mutate(contribution = n * score,
+  mutate(contribution = n * value,
          word2 = reorder(paste(word2, word1, sep = "__"), contribution)) %>%
   group_by(word1) %>%
   top_n(12, abs(contribution)) %>%
-  ggplot(aes(word2, contribution, fill = n * score > 0)) +
+  ggplot(aes(word2, contribution, fill = n * value > 0)) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ word1, scales = "free") +
   scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
   xlab("Words preceded by negation term") +
-  ylab("Sentiment score * # of occurrences") +
+  ylab("Sentiment value * # of occurrences") +
   coord_flip()
 ```
 

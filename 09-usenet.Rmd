@@ -269,35 +269,35 @@ Notice that the division of Usenet messages wasn't as clean as the division of b
 
 We can use the sentiment analysis techniques we explored in Chapter \@ref(sentiment) to examine how often positive and negative words occurred in these Usenet posts. Which newsgroups were the most positive or negative overall?
 
-In this example we'll use the AFINN sentiment lexicon, which provides numeric positivity scores for each word, and visualize it with a bar plot (Figure \@ref(fig:newsgroupsentiments)).
+In this example we'll use the AFINN sentiment lexicon, which provides numeric positivity values for each word, and visualize it with a bar plot (Figure \@ref(fig:newsgroupsentiments)).
 
 ```{r eval=FALSE}
 newsgroup_sentiments <- words_by_newsgroup %>%
   inner_join(get_sentiments("afinn"), by = "word") %>%
   group_by(newsgroup) %>%
-  summarize(score = sum(score * n) / sum(n))
+  summarize(value = sum(value * n) / sum(n))
 
 newsgroup_sentiments %>%
-  mutate(newsgroup = reorder(newsgroup, score)) %>%
-  ggplot(aes(newsgroup, score, fill = score > 0)) +
+  mutate(newsgroup = reorder(newsgroup, value)) %>%
+  ggplot(aes(newsgroup, value, fill = value > 0)) +
   geom_col(show.legend = FALSE) +
   coord_flip() +
-  ylab("Average sentiment score")
+  ylab("Average sentiment value")
 ```
 
-```{r newsgroupsentiments, dependson = "words_by_newsgroup", echo = FALSE, fig.width=7, fig.height=6, fig.cap = "Average AFINN score for posts within each newsgroup"}
+```{r newsgroupsentiments, dependson = "words_by_newsgroup", echo = FALSE, fig.width=7, fig.height=6, fig.cap = "Average AFINN value for posts within each newsgroup"}
 load("data/afinn.rda")
 newsgroup_sentiments <- words_by_newsgroup %>%
   inner_join(afinn, by = "word") %>%
   group_by(newsgroup) %>%
-  summarize(score = sum(score * n) / sum(n))
+  summarize(value = sum(value * n) / sum(n))
 
 newsgroup_sentiments %>%
-  mutate(newsgroup = reorder(newsgroup, score)) %>%
-  ggplot(aes(newsgroup, score, fill = score > 0)) +
+  mutate(newsgroup = reorder(newsgroup, value)) %>%
+  ggplot(aes(newsgroup, value, fill = value > 0)) +
   geom_col(show.legend = FALSE) +
   coord_flip() +
-  ylab("Average sentiment score")
+  ylab("Average sentiment value")
 ```
 
 According to this analysis, the "misc.forsale" newsgroup was the most positive. This makes sense, since it likely included many positive adjectives about the products that users wanted to sell!
@@ -311,7 +311,7 @@ contributions <- usenet_words %>%
   inner_join(get_sentiments("afinn"), by = "word") %>%
   group_by(word) %>%
   summarize(occurences = n(),
-            contribution = sum(score))
+            contribution = sum(value))
 
 contributions
 ```
@@ -321,14 +321,14 @@ contributions <- usenet_words %>%
   inner_join(afinn, by = "word") %>%
   group_by(word) %>%
   summarize(occurences = n(),
-            contribution = sum(score))
+            contribution = sum(value))
 
 contributions
 ```
 
-Which words had the most effect on sentiment scores overall (Figure \@ref(fig:usenetcontributions))? 
+Which words had the most effect on sentiment values overall (Figure \@ref(fig:usenetcontributions))? 
 
-```{r usenetcontributions, dependson = "contributions", fig.width=6, fig.height=6, fig.cap = "Words with the greatest contributions to positive/negative sentiment scores in the Usenet text"}
+```{r usenetcontributions, dependson = "contributions", fig.width=6, fig.height=6, fig.cap = "Words with the greatest contributions to positive/negative sentiment values in the Usenet text"}
 contributions %>%
   top_n(25, abs(contribution)) %>%
   mutate(word = reorder(word, contribution)) %>%
@@ -344,7 +344,7 @@ We may also care about which words contributed the most *within each newsgroup*,
 ```{r eval=FALSE}
 top_sentiment_words <- words_by_newsgroup %>%
   inner_join(get_sentiments("afinn"), by = "word") %>%
-  mutate(contribution = score * n / sum(n))
+  mutate(contribution = value * n / sum(n))
 
 top_sentiment_words
 ```
@@ -352,7 +352,7 @@ top_sentiment_words
 ```{r top_sentiment_words, dependson = "words_by_newsgroup", echo=FALSE}
 top_sentiment_words <- words_by_newsgroup %>%
   inner_join(afinn, by = "word") %>%
-  mutate(contribution = score * n / sum(n))
+  mutate(contribution = value * n / sum(n))
 
 top_sentiment_words
 ```
@@ -371,7 +371,7 @@ top_sentiment_words %>%
   facet_wrap(~ newsgroup, scales = "free") +
   coord_flip() +
   labs(x = "",
-       y = "Sentiment score * # of occurrences")
+       y = "Sentiment value * # of occurrences")
 ```
 
 This confirms our hypothesis about the "misc.forsale" newsgroup: most of the sentiment was driven by positive adjectives such as "excellent" and "perfect". We can also see how much sentiment is confounded with topic. An atheism newsgroup is likely to discuss "god" in detail even in a negative context, and we can see that it makes the newsgroup look more positive. Similarly, the negative contribution of the word "gun" to the "talk.politics.guns" group will occur even when the members are discussing guns positively.
@@ -386,7 +386,7 @@ We can also try finding the most positive and negative individual messages, by g
 sentiment_messages <- usenet_words %>%
   inner_join(get_sentiments("afinn"), by = "word") %>%
   group_by(newsgroup, id) %>%
-  summarize(sentiment = mean(score),
+  summarize(sentiment = mean(value),
             words = n()) %>%
   ungroup() %>%
   filter(words >= 5)
@@ -396,7 +396,7 @@ sentiment_messages <- usenet_words %>%
 sentiment_messages <- usenet_words %>%
   inner_join(afinn, by = "word") %>%
   group_by(newsgroup, id) %>%
-  summarize(sentiment = mean(score),
+  summarize(sentiment = mean(value),
             words = n()) %>%
   ungroup() %>%
   filter(words >= 5)
@@ -463,7 +463,7 @@ usenet_bigram_counts %>%
   filter(word1 %in% negate_words) %>%
   count(word1, word2, wt = n, sort = TRUE) %>%
   inner_join(get_sentiments("afinn"), by = c(word2 = "word")) %>%
-  mutate(contribution = score * n) %>%
+  mutate(contribution = value * n) %>%
   group_by(word1) %>%
   top_n(10, abs(contribution)) %>%
   ungroup() %>%
@@ -473,7 +473,7 @@ usenet_bigram_counts %>%
   facet_wrap(~ word1, scales = "free", nrow = 3) +
   scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
   xlab("Words preceded by a negation") +
-  ylab("Sentiment score * # of occurrences") +
+  ylab("Sentiment value * # of occurrences") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   coord_flip()
 ```
@@ -485,7 +485,7 @@ usenet_bigram_counts %>%
   filter(word1 %in% negate_words) %>%
   count(word1, word2, wt = n, sort = TRUE) %>%
   inner_join(afinn, by = c(word2 = "word")) %>%
-  mutate(contribution = score * n) %>%
+  mutate(contribution = value * n) %>%
   group_by(word1) %>%
   top_n(10, abs(contribution)) %>%
   ungroup() %>%
@@ -495,7 +495,7 @@ usenet_bigram_counts %>%
   facet_wrap(~ word1, scales = "free", nrow = 3) +
   scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
   xlab("Words preceded by a negation") +
-  ylab("Sentiment score * # of occurrences") +
+  ylab("Sentiment value * # of occurrences") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   coord_flip()
 ```

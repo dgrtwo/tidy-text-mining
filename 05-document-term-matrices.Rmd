@@ -352,30 +352,30 @@ stock_tokens %>%
   count(word, id, sort = TRUE) %>%
   inner_join(get_sentiments("afinn"), by = "word") %>%
   group_by(word) %>%
-  summarize(contribution = sum(n * score)) %>%
+  summarize(contribution = sum(n * value)) %>%
   top_n(12, abs(contribution)) %>%
   mutate(word = reorder(word, contribution)) %>%
   ggplot(aes(word, contribution)) +
   geom_col() +
   coord_flip() +
-  labs(y = "Frequency of word * AFINN score")
+  labs(y = "Frequency of word * AFINN value")
 ```
 
 
-```{r stockafinn, dependson = "stock_articles", echo=FALSE, fig.cap = "The words with the largest contribution to sentiment scores in recent financial articles, according to the AFINN dictionary. The 'contribution' is the product of the word and the sentiment score."}
+```{r stockafinn, dependson = "stock_articles", echo=FALSE, fig.cap = "The words with the largest contribution to sentiment values in recent financial articles, according to the AFINN dictionary. The 'contribution' is the product of the word and the sentiment score."}
 load("data/afinn.rda")
 stock_tokens %>%
   anti_join(stop_words, by = "word") %>%
   count(word, id, sort = TRUE) %>%
   inner_join(afinn, by = "word") %>%
   group_by(word) %>%
-  summarize(contribution = sum(n * score)) %>%
+  summarize(contribution = sum(n * value)) %>%
   top_n(12, abs(contribution)) %>%
   mutate(word = reorder(word, contribution)) %>%
   ggplot(aes(word, contribution)) +
   geom_col() +
   coord_flip() +
-  labs(y = "Frequency of word * AFINN score")
+  labs(y = "Frequency of word * AFINN value")
 ```
 
 In the context of these financial articles, there are a few big red flags here. The words "share" and "shares" are counted as positive verbs by the AFINN lexicon ("Alice will **share** her cake with Bob"), but they're actually neutral nouns ("The stock price is $12 per **share**") that could just as easily be in a positive sentence as a negative one. The word "fool" is even more deceptive: it refers to Motley Fool, a financial services company. In short, we can see that the AFINN sentiment lexicon is entirely unsuited to the context of financial data (as are the NRC and Bing lexicons).
