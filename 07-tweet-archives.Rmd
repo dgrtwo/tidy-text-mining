@@ -131,7 +131,7 @@ word_ratios <- tidy_tweets %>%
   filter(sum(n) >= 10) %>%
   ungroup() %>%
   spread(person, n, fill = 0) %>%
-  mutate_if(is.numeric, funs((. + 1) / (sum(.) + 1))) %>%
+  mutate_if(is.numeric, list(~(. + 1) / (sum(.) + 1))) %>%
   mutate(logratio = log(David / Julia)) %>%
   arrange(desc(logratio))
 ```
