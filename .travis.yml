@@ -19,9 +19,6 @@ before_install:
 - npm install netlify-cli -g
 
 script:
-- Rscript --interactive -e 'textdata::lexicon_afinn()' < agree.txt
-- Rscript --interactive -e 'textdata::lexicon_nrc()' < agree.txt
-- Rscript --interactive -e 'textdata::lexicon_loughran()' < agree.txt
 - Rscript -e 'bookdown::render_book("index.Rmd")'
 - Rscript -e 'xfun::optipng()'
 
