@@ -11,6 +11,7 @@ Imports:
   textdata,
   dplyr,
   tidyr,
+  forcats,
   ggplot2,
   reshape2,
   gutenbergr,
