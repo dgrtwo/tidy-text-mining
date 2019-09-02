@@ -430,16 +430,14 @@ It is not very easy to interpret what the topics are about from a data frame lik
 
 ```{r plotbeta, dependson = "top_terms", fig.width=12, fig.height=16, fig.cap="Top terms in topic modeling of NASA metadata description field texts"}
 top_terms %>%
-  mutate(term = reorder(term, beta)) %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
   group_by(topic, term) %>%    
   arrange(desc(beta)) %>%  
   ungroup() %>%
-  mutate(term = factor(paste(term, topic, sep = "__"), 
-                       levels = rev(paste(term, topic, sep = "__")))) %>%
   ggplot(aes(term, beta, fill = as.factor(topic))) +
   geom_col(show.legend = FALSE) +
   coord_flip() +
-  scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
+  scale_x_reordered() +
   labs(title = "Top 10 terms in each LDA topic",
        x = NULL, y = expression(beta)) +
   facet_wrap(~ topic, ncol = 4, scales = "free")
@@ -506,17 +504,14 @@ What are the top keywords for each topic?
 top_keywords %>%
   group_by(topic) %>%
   top_n(5, n) %>%
-  group_by(topic, keyword) %>%
-  arrange(desc(n)) %>%  
-  ungroup() %>%
-  mutate(keyword = factor(paste(keyword, topic, sep = "__"), 
-                          levels = rev(paste(keyword, topic, sep = "__")))) %>%
+  ungroup %>%
+  mutate(keyword = reorder_within(keyword, n, topic)) %>%
   ggplot(aes(keyword, n, fill = as.factor(topic))) +
   geom_col(show.legend = FALSE) +
   labs(title = "Top keywords for each LDA topic",
        x = NULL, y = "Number of documents") +
   coord_flip() +
-  scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
+  scale_x_reordered() +
   facet_wrap(~ topic, ncol = 4, scales = "free")
 ```
 

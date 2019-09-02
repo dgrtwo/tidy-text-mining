@@ -240,11 +240,12 @@ sci_lda %>%
   group_by(topic) %>%
   top_n(8, beta) %>%
   ungroup() %>%
-  mutate(term = reorder(term, beta)) %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(term, beta, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free_y") +
-  coord_flip()
+  coord_flip() +
+  scale_x_reordered()
 ```
 
 From the top words, we can start to suspect which topics may capture which newsgroups. Topic 1 certainly represents the sci.space newsgroup (thus the most common word being "space"), and topic 2 is likely drawn from cryptography, with terms such as "key" and "encryption". Just as we did in Chapter \@ref(per-document), we can confirm this by seeing how documents from each newsgroup have higher "gamma" for each topic (Figure \@ref(fig:usenetassignments)).
