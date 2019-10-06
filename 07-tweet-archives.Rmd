@@ -217,7 +217,8 @@ Now notice that we have a new column for the modeling results; it is another lis
 library(broom)
 
 slopes <- nested_models %>%
-  unnest(map(models, tidy)) %>%
+  mutate(models = map(models, tidy)) %>%
+  unnest(cols = c(models)) %>%
   filter(term == "time_floor") %>%
   mutate(adjusted.p.value = p.adjust(p.value))
 ```
