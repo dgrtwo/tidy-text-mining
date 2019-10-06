@@ -39,7 +39,8 @@ read_folder <- function(infolder) {
 
 # Use unnest() and map() to apply read_folder to each subfolder
 raw_text <- tibble(folder = dir(training_folder, full.names = TRUE)) %>%
-  unnest(map(folder, read_folder)) %>%
+  mutate(folder_out = map(folder, read_folder)) %>%
+  unnest(cols = c(folder_out)) %>%
   transmute(newsgroup = basename(folder), id, text)
 ```
 
