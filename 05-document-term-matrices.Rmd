@@ -310,7 +310,8 @@ Each of the items in the `corpus` list column is a `WebCorpus` object, which is 
 
 ```{r stock_tokens, dependson = "stock_articles"}
 stock_tokens <- stock_articles %>%
-  unnest(map(corpus, tidy)) %>%
+  mutate(corpus = map(corpus, tidy)) %>%
+  unnest(cols = (corpus)) %>%
   unnest_tokens(word, text) %>%
   select(company, datetimestamp, word, id, heading)
 
@@ -319,7 +320,7 @@ stock_tokens
 
 Here we see some of each article's metadata alongside the words used. We could use tf-idf to determine which words were most specific to each stock symbol.
 
-```{r}
+```{r stocktfidfdata, dependson="stock_tokens"}
 library(stringr)
 
 stock_tf_idf <- stock_tokens %>%
@@ -331,7 +332,7 @@ stock_tf_idf <- stock_tokens %>%
 
 The top terms for each are visualized in Figure \@ref(fig:stocktfidf). As we'd expect, the company's name and symbol are typically included, but so are several of their product offerings and executives, as well as companies they are making deals with (such as Disney with Netflix).
 
-```{r stocktfidf, dependson = "stock_tf_idf", echo = FALSE, fig.cap = "The 8 words with the highest tf-idf in recent articles specific to each company", fig.height = 8, fig.width = 8}
+```{r stocktfidf, dependson = "stocktfidfdata", echo = FALSE, fig.cap = "The 8 words with the highest tf-idf in recent articles specific to each company", fig.height = 8, fig.width = 8}
 stock_tf_idf %>%
   group_by(company) %>%
   top_n(8, tf_idf) %>%
