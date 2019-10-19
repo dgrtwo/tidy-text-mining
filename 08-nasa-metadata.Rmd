@@ -181,7 +181,7 @@ desc_word_pairs <- nasa_desc %>%
 desc_word_pairs
 ```
 
-These are the pairs of words that occur together most often in descripton fields. "Data" is a very common word in description fields; there is no shortage of data in the datasets at NASA!
+These are the pairs of words that occur together most often in description fields. "Data" is a very common word in description fields; there is no shortage of data in the datasets at NASA!
 
 Let's plot networks of these co-occurring words so we can see these relationships better in Figure \@ref(fig:plottitle). We will again use the ggraph package for visualizing our networks.
 
@@ -453,7 +453,7 @@ lda_gamma <- tidy(desc_lda, matrix = "gamma")
 lda_gamma
 ```
 
-Notice that some of the probabilites visible at the top of the data frame are low and some are higher. Our model has assigned a probability to each description belonging to each of the topics we constructed from the sets of words. How are the probabilities distributed? Let's visualize them (Figure \@ref(fig:plotgammaall)).
+Notice that some of the probabilities visible at the top of the data frame are low and some are higher. Our model has assigned a probability to each description belonging to each of the topics we constructed from the sets of words. How are the probabilities distributed? Let's visualize them (Figure \@ref(fig:plotgammaall)).
 
 ```{r plotgammaall, dependson = "lda_gamma", fig.width=7, fig.height=5, fig.cap="Probability distribution in topic modeling of NASA metadata description field texts"}
 ggplot(lda_gamma, aes(gamma)) +
