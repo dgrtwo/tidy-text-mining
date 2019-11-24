@@ -340,6 +340,8 @@ assignments
 This combination of the true book (`title`) and the book assigned to it (`consensus`) is useful for further exploration. We can, for example, visualize a **confusion matrix**, showing how often words from one book were assigned to another, using dplyr's `count()` and ggplot2's `geom_tile` (Figure \@ref(fig:confusionmatrix).
 
 ```{r confusionmatrix, dependson = "assignments2", fig.width = 10, fig.height = 8, fig.cap = "Confusion matrix showing where LDA assigned the words from each book. Each row of this table represents the true book each word came from, and each column represents what book it was assigned to."}
+library(scales)
+
 assignments %>%
   count(title, consensus, wt = count) %>%
   group_by(title) %>%
