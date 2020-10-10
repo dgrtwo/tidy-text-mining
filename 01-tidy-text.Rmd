@@ -228,7 +228,7 @@ frequency <- bind_rows(mutate(tidy_bronte, author = "Brontë Sisters"),
   mutate(proportion = n / sum(n)) %>% 
   select(-n) %>% 
   spread(author, proportion) %>% 
-  gather(author, proportion, `Brontë Sisters`:`H.G. Wells`)
+  gather(author, proportion, `Brontë Sisters`,`H.G. Wells`)
 ```
 
 We use `str_extract()` here because the UTF-8 encoded texts from Project Gutenberg have some examples of words with underscores around them to indicate emphasis (like italics). The tokenizer treated these as words, but we don't want to count "\_any\_" separately from "any" as we saw in our initial data exploration before choosing to use `str_extract()`. 
