@@ -92,17 +92,74 @@ We do assume that the reader is at least slightly familiar with dplyr, ggplot2, 
 
 ## Using code examples {-}
 
-While we show the code behind the vast majority of the analyses, in the interest of space we sometimes choose not to show the code generating a particular visualization if we've already provided the code for several similar graphs. We trust the reader can learn from and build on our examples, and the code used to generate the book can be found in our [public GitHub repository](https://github.com/dgrtwo/tidy-text-mining).
+This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [website](https://www.tidytextmining.com/) is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). While we show the code behind the vast majority of the analyses, in the interest of space we sometimes choose not to show the code generating a particular visualization if we've already provided the code for several similar graphs. We trust the reader can learn from and build on our examples, and the code used to generate the book can be found in our [public GitHub repository](https://github.com/dgrtwo/tidy-text-mining). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its light theme (`theme_light()`).
+
+This version of the book was built with `r R.version.string` and the following packages:
+
+```{r, echo = FALSE, results="asis"}
+deps <- desc::desc_get_deps()
+pkgs <- sort(deps$package[deps$type == "Imports"])
+pkgs <- sessioninfo::package_info(pkgs, dependencies = FALSE)
+df <- tibble(
+  package = pkgs$package,
+  version = pkgs$ondiskversion,
+  source = gsub("@", "\\\\@", pkgs$source)
+)
+knitr::kable(df, format = "markdown")
+```
 
 ## Acknowledgements {-}
 
 We are so thankful for the contributions, help, and perspectives of people who have moved us forward in this project. There are several people and organizations we would like to thank in particular. 
 
-We would like to thank Oliver Keyes and Gabriela de Queiroz for their contributions to the tidytext package, Lincoln Mullen for his work on the [tokenizers](https://github.com/ropensci/tokenizers) package, Kenneth Benoit for his work on the [quanteda](https://github.com/kbenoit/quanteda) package, Thomas Pedersen for his work on the [ggraph](https://github.com/thomasp85/ggraph) package, and Hadley Wickham for his work in framing tidy data principles and building tidy tools. We would also like to thank [rOpenSci](https://ropensci.org/), which hosted us at the unconference where we began work, and the [NASA Datanauts](https://open.nasa.gov/explore/datanauts/) program, for the opportunities and support they have provided Julia during her time with them. 
+We would like to thank Os Keyes and Gabriela de Queiroz for their contributions to the tidytext package, Lincoln Mullen for his work on the [tokenizers](https://github.com/ropensci/tokenizers) package, Kenneth Benoit for his work on the [quanteda](https://github.com/kbenoit/quanteda) package, Thomas Pedersen for his work on the [ggraph](https://github.com/thomasp85/ggraph) package, and Hadley Wickham for his work in framing tidy data principles and building tidy tools. We would also like to thank [rOpenSci](https://ropensci.org/), which hosted us at the unconference where we began work, and the [NASA Datanauts](https://open.nasa.gov/explore/datanauts/) program, for the opportunities and support they have provided Julia during her time with them. 
 
 We received thoughtful, thorough technical reviews that improved the quality of this book significantly. We would like to thank Mara Averick, Carolyn Clayton, Simon Jackson, Sean Kross, and Lincoln Mullen for their investment of time and energy in these technical reviews.
 
-This book was written in the open, and several people contributed via pull requests or issues. Special thanks goes to those who contributed via GitHub: \@ainilaha, Brian G. Barkley, Jon Calder, \@eijoac, Marc Ferradou, Jonathan Gilligan, Matthew Henderson, Simon Jackson, \@jedgore, \@kanishkamisra, Josiah Parry, Yu-Wen Pu, \@suyi19890508, Stephen Turner, and Yihui Xie.
+```{r, eval = FALSE, echo = FALSE}
+library(tidyverse)
+contribs_all_json <- gh::gh("/repos/:owner/:repo/contributors",
+  owner = "dgrtwo",
+  repo = "tidy-text-mining",
+  .limit = Inf
+)
+contribs_all <- tibble(
+  login = contribs_all_json %>% map_chr("login"),
+  n = contribs_all_json %>% map_int("contributions")
+)
+contribs_old <- read_csv("contributors.csv", col_types = list())
+contribs_new <- contribs_all %>% anti_join(contribs_old, by = "login")
+# Get info for new contributors
+needed_json <- map(
+  contribs_new$login, 
+  ~ gh::gh("/users/:username", username = .x)
+)
+info_new <- tibble(
+  login = contribs_new$login,
+  name = map_chr(needed_json, "name", .default = NA),
+  blog = map_chr(needed_json, "blog", .default = NA)
+)
+info_old <- contribs_old %>% select(login, name, blog)
+info_all <- bind_rows(info_old, info_new)
+contribs_all <- contribs_all %>% 
+  left_join(info_all, by = "login") %>% 
+  arrange(login)
+write_csv(contribs_all, "contributors.csv")
+```
+
+```{r, results = "asis", echo = FALSE, message = FALSE}
+library(dplyr)
+contributors <- read.csv("contributors.csv", stringsAsFactors = FALSE)
+contributors <- contributors %>% 
+  filter(!login %in% c("dgrtwo", "juliasilge")) %>% 
+  mutate(
+    login = paste0("\\@", login),
+    desc = ifelse(is.na(name), login, paste0(name, " (", login, ")"))
+  )
+cat("This book was written in the open, and several people contributed via pull requests or issues. Special thanks goes to those who contributed via GitHub pull requests (in alphabetical order by username): ", sep = "")
+cat(paste0(contributors$desc, collapse = ", "))
+cat(".\n")
+```
 
 Finally, we want to dedicate this book to our spouses, Robert and Dana. We both could produce a great deal of sentimental text on this subject but will restrict ourselves to heartfelt thanks.
 
