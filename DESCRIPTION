@@ -29,5 +29,6 @@ Imports:
   stringr,
   ggforce,
   widyr,
-  mallet
+  mallet,
+  sessioninfo
 
