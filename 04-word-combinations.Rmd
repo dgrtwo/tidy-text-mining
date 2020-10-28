@@ -3,7 +3,7 @@
 ```{r echo = FALSE}
 library(knitr)
 opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
-options(width = 100, dplyr.width = 100)
+options(width = 100, dplyr.width = 150, crayon.enabled = FALSE)
 library(ggplot2)
 theme_set(theme_light())
 ```
