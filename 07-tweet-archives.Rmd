@@ -18,7 +18,7 @@ One type of text that gets plenty of attention is text shared online via Twitter
 
 An individual can download their own Twitter archive by following [directions available on Twitter's website](https://support.twitter.com/articles/20170160). We each downloaded ours and will now open them up. Let's use the lubridate package to convert the string timestamps to date-time objects and initially take a look at our tweeting patterns overall (Figure \@ref(fig:setup)).
 
-```{r setup, fig.width=7, fig.height=7, fig.cap="All tweets from our accounts"}
+```{r tweets, fig.width=7, fig.height=7, fig.cap="All tweets from our accounts"}
 library(lubridate)
 library(ggplot2)
 library(dplyr)
@@ -51,7 +51,7 @@ In the call to `unnest_tokens()`, we unnest using the specialized `"tweets"` tok
 
 Because we have kept text such as hashtags and usernames in the dataset, we can't use a simple `anti_join()` to remove stop words. Instead, we can take the approach shown in the `filter()` line that uses `str_detect()` from the stringr package.
 
-```{r tidytweets, dependson = "setup"}
+```{r tidytweets, dependson = "tweets"}
 library(tidytext)
 library(stringr)
 
