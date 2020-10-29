@@ -16,7 +16,7 @@ One type of text that gets plenty of attention is text shared online via Twitter
 
 ## Getting the data and distribution of tweets
 
-An individual can download their own Twitter archive by following [directions available on Twitter's website](https://support.twitter.com/articles/20170160). We each downloaded ours and will now open them up. Let's use the lubridate package to convert the string timestamps to date-time objects and initially take a look at our tweeting patterns overall (Figure \@ref(fig:setup)).
+An individual can download their own Twitter archive by following [directions available on Twitter's website](https://support.twitter.com/articles/20170160). We each downloaded ours and will now open them up. Let's use the lubridate package to convert the string timestamps to date-time objects and initially take a look at our tweeting patterns overall (Figure \@ref(fig:tweets)).
 
 ```{r tweets, fig.width=7, fig.height=7, fig.cap="All tweets from our accounts"}
 library(lubridate)
