@@ -1,9 +1,12 @@
 # Case study: analyzing usenet text {#usenet}
 
-```{r echo = FALSE}
+```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(message = FALSE, warning = FALSE, cache = TRUE)
-options(width = 100, dplyr.width = 150, crayon.enabled = FALSE)
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
+                      tidy = "styler", fig.width = 8, fig.height = 5)
+options(cli.width = 85)
+options(crayon.enabled = FALSE)
 library(ggplot2)
 library(methods)
 theme_set(theme_light())
