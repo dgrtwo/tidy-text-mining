@@ -122,10 +122,10 @@ The idea of tf-idf is to find the important words for the content of each docume
 The `bind_tf_idf` function in the tidytext package takes a tidy text dataset as input with one row per token (term), per document. One column (`word` here) contains the terms/tokens, one column contains the documents (`book` in this case), and the last necessary column contains the counts, how many times each document contains each term (`n` in this example). We calculated a `total` for each book for our explorations in previous sections, but it is not necessary for the `bind_tf_idf` function; the table only needs to contain all the words in each document.
 
 ```{r tf_idf, dependson = "book_words"}
-book_words <- book_words %>%
+book_tf_idf <- book_words %>%
   bind_tf_idf(word, book, n)
 
-book_words
+book_tf_idf
 ```
 
 Notice that idf and thus tf-idf are zero for these extremely common words. These are all words that appear in all six of Jane Austen's novels, so the idf term (which will then be the natural log of 1) is zero. The inverse document frequency (and thus tf-idf) is very low (near zero) for words that occur in many of the documents in a collection; this is how this approach decreases the weight for common words. The inverse document frequency will be a higher number for words that occur in fewer of the documents in the collection. 
@@ -133,7 +133,7 @@ Notice that idf and thus tf-idf are zero for these extremely common words. These
 Let's look at terms with high tf-idf in Jane Austen's works.
 
 ```{r desc_idf, dependson = "tf_idf"}
-book_words %>%
+book_tf_idf %>%
   select(-total) %>%
   arrange(desc(tf_idf))
 ```
@@ -147,7 +147,7 @@ Some of the values for idf are the same for different terms because there are 6 
 Let's look at a visualization for these high tf-idf words in Figure \@ref(fig:plotseparate).
 
 ```{r plotseparate, dependson = "plot_austen", fig.height=10, fig.width=9, fig.cap="Highest tf-idf words in each of Jane Austen's Novels"}
-book_words %>%
+book_tf_idf %>%
   arrange(desc(tf_idf)) %>%
   mutate(word = factor(word, levels = rev(unique(word)))) %>% 
   group_by(book) %>% 
