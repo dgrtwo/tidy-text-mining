@@ -111,7 +111,7 @@ data("data_corpus_inaugural", package = "quanteda")
 inaug_dfm <- quanteda::dfm(data_corpus_inaugural, verbose = FALSE)
 ```
 
-```{r dependson = "inaug_dfm"}
+```{r dependson = "inaug_dfm", R.options=list(quanteda_print_dfm_max_ndoc = 0, quanteda_print_dfm_max_nfeat = 0)}
 inaug_dfm
 ```
 
@@ -197,7 +197,7 @@ ap_td %>%
 
 Similarly, we could cast the table into a `dfm` object from quanteda's dfm with `cast_dfm()`.
 
-```{r chunk1}
+```{r chunk1, R.options=list(quanteda_print_dfm_max_ndoc = 0, quanteda_print_dfm_max_nfeat = 0)}
 ap_td %>%
   cast_dfm(document, term, count)
 ```
