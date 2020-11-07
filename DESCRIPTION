@@ -31,5 +31,13 @@ Imports:
   widyr,
   mallet,
   sessioninfo,
-  styler
+  styler,
+  tidyverse
+Suggests:
+  bslib,
+  downlit,
+  xml2
+Remotes:
+  rstudio/bookdown,
+  rstudio/bslib
 

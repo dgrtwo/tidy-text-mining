@@ -27,8 +27,7 @@ knitr::write_bib(c(
 
 # Welcome to Text Mining with R {-}
 
-<img src="images/cover.png" width="350" height="460" alt="Cover image" />
-
+<a href="http://amzn.to/2tZkmxG"><img src="images/cover.png" width="350" height="460" alt="Buy from Amazon" class="cover" /></a>
 
 This is the [website](http://tidytextmining.com/) for *Text Mining with R*! Visit the [GitHub repository for this site](https://github.com/dgrtwo/tidy-text-mining), find the book at [O'Reilly](http://www.jdoqocy.com/click-4428796-11290546?url=http%3A%2F%2Fshop.oreilly.com%2Fproduct%2F0636920067153.do%3Fcmp%3Daf-strata-books-video-product_cj_0636920067153_%25zp&cjsku=0636920067153), or [buy it on Amazon](http://amzn.to/2tZkmxG).
 

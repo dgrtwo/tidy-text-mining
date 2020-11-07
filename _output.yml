@@ -1,3 +1,11 @@
+bookdown::bs4_book:
+  theme:
+    primary: "#5b7886"
+    #base_font: "Lora"
+  repo: https://github.com/dgrtwo/tidy-text-mining
+  includes:
+    in_header: _includes/analytics.html
+
 bookdown::gitbook:
   css: style.css
   config:
@@ -11,10 +19,12 @@ bookdown::gitbook:
       link: https://github.com/dgrtwo/tidy-text-mining/edit/master/%s
   includes:
     in_header: _includes/analytics.html
+
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex
   latex_engine: xelatex
   citation_package: natbib
   keep_tex: yes
+
 bookdown::epub_book: default
