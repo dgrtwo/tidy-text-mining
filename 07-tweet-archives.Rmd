@@ -1,17 +1,5 @@
 # Case study: comparing Twitter archives {#twitter}
 
-```{r setup, include=FALSE}
-library(knitr)
-knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
-                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
-                      tidy = "styler", fig.width = 8, fig.height = 5)
-options(cli.width = 85)
-options(crayon.enabled = FALSE)
-library(ggplot2)
-library(methods)
-theme_set(theme_light())
-```
-
 One type of text that gets plenty of attention is text shared online via Twitter. In fact, several of the sentiment lexicons used in this book (and commonly used in general) were designed for use with and validated on tweets. Both of the authors of this book are on Twitter and are fairly regular users of it, so in this case study, let's compare the entire Twitter archives of [Julia](https://twitter.com/juliasilge) and [David](https://twitter.com/drob).
 
 ## Getting the data and distribution of tweets
@@ -325,7 +313,7 @@ word_by_rts %>%
 
 At the top of this sorted data frame, we see tweets from Julia and David about packages that they work on, like [gganimate](https://github.com/dgrtwo/gganimate) and [tidytext](https://cran.r-project.org/package=tidytext). Let's plot the words that have the highest median retweets for each of our accounts (Figure \@ref(fig:plotrts)).
 
-```{r plotrts, dependson = "word_by_rts", fig.width=10, fig.height=5, fig.cap="Words with highest median retweets"}
+```{r plotrts, dependson = "word_by_rts", fig.width=8, fig.height=4, fig.cap="Words with highest median retweets"}
 word_by_rts %>%
   filter(uses >= 5) %>%
   group_by(person) %>%
@@ -365,7 +353,7 @@ word_by_favs <- tidy_tweets %>%
 
 We have built the data frames we need. Now let's make our visualization in Figure \@ref(fig:plotfavs).
 
-```{r plotfavs, dependson = "word_by_favs", fig.width=10, fig.height=5, fig.cap="Words with highest median favorites"}
+```{r plotfavs, dependson = "word_by_favs", fig.width=8, fig.height=4, fig.cap="Words with highest median favorites"}
 word_by_favs %>%
   filter(uses >= 5) %>%
   group_by(person) %>%

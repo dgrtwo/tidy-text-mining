@@ -1,18 +1,5 @@
 # Topic modeling {#topicmodeling}
 
-```{r setup, include=FALSE}
-library(knitr)
-knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
-                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
-                      tidy = "styler", fig.width = 8, fig.height = 5)
-options(cli.width = 85)
-options(crayon.enabled = FALSE)
-library(ggplot2)
-library(scales)
-library(methods)
-theme_set(theme_light())
-``` 
-
 In text mining, we often have collections of documents, such as blog posts or news articles, that we'd like to divide into natural groups so that we can understand them separately. Topic modeling is a method for unsupervised classification of such documents, similar to clustering on numeric data, which finds natural groups of items even when we're not sure what we're looking for.
 
 Latent Dirichlet allocation (LDA) is a particularly popular method for fitting a topic model. It treats each document as a mixture of topics, and each topic as a mixture of words. This allows documents to "overlap" each other in terms of content, rather than being separated into discrete groups, in a way that mirrors typical use of natural language.
@@ -72,7 +59,7 @@ Notice that this has turned the model into a one-topic-per-term-per-row format. 
 
 We could use dplyr's `top_n()` to find the 10 terms that are most common within each topic. As a tidy data frame, this lends itself well to a ggplot2 visualization (Figure \@ref(fig:aptoptermsplot)).
 
-```{r aptoptermsplot, dependson = "ap_topics", fig.height=5, fig.width=7, fig.cap = "The terms that are most common within each topic"}
+```{r aptoptermsplot, dependson = "ap_topics", fig.height=4, fig.width=7, fig.cap = "The terms that are most common within each topic"}
 library(ggplot2)
 library(dplyr)
 
@@ -84,11 +71,10 @@ ap_top_terms <- ap_topics %>%
 
 ap_top_terms %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(term, beta, fill = factor(topic))) +
+  ggplot(aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
-  coord_flip() +
-  scale_x_reordered()
+  scale_y_reordered()
 ```
 
 This visualization lets us understand the two topics that were extracted from the articles. The most common words in topic 1 include "percent", "million", "billion", and "company", which suggests it may represent business or financial news. Those most common in topic 2 include "president", "government", and "soviet", suggesting that this topic represents political news. One important observation about the words in each topic is that some words, such as "new" and "people", are common within both topics. This is an advantage of topic modeling as opposed to "hard clustering" methods: topics used in natural language could have some overlap in terms of words.
@@ -117,10 +103,9 @@ beta_spread %>%
   top_n(10, abs(log_ratio)) %>%
   ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio)) +
+  ggplot(aes(log_ratio, term)) +
   geom_col() +
-  labs(y = "Log2 ratio of beta in topic 2 / topic 1") +
-  coord_flip()
+  labs(x = "Log2 ratio of beta in topic 2 / topic 1", y = NULL)
 ```
 
 We can see that the words more common in topic 2 include political parties such as "democratic" and "republican", as well as politician's names such as "dukakis" and "gorbachev". Topic 1 was more characterized by currencies like "yen" and "dollar", as well as financial terms such as "index", "prices" and "rates". This helps confirm that the two topics the algorithm identified were political and financial news.
@@ -162,8 +147,10 @@ This vandal has torn the books into individual chapters, and left them in one la
 We'll retrieve the text of these four books using the gutenbergr package introduced in Chapter \@ref(tfidf).
 
 ```{r titles}
-titles <- c("Twenty Thousand Leagues under the Sea", "The War of the Worlds",
-            "Pride and Prejudice", "Great Expectations")
+titles <- c("Twenty Thousand Leagues under the Sea", 
+            "The War of the Worlds",
+            "Pride and Prejudice", 
+            "Great Expectations")
 ```
 
 ```{r eval = FALSE}
@@ -185,7 +172,9 @@ library(stringr)
 # divide into documents, each representing one chapter
 by_chapter <- books %>%
   group_by(title) %>%
-  mutate(chapter = cumsum(str_detect(text, regex("^chapter ", ignore_case = TRUE)))) %>%
+  mutate(chapter = cumsum(str_detect(
+    text, regex("^chapter ", ignore_case = TRUE)
+  ))) %>%
   ungroup() %>%
   filter(chapter > 0) %>%
   unite(document, title, chapter)
@@ -249,11 +238,10 @@ library(ggplot2)
 
 top_terms %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(term, beta, fill = factor(topic))) +
+  ggplot(aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
-  coord_flip() +
-  scale_x_reordered()
+  scale_y_reordered()
 ```
 
 These topics are pretty clearly associated with the four books! There's no question that the topic of "captain", "nautilus", "sea", and "nemo" belongs to *Twenty Thousand Leagues Under the Sea*, and that "jane", "darcy", and "elizabeth" belongs to *Pride and Prejudice*. We see "pip" and "joe" from *Great Expectations* and "martians", "black", and "night" from *The War of the Worlds*. We also notice that, in line with LDA being a "fuzzy clustering" method, there can be words in common between multiple topics, such as "miss" in topics 1 and 4, and "time" in topics 3 and 4.
@@ -280,13 +268,14 @@ chapters_gamma <- chapters_gamma %>%
 chapters_gamma
 ```
 
-```{r chaptersldagamma, fig.width=8, fig.height=8, fig.cap = "The gamma probabilities for each chapter within each book"}
+```{r chaptersldagamma, fig.width=6, fig.height=6, fig.cap = "The gamma probabilities for each chapter within each book"}
 # reorder titles in order of topic 1, topic 2, etc before plotting
 chapters_gamma %>%
   mutate(title = reorder(title, gamma * topic)) %>%
   ggplot(aes(factor(topic), gamma)) +
   geom_boxplot() +
-  facet_wrap(~ title)
+  facet_wrap(~ title) +
+  labs(x = "topic", y = expression(gamma))
 ```
 
 We notice that almost all of the chapters from *Pride and Prejudice*, *War of the Worlds*, and *Twenty Thousand Leagues Under the Sea* were uniquely identified as a single topic each.
@@ -296,7 +285,7 @@ It does look like some chapters from Great Expectations (which should be topic 4
 ```{r chapter_classifications, dependson = "chapters_gamma"}
 chapter_classifications <- chapters_gamma %>%
   group_by(title, chapter) %>%
-  top_n(1, gamma) %>%
+  slice_max(gamma) %>%
   ungroup()
 
 chapter_classifications
@@ -334,7 +323,8 @@ This returns a tidy data frame of book-term counts, but adds an extra column: `.
 
 ```{r assignments2, dependson = c("assignments", "book_topics")}
 assignments <- assignments %>%
-  separate(document, c("title", "chapter"), sep = "_", convert = TRUE) %>%
+  separate(document, c("title", "chapter"), 
+           sep = "_", convert = TRUE) %>%
   inner_join(book_topics, by = c(".topic" = "topic"))
 
 assignments
@@ -342,16 +332,17 @@ assignments
 
 This combination of the true book (`title`) and the book assigned to it (`consensus`) is useful for further exploration. We can, for example, visualize a **confusion matrix**, showing how often words from one book were assigned to another, using dplyr's `count()` and ggplot2's `geom_tile` (Figure \@ref(fig:confusionmatrix).
 
-```{r confusionmatrix, dependson = "assignments2", fig.width = 10, fig.height = 8, fig.cap = "Confusion matrix showing where LDA assigned the words from each book. Each row of this table represents the true book each word came from, and each column represents what book it was assigned to."}
+```{r confusionmatrix, dependson = "assignments2", fig.cap = "Confusion matrix showing where LDA assigned the words from each book. Each row of this table represents the true book each word came from, and each column represents what book it was assigned to."}
 library(scales)
 
 assignments %>%
   count(title, consensus, wt = count) %>%
+  mutate(across(c(title, consensus), ~str_wrap(., 20))) %>%
   group_by(title) %>%
   mutate(percent = n / sum(n)) %>%
   ggplot(aes(consensus, title, fill = percent)) +
   geom_tile() +
-  scale_fill_gradient2(high = "red", label = percent_format()) +
+  scale_fill_gradient2(high = "darkred", label = percent_format()) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1),
         panel.grid = element_blank()) +

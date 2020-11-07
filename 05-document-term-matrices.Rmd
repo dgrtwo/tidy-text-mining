@@ -1,18 +1,5 @@
 # Converting to and from non-tidy formats {#dtm}
 
-```{r setup, include=FALSE}
-library(knitr)
-knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
-                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
-                      tidy = "styler", fig.width = 8, fig.height = 5)
-options(cli.width = 85)
-options(crayon.enabled = FALSE)
-library(ggplot2)
-library(methods)
-theme_set(theme_light())
-library(purrr)
-```
-
 In the previous chapters, we've been analyzing text arranged in the tidy text format: a table with one-token-per-document-per-row, such as is constructed by the `unnest_tokens()` function. This lets us use the popular suite of tidy tools such as dplyr, tidyr, and ggplot2 to explore and visualize text data. We've demonstrated that many informative text analyses can be performed using these tools.
 
 However, most of the existing R tools for natural language processing, besides the tidytext package, aren't compatible with this format. The [CRAN Task View for Natural Language Processing](https://cran.r-project.org/web/views/NaturalLanguageProcessing.html) lists a large selection of packages that take other structures of input and provide non-tidy outputs. These packages are very useful in text mining applications, and many existing text datasets are structured according to these formats.
@@ -87,7 +74,7 @@ ap_sentiments
 
 This would let us visualize which words from the AP articles most often contributed to positive or negative sentiment, seen in Figure \@ref(fig:apsentimentplot). We can see that the most common positive words include "like", "work", "support", and "good", while the most negative words include "killed", "death", and "vice". (The inclusion of "vice" as a negative term is probably a mistake on the algorithm's part, since it likely usually refers to "vice president").
 
-```{r apsentimentplot, dependson = "apsentiments", fig.height = 6, fig.width = 7, fig.cap = "Words from AP articles with the greatest contribution to positive or negative sentiments, using the Bing sentiment lexicon."}
+```{r apsentimentplot, dependson = "apsentiments", fig.height = 6, fig.width = 7, fig.cap = "Words from AP articles with the greatest contribution to positive or negative sentiments, using the Bing sentiment lexicon"}
 library(ggplot2)
 
 ap_sentiments %>%
@@ -96,22 +83,18 @@ ap_sentiments %>%
   filter(n >= 200) %>%
   mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
   mutate(term = reorder(term, n)) %>%
-  ggplot(aes(term, n, fill = sentiment)) +
-  geom_bar(stat = "identity") +
-  ylab("Contribution to sentiment") +
-  coord_flip()
+  ggplot(aes(n, term, fill = sentiment)) +
+  geom_col() +
+  labs(x = "Contribution to sentiment", y = NULL)
 ```
 
-### Tidying dfm objects
+### Tidying `dfm` objects
 
 Other text mining packages provide alternative implementations of document-term matrices, such as the `dfm` (document-feature matrix) class from the quanteda package [@R-quanteda]. For example, the quanteda package comes with a corpus of presidential inauguration speeches, which can be converted to a `dfm` using the appropriate function.
 
-```{r inaug_dfm, message = FALSE, results = "hide"}
+```{r inaug_dfm, R.options=list(quanteda_print_dfm_max_ndoc = 0, quanteda_print_dfm_max_nfeat = 0)}
 data("data_corpus_inaugural", package = "quanteda")
 inaug_dfm <- quanteda::dfm(data_corpus_inaugural, verbose = FALSE)
-```
-
-```{r dependson = "inaug_dfm", R.options=list(quanteda_print_dfm_max_ndoc = 0, quanteda_print_dfm_max_nfeat = 0)}
 inaug_dfm
 ```
 
@@ -134,14 +117,14 @@ inaug_tf_idf
 
 We could use this data to pick four notable inaugural addresses (from Presidents Lincoln, Roosevelt, Kennedy, and Obama), and visualize the words most specific to each speech, as shown in Figure \@ref(fig:presidentspeeches).
 
-```{r presidentspeeches, dependson = "presidents", echo = FALSE, fig.cap = "The terms with the highest tf-idf from each of four selected inaugural addresses. Note that quanteda's tokenizer includes the '?' punctuation mark as a term, though the texts we've tokenized ourselves with unnest_tokens do not.", fig.height=7, fig.width=6}
+```{r presidentspeeches, dependson = "presidents", echo = FALSE, fig.cap = "The terms with the highest tf-idf from each of four selected inaugural addresses. Note that quanteda's tokenizer includes the '?' punctuation mark as a term, though the texts we've tokenized ourselves with `unnest_tokens()` do not.", fig.height=6, fig.width=7}
 speeches <- c("1933-Roosevelt", "1861-Lincoln",
               "1961-Kennedy", "2009-Obama")
 
 inaug_tf_idf %>%
   filter(document %in% speeches) %>%
   group_by(document) %>%
-  top_n(10, tf_idf) %>%
+  slice_max(tf_idf, n = 10, with_ties = FALSE) %>%
   ungroup() %>%
   mutate(term = reorder_within(term, tf_idf, document)) %>%
   ggplot(aes(term, tf_idf, fill = document)) +
@@ -149,7 +132,7 @@ inaug_tf_idf %>%
   facet_wrap(~ document, scales = "free") +
   coord_flip() +
   scale_x_reordered() +
-  labs(x = "",
+  labs(x = NULL,
        y = "tf-idf")
 ```
 
@@ -179,7 +162,7 @@ year_term_counts %>%
   geom_smooth() +
   facet_wrap(~ term, scales = "free_y") +
   scale_y_continuous(labels = scales::percent_format()) +
-  ylab("% frequency of word in inaugural address")
+  labs(y = "% frequency of word in inaugural address")
 ```
 
 These examples show how you can use tidytext, and the related suite of tidy tools, to analyze sources even if their origin was not in a tidy format.
@@ -288,14 +271,15 @@ library(purrr)
 
 company <- c("Microsoft", "Apple", "Google", "Amazon", "Facebook",
              "Twitter", "IBM", "Yahoo", "Netflix")
-symbol <- c("MSFT", "AAPL", "GOOG", "AMZN", "FB", "TWTR", "IBM", "YHOO", "NFLX")
+symbol  <- c("MSFT", "AAPL", "GOOG", "AMZN", "FB", 
+             "TWTR", "IBM", "YHOO", "NFLX")
 
 download_articles <- function(symbol) {
   WebCorpus(GoogleFinanceSource(paste0("NASDAQ:", symbol)))
 }
 
 stock_articles <- tibble(company = company,
-                             symbol = symbol) %>%
+                         symbol = symbol) %>%
   mutate(corpus = map(symbol, download_articles))
 ```
 
@@ -345,7 +329,7 @@ stock_tf_idf %>%
   geom_col(show.legend = FALSE) +
   facet_wrap(~ company, scales = "free") +
   coord_flip() +
-  labs(x = "Word",
+  labs(x = NULL,
        y = "tf-idf")
 ```
 
@@ -358,12 +342,11 @@ stock_tokens %>%
   inner_join(get_sentiments("afinn"), by = "word") %>%
   group_by(word) %>%
   summarize(contribution = sum(n * value)) %>%
-  top_n(12, abs(contribution)) %>%
+  slice_max(abs(contribution), n = 12) %>%
   mutate(word = reorder(word, contribution)) %>%
-  ggplot(aes(word, contribution)) +
+  ggplot(aes(contribution, word)) +
   geom_col() +
-  coord_flip() +
-  labs(y = "Frequency of word * AFINN value")
+  labs(x = "Frequency of word * AFINN value", y = NULL)
 ```
 
 
@@ -375,12 +358,11 @@ stock_tokens %>%
   inner_join(afinn, by = "word") %>%
   group_by(word) %>%
   summarize(contribution = sum(n * value)) %>%
-  top_n(12, abs(contribution)) %>%
+  slice_max(abs(contribution), n = 12) %>%
   mutate(word = reorder(word, contribution)) %>%
-  ggplot(aes(word, contribution)) +
+  ggplot(aes(contribution, word)) +
   geom_col() +
-  coord_flip() +
-  labs(y = "Frequency of word * AFINN value")
+  labs(x = "Frequency of word * AFINN value", y = NULL)
 ```
 
 In the context of these financial articles, there are a few big red flags here. The words "share" and "shares" are counted as positive verbs by the AFINN lexicon ("Alice will **share** her cake with Bob"), but they're actually neutral nouns ("The stock price is $12 per **share**") that could just as easily be in a positive sentence as a negative one. The word "fool" is even more deceptive: it refers to Motley Fool, a financial services company. In short, we can see that the AFINN sentiment lexicon is entirely unsuited to the context of financial data (as are the NRC and Bing lexicons).
@@ -394,14 +376,13 @@ stock_tokens %>%
   count(word) %>%
   inner_join(get_sentiments("loughran"), by = "word") %>%
   group_by(sentiment) %>%
-  top_n(5, n) %>%
+  slice_max(n, n = 5, with_ties = FALSE) %>%
   ungroup() %>%
   mutate(word = reorder(word, n)) %>%
-  ggplot(aes(word, n)) +
+  ggplot(aes(n, word)) +
   geom_col() +
-  coord_flip() +
   facet_wrap(~ sentiment, scales = "free") +
-  ylab("Frequency of this word in the recent financial articles")
+  labs(x = "Frequency of this word in the recent financial articles", y = NULL)
 ```
 
 
@@ -411,14 +392,13 @@ stock_tokens %>%
   count(word) %>%
   inner_join(loughran, by = "word") %>%
   group_by(sentiment) %>%
-  top_n(5, n) %>%
+  slice_max(n, n = 5, with_ties = FALSE) %>%
   ungroup() %>%
   mutate(word = reorder(word, n)) %>%
-  ggplot(aes(word, n)) +
+  ggplot(aes(n, word)) +
   geom_col() +
-  coord_flip() +
   facet_wrap(~ sentiment, scales = "free") +
-  ylab("Frequency of this word in the recent financial articles")
+  labs(x = "Frequency of this word in the recent financial articles", y = NULL)
 ```
 
 These assignments (Figure \@ref(fig:stockloughransentiments)) of words to sentiments look more reasonable: common positive words include "strong" and "better", but not "shares" or "growth", while negative words include "volatility" but not "fool". The other sentiments look reasonable as well: the most common "uncertainty" terms include "could" and "may".
@@ -449,11 +429,9 @@ It might be interesting to examine which company has the most news with "litigio
 stock_sentiment_count %>%
   mutate(score = (positive - negative) / (positive + negative)) %>%
   mutate(company = reorder(company, score)) %>%
-  ggplot(aes(company, score, fill = score > 0)) +
+  ggplot(aes(score, company, fill = score > 0)) +
   geom_col(show.legend = FALSE) +
-  coord_flip() +
-  labs(x = "Company",
-       y = "Positivity score among 20 recent news articles")
+  labs(x = "Positivity score among 20 recent news articles", y = NULL)
 ```
 
 Based on this analysis, we'd say that in January 2017 most of the coverage of Yahoo and Twitter was strongly negative, while coverage of Google and Amazon was the most positive. A glance at current financial headlines suggest that it's on the right track. If you were interested in further analysis, you could use one of R's many quantitative finance packages to compare these articles to recent stock prices and other metrics.

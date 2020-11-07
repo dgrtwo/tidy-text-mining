@@ -1,17 +1,5 @@
 # Case study: mining NASA metadata {#nasa}
 
-```{r setup, include=FALSE}
-library(knitr)
-knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
-                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
-                      tidy = "styler", fig.width = 8, fig.height = 5)
-options(cli.width = 85)
-options(crayon.enabled = FALSE)
-library(ggplot2)
-library(methods)
-theme_set(theme_light())
-```
-
 There are over 32,000 datasets hosted and/or maintained by [NASA](https://www.nasa.gov/); these datasets cover topics from Earth science to aerospace engineering to management of NASA itself. We can use the metadata for these datasets to understand the connections between them. 
 
 ```{block, type = "rmdnote"}
@@ -57,7 +45,7 @@ Let's set up separate tidy data frames for title, description, and keyword, keep
 library(dplyr)
 
 nasa_title <- tibble(id = metadata$dataset$`_id`$`$oid`, 
-                         title = metadata$dataset$title)
+                     title = metadata$dataset$title)
 nasa_title
 ```
 
@@ -65,7 +53,7 @@ These are just a few example titles from the datasets we will be exploring. Noti
 
 ```{r desc, dependson = "download", dplyr.width = 150}
 nasa_desc <- tibble(id = metadata$dataset$`_id`$`$oid`, 
-                        desc = metadata$dataset$description)
+                    desc = metadata$dataset$description)
 
 nasa_desc %>% 
   select(desc) %>% 
@@ -80,7 +68,7 @@ Now we can build the tidy data frame for the keywords. For this one, we need to 
 library(tidyr)
 
 nasa_keyword <- tibble(id = metadata$dataset$`_id`$`$oid`, 
-                           keyword = metadata$dataset$keyword) %>%
+                       keyword = metadata$dataset$keyword) %>%
   unnest(keyword)
 
 nasa_keyword
@@ -134,8 +122,8 @@ We can do this by making a list of custom stop words and using `anti_join()` to 
 
 ```{r my_stopwords, dependson = "unnest"}
 my_stopwords <- tibble(word = c(as.character(1:10), 
-                                    "v1", "v03", "l2", "l3", "l4", "v5.2.0", 
-                                    "v003", "v004", "v005", "v006", "v7"))
+                                "v1", "v03", "l2", "l3", "l4", "v5.2.0", 
+                                "v003", "v004", "v005", "v006", "v7"))
 nasa_title <- nasa_title %>% 
   anti_join(my_stopwords)
 nasa_desc <- nasa_desc %>% 
@@ -322,7 +310,7 @@ desc_tf_idf <- full_join(desc_tf_idf, nasa_keyword, by = "id")
 
 Let's plot some of the most important words, as measured by tf-idf, for a few example keywords used on NASA datasets. First, let's use dplyr operations to filter for the keywords we want to examine and take just the top 15 words for each keyword. Then, let's plot those words in Figure \@ref(fig:plottfidf).
 
-```{r plottfidf, dependson = "full_join", fig.width=10, fig.height=7, fig.cap="Distribution of tf-idf for words from datasets labeled with selected keywords"}
+```{r plottfidf, dependson = "full_join", fig.width=9, fig.height=7, fig.cap="Distribution of tf-idf for words from datasets labeled with selected keywords"}
 desc_tf_idf %>% 
   filter(!near(tf, 1)) %>%
   filter(keyword %in% c("SOLAR ACTIVITY", "CLOUDS", 
@@ -331,16 +319,15 @@ desc_tf_idf %>%
   arrange(desc(tf_idf)) %>%
   group_by(keyword) %>%
   distinct(word, keyword, .keep_all = TRUE) %>%
-  top_n(15, tf_idf) %>% 
+  slice_max(tf_idf, n = 15, with_ties = FALSE) %>% 
   ungroup() %>%
   mutate(word = factor(word, levels = rev(unique(word)))) %>%
-  ggplot(aes(word, tf_idf, fill = keyword)) +
+  ggplot(aes(tf_idf, word, fill = keyword)) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~keyword, ncol = 3, scales = "free") +
-  coord_flip() +
   labs(title = "Highest tf-idf words in NASA metadata description fields",
        caption = "NASA metadata from https://data.nasa.gov/data.json",
-       x = NULL, y = "tf-idf")
+       x = "tf-idf", y = NULL)
 ```
 
 Using tf-idf has allowed us to identify important description words for each of these keywords. Datasets labeled with the keyword "SEISMOLOGY" have words like "earthquake", "risk", and "hazard" in their description, while those labeled with "HUMAN HEALTH" have descriptions characterized by words like "wellbeing", "vulnerability", and "children." Most of the combinations of letters that are not English words are certainly acronyms (like OMB for the Office of Management and Budget), and the examples of years and numbers are important for these topics. The tf-idf statistic has identified the kinds of words it is intended to, important words for individual documents within a collection of documents.
@@ -358,12 +345,12 @@ Let’s clean up the text a bit using stop words to remove some of the nonsense 
 ```{r word_counts, dependson = "my_stopwords"}
 my_stop_words <- bind_rows(stop_words, 
                            tibble(word = c("nbsp", "amp", "gt", "lt",
-                                               "timesnewromanpsmt", "font",
-                                               "td", "li", "br", "tr", "quot",
-                                               "st", "img", "src", "strong",
-                                               "http", "file", "files",
-                                               as.character(1:12)), 
-                                      lexicon = rep("custom", 30)))
+                                           "timesnewromanpsmt", "font",
+                                           "td", "li", "br", "tr", "quot",
+                                           "st", "img", "src", "strong",
+                                           "http", "file", "files",
+                                           as.character(1:12)), 
+                                  lexicon = rep("custom", 30)))
 
 word_counts <- nasa_desc %>%
   anti_join(my_stop_words) %>%
@@ -421,7 +408,7 @@ What is each topic about? Let's examine the top 10 terms for each topic.
 ```{r top_terms, dependson = "tidy_lda"}
 top_terms <- tidy_lda %>%
   group_by(topic) %>%
-  top_n(10, beta) %>%
+  slice_max(beta, n = 10, with_ties = FALSE) %>%
   ungroup() %>%
   arrange(topic, -beta)
 
@@ -430,18 +417,17 @@ top_terms
 
 It is not very easy to interpret what the topics are about from a data frame like this so let’s look at this information visually in Figure \@ref(fig:plotbeta).
 
-```{r plotbeta, dependson = "top_terms", fig.width=12, fig.height=16, fig.cap="Top terms in topic modeling of NASA metadata description field texts"}
+```{r plotbeta, dependson = "top_terms", fig.width=10, fig.height=14, fig.cap="Top terms in topic modeling of NASA metadata description field texts"}
 top_terms %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   group_by(topic, term) %>%    
   arrange(desc(beta)) %>%  
   ungroup() %>%
-  ggplot(aes(term, beta, fill = as.factor(topic))) +
+  ggplot(aes(beta, term, fill = as.factor(topic))) +
   geom_col(show.legend = FALSE) +
-  coord_flip() +
-  scale_x_reordered() +
+  scale_y_reordered() +
   labs(title = "Top 10 terms in each LDA topic",
-       x = NULL, y = expression(beta)) +
+       x = expression(beta), y = NULL) +
   facet_wrap(~ topic, ncol = 4, scales = "free")
 ```
 
@@ -459,7 +445,7 @@ Notice that some of the probabilities visible at the top of the data frame are l
 
 ```{r plotgammaall, dependson = "lda_gamma", fig.width=7, fig.height=5, fig.cap="Probability distribution in topic modeling of NASA metadata description field texts"}
 ggplot(lda_gamma, aes(gamma)) +
-  geom_histogram() +
+  geom_histogram(alpha = 0.8) +
   scale_y_log10() +
   labs(title = "Distribution of probabilities for all topics",
        y = "Number of documents", x = expression(gamma))
@@ -467,9 +453,9 @@ ggplot(lda_gamma, aes(gamma)) +
 
 First notice that the y-axis is plotted on a log scale; otherwise it is difficult to make out any detail in the plot. Next, notice that $\gamma$ runs from 0 to 1; remember that this is the probability that a given document belongs in a given topic. There are many values near zero, which means there are many documents that do not belong in each topic. Also, there are many values near $\gamma = 1$; these are the documents that *do* belong in those topics. This distribution shows that documents are being well discriminated as belonging to a topic or not. We can also look at how the probabilities are distributed within each topic, as shown in Figure \@ref(fig:plotgamma).
 
-```{r plotgamma, dependson = "lda_gamma", fig.width=10, fig.height=12, fig.cap="Probability distribution for each topic in topic modeling of NASA metadata description field texts"}
+```{r plotgamma, dependson = "lda_gamma", fig.width=8, fig.height=10, fig.cap="Probability distribution for each topic in topic modeling of NASA metadata description field texts"}
 ggplot(lda_gamma, aes(gamma, fill = as.factor(topic))) +
-  geom_histogram(show.legend = FALSE) +
+  geom_histogram(alpha = 0.8, show.legend = FALSE) +
   facet_wrap(~ topic, ncol = 4) +
   scale_y_log10() +
   labs(title = "Distribution of probability for each topic",
@@ -502,18 +488,17 @@ top_keywords
 
 What are the top keywords for each topic?
 
-```{r plottopkeywords, dependson = "top_keywords", fig.width=16, fig.height=16, fig.cap="Top keywords in topic modeling of NASA metadata description field texts"}
+```{r plottopkeywords, dependson = "top_keywords", fig.width=14, fig.height=14, fig.cap="Top keywords in topic modeling of NASA metadata description field texts"}
 top_keywords %>%
   group_by(topic) %>%
-  top_n(5, n) %>%
+  slice_max(n, n = 5, with_ties = FALSE) %>%
   ungroup %>%
   mutate(keyword = reorder_within(keyword, n, topic)) %>%
-  ggplot(aes(keyword, n, fill = as.factor(topic))) +
+  ggplot(aes(n, keyword, fill = as.factor(topic))) +
   geom_col(show.legend = FALSE) +
   labs(title = "Top keywords for each LDA topic",
-       x = NULL, y = "Number of documents") +
-  coord_flip() +
-  scale_x_reordered() +
+       x = "Number of documents", y = NULL) +
+  scale_y_reordered() +
   facet_wrap(~ topic, ncol = 4, scales = "free")
 ```
 
