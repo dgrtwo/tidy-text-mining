@@ -1,7 +1,7 @@
 bookdown::bs4_book:
   theme:
     primary: "#5b7886"
-    #base_font: "Lora"
+    base_font: "Lato"
   repo: https://github.com/dgrtwo/tidy-text-mining
   includes:
     in_header: _includes/analytics.html
