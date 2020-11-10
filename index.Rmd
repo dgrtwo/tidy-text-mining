@@ -7,7 +7,7 @@ knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
-bibliography: [book.bib, packages.bib]
+bibliography: [book.bib]
 biblio-style: apalike
 link-citations: true
 links-as-notes: true
