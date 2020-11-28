@@ -297,7 +297,7 @@ Each of the items in the `corpus` list column is a `WebCorpus` object, which is 
 
 ```{r stock_tokens, dependson = "stock_articles"}
 stock_tokens <- stock_articles %>%
-  mutate(corpus = map(corpus, tidy)) %>%
+  mutate(corpus = purrr::map(corpus, tidy)) %>%
   unnest(cols = (corpus)) %>%
   unnest_tokens(word, text) %>%
   select(company, datetimestamp, word, id, heading)
