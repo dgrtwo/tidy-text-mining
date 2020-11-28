@@ -119,7 +119,7 @@ ap_documents <- tidy(ap_lda, matrix = "gamma")
 ap_documents
 ```
 
-Each of these values is an estimated proportion of words from that document that are generated from that topic. For example, the model estimates that only about `r percent(ap_documents$gamma[1])` of the words in document 1 were generated from topic 1.
+Each of these values is an estimated proportion of words from that document that are generated from that topic. For example, the model estimates that only about `r scales::percent(ap_documents$gamma[1])` of the words in document 1 were generated from topic 1.
 
 We can see that many of these documents were drawn from a mix of the two topics, but that document 6 was drawn almost entirely from topic 2, having a $\gamma$ from topic 1 close to zero. To check this answer, we could `tidy()` the document-term matrix (see Chapter \@ref(tidy-dtm)) and check what the most common words in that document were.
 
@@ -217,7 +217,7 @@ chapter_topics <- tidy(chapters_lda, matrix = "beta")
 chapter_topics
 ```
 
-Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term "joe" has an almost zero probability of being generated from topics 1, 2, or 3, but it makes up `r percent(chapter_topics$beta[4])` of topic 4.
+Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term "joe" has an almost zero probability of being generated from topics 1, 2, or 3, but it makes up `r scales::percent(chapter_topics$beta[4])` of topic 4.
 
 We could use dplyr's `top_n()` to find the top 5 terms within each topic.
 
@@ -255,7 +255,7 @@ chapters_gamma <- tidy(chapters_lda, matrix = "gamma")
 chapters_gamma
 ```
 
-Each of these values is an estimated proportion of words from that document that are generated from that topic. For example, the model estimates that each word in the `r chapters_gamma$document[1]` document has only a `r percent(chapters_gamma$gamma[1])` probability of coming from topic 1 (Pride and Prejudice).
+Each of these values is an estimated proportion of words from that document that are generated from that topic. For example, the model estimates that each word in the `r chapters_gamma$document[1]` document has only a `r scales::percent(chapters_gamma$gamma[1])` probability of coming from topic 1 (Pride and Prejudice).
 
 Now that we have these topic probabilities, we can see how well our unsupervised learning did at distinguishing the four books. We'd expect that chapters within a book would be found to be mostly (or entirely), generated from the corresponding topic.
 
