@@ -22,14 +22,12 @@ jobs:
       - name: Setup R
         uses: r-lib/actions/setup-r@v1
 
-      - name: Install pandoc and pandoc citeproc
-        run: |
-          brew install pandoc
-          brew install pandoc-citeproc
+      - name: Install pandoc
+        uses: r-lib/actions/setup-pandoc@v1
 
       - name: Install system dependencies
         run: |
-          brew cask install xquartz
+          brew install --cask xquartz
           brew install pkg-config cairo
           brew install gsl
           brew install libxml2
