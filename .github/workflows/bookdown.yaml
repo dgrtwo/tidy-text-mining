@@ -56,6 +56,8 @@ jobs:
       - name: Install packages
         run: |
           R -e 'remotes::install_deps(dependencies = TRUE)'
+          R -e 'remotes::install_cran("rcmdcheck")'
+
       - name: Configure Git user
         run: |
           git config --local user.name "$GITHUB_ACTOR"
