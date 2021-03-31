@@ -268,7 +268,7 @@ This can be shown visually, and we can pipe straight into ggplot2, if we like, b
 ```{r pipetoplot, dependson = "wordcounts", fig.width=6, fig.height=3, fig.cap="Words that contribute to positive and negative sentiment in Jane Austen's novels"}
 bing_word_counts %>%
   group_by(sentiment) %>%
-  top_n(10) %>%
+  slice_max(n, n = 10) %>% 
   ungroup() %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(n, word, fill = sentiment)) +
@@ -373,7 +373,7 @@ tidy_books %>%
   left_join(wordcounts, by = c("book", "chapter")) %>%
   mutate(ratio = negativewords/words) %>%
   filter(chapter != 0) %>%
-  top_n(1) %>%
+  slice_max(ratio, n = 1) %>% 
   ungroup()
 ```
 
