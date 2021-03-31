@@ -81,24 +81,25 @@ This visualization lets us understand the two topics that were extracted from th
 
 As an alternative, we could consider the terms that had the *greatest difference* in $\beta$ between topic 1 and topic 2. This can be estimated based on the log ratio of the two: $\log_2(\frac{\beta_2}{\beta_1})$ (a log ratio is useful because it makes the difference symmetrical: $\beta_2$ being twice as large leads to a log ratio of 1, while $\beta_1$ being twice as large results in -1). To constrain it to a set of especially relevant words, we can filter for relatively common words, such as those that have a $\beta$ greater than 1/1000 in at least one topic.
 
-```{r beta_spread}
+```{r beta_wide}
 library(tidyr)
 
-beta_spread <- ap_topics %>%
+beta_wide <- ap_topics %>%
   mutate(topic = paste0("topic", topic)) %>%
-  spread(topic, beta) %>%
+  pivot_wider(names_from = topic,
+              values_from = beta) %>% 
   filter(topic1 > .001 | topic2 > .001) %>%
   mutate(log_ratio = log2(topic2 / topic1))
 
-beta_spread
+beta_wide
 ```
 
 The words with the greatest differences between the two topics are visualized in Figure \@ref(fig:topiccompare).
 
 (ref:topiccap) Words with the greatest difference in $\beta$ between topic 2 and topic 1
 
-```{r topiccompare, dependson = "beta_spread", fig.cap = "(ref:topiccap)", echo = FALSE}
-beta_spread %>%
+```{r topiccompare, dependson = "beta_wide", fig.cap = "(ref:topiccap)", echo = FALSE}
+beta_wide %>%
   group_by(direction = log_ratio > 0) %>%
   top_n(10, abs(log_ratio)) %>%
   ungroup() %>%
