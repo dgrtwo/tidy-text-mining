@@ -145,7 +145,7 @@ Which words are most likely to be from Julia's account or from David's account? 
 ```{r plotratios, dependson = "word_ratios", fig.width=6.5, fig.height=6, fig.cap="Comparing the odds ratios of words from our accounts"}
 word_ratios %>%
   group_by(logratio < 0) %>%
-  top_n(15, abs(logratio)) %>%
+  slice_max(abs(logratio), n = 15) %>% 
   ungroup() %>%
   mutate(word = reorder(word, logratio)) %>%
   ggplot(aes(word, logratio, fill = logratio < 0)) +
@@ -320,7 +320,7 @@ At the top of this sorted data frame, we see tweets from Julia and David about p
 word_by_rts %>%
   filter(uses >= 5) %>%
   group_by(person) %>%
-  top_n(10, retweets) %>%
+  slice_max(retweets, n = 10) %>% 
   arrange(retweets) %>%
   ungroup() %>%
   mutate(word = factor(word, unique(word))) %>%
@@ -360,7 +360,7 @@ We have built the data frames we need. Now let's make our visualization in Figur
 word_by_favs %>%
   filter(uses >= 5) %>%
   group_by(person) %>%
-  top_n(10, favorites) %>%
+  slice_max(favorites, n = 10) %>% 
   arrange(favorites) %>%
   ungroup() %>%
   mutate(word = factor(word, unique(word))) %>%
