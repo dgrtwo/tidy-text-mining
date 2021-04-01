@@ -57,7 +57,7 @@ ap_topics
 
 Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term "aaron" has a $`r ap_topics$beta[1]`$ probability of being generated from topic 1, but a $`r ap_topics$beta[2]`$ probability of being generated from topic 2.
 
-We could use dplyr's `top_n()` to find the 10 terms that are most common within each topic. As a tidy data frame, this lends itself well to a ggplot2 visualization (Figure \@ref(fig:aptoptermsplot)).
+We could use dplyr's `slice_max()` to find the 10 terms that are most common within each topic. As a tidy data frame, this lends itself well to a ggplot2 visualization (Figure \@ref(fig:aptoptermsplot)).
 
 ```{r aptoptermsplot, dependson = "ap_topics", fig.height=4, fig.width=7, fig.cap = "The terms that are most common within each topic"}
 library(ggplot2)
@@ -65,7 +65,7 @@ library(dplyr)
 
 ap_top_terms <- ap_topics %>%
   group_by(topic) %>%
-  top_n(10, beta) %>%
+  slice_max(beta, n = 10) %>% 
   ungroup() %>%
   arrange(topic, -beta)
 
@@ -101,7 +101,7 @@ The words with the greatest differences between the two topics are visualized in
 ```{r topiccompare, dependson = "beta_wide", fig.cap = "(ref:topiccap)", echo = FALSE}
 beta_wide %>%
   group_by(direction = log_ratio > 0) %>%
-  top_n(10, abs(log_ratio)) %>%
+  slice_max(abs(log_ratio), n = 10) %>% 
   ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
   ggplot(aes(log_ratio, term)) +
@@ -220,12 +220,12 @@ chapter_topics
 
 Notice that this has turned the model into a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term "joe" has an almost zero probability of being generated from topics 1, 2, or 3, but it makes up `r percent(chapter_topics$beta[4])` of topic 4.
 
-We could use dplyr's `top_n()` to find the top 5 terms within each topic.
+We could use dplyr's `slice_max()` to find the top 5 terms within each topic.
 
 ```{r top_terms}
 top_terms <- chapter_topics %>%
   group_by(topic) %>%
-  top_n(5, beta) %>%
+  slice_max(beta, n = 5) %>% 
   ungroup() %>%
   arrange(topic, -beta)
 
@@ -281,7 +281,7 @@ chapters_gamma %>%
 
 We notice that almost all of the chapters from *Pride and Prejudice*, *War of the Worlds*, and *Twenty Thousand Leagues Under the Sea* were uniquely identified as a single topic each.
 
-It does look like some chapters from Great Expectations (which should be topic 4) were somewhat associated with other topics. Are there any cases where the topic most associated with a chapter belonged to another book? First we'd find the topic that was most associated with each chapter using `top_n()`, which is effectively the "classification" of that chapter.
+It does look like some chapters from Great Expectations (which should be topic 4) were somewhat associated with other topics. Are there any cases where the topic most associated with a chapter belonged to another book? First we'd find the topic that was most associated with each chapter using `slice_max()`, which is effectively the "classification" of that chapter.
 
 ```{r chapter_classifications, dependson = "chapters_gamma"}
 chapter_classifications <- chapters_gamma %>%
@@ -298,7 +298,7 @@ We can then compare each to the "consensus" topic for each book (the most common
 book_topics <- chapter_classifications %>%
   count(title, topic) %>%
   group_by(title) %>%
-  top_n(1, n) %>%
+  slice_max(n, n = 1) %>% 
   ungroup() %>%
   transmute(consensus = title, topic)
 
