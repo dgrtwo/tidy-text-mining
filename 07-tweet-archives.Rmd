@@ -67,14 +67,15 @@ frequency <- tidy_tweets %>%
 frequency
 ```
 
-This is a nice and tidy data frame but we would actually like to plot those frequencies on the x- and y-axes of a plot, so we will need to use `spread()` from tidyr make a differently shaped data frame.
+This is a nice and tidy data frame but we would actually like to plot those frequencies on the x- and y-axes of a plot, so we will need to use `pivot_wider()` from tidyr make a differently shaped data frame.
 
-```{r spread, dependson = "frequency"}
+```{r wide, dependson = "frequency"}
 library(tidyr)
 
 frequency <- frequency %>% 
   select(person, word, freq) %>% 
-  spread(person, freq) %>%
+  pivot_wider(names_from = person,
+              values_from = freq) %>%
   arrange(Julia, David)
 
 frequency
@@ -82,7 +83,7 @@ frequency
 
 Now this is ready for us to plot. Let's use `geom_jitter()` so that we don't see the discreteness at the low end of frequency as much, and `check_overlap = TRUE` so the text labels don't all print out on top of each other (only some will print).
 
-```{r spreadplot, dependson = "spread", fig.height=7, fig.width=7, fig.cap= "Comparing the frequency of words used by Julia and David"}
+```{r wideplot, dependson = "wide", fig.height=7, fig.width=7, fig.cap= "Comparing the frequency of words used by Julia and David"}
 library(scales)
 
 ggplot(frequency, aes(Julia, David)) +
@@ -94,7 +95,7 @@ ggplot(frequency, aes(Julia, David)) +
 ```
 
 
-Words near the line in Figure \@ref(fig:spreadplot) are used with about equal frequencies by David and Julia, while words far away from the line are used much more by one person compared to the other. Words, hashtags, and usernames that appear in this plot are ones that we have both used at least once in tweets.
+Words near the line in Figure \@ref(fig:wideplot) are used with about equal frequencies by David and Julia, while words far away from the line are used much more by one person compared to the other. Words, hashtags, and usernames that appear in this plot are ones that we have both used at least once in tweets.
 
 This may not even need to be pointed out, but David and Julia have used their Twitter accounts rather differently over the course of the past several years. David has used his Twitter account almost exclusively for professional purposes since he became more active, while Julia used it for entirely personal purposes until late 2015 and still uses it more personally than David. We see these differences immediately in this plot exploring word frequencies, and they will continue to be obvious in the rest of this chapter. 
 
@@ -108,7 +109,7 @@ tidy_tweets <- tidy_tweets %>%
          timestamp < as.Date("2017-01-01"))
 ```
 
-Next, let's use `str_detect()` to remove Twitter usernames from the `word` column, because otherwise, the results here are dominated only by people who Julia or David know and the other does not. After removing these, we count how many times each person uses each word and keep only the words used more than 10 times. After a `spread()` operation, we can calculate the log odds ratio for each word, using
+Next, let's use `str_detect()` to remove Twitter usernames from the `word` column, because otherwise, the results here are dominated only by people who Julia or David know and the other does not. After removing these, we count how many times each person uses each word and keep only the words used more than 10 times. After a `pivot_wider()` operation, we can calculate the log odds ratio for each word, using
 
 
 $$\text{log odds ratio} = \ln{\left(\frac{\left[\frac{n+1}{\text{total}+1}\right]_\text{David}}{\left[\frac{n+1}{\text{total}+1}\right]_\text{Julia}}\right)}$$
@@ -122,7 +123,9 @@ word_ratios <- tidy_tweets %>%
   group_by(word) %>%
   filter(sum(n) >= 10) %>%
   ungroup() %>%
-  spread(person, n, fill = 0) %>%
+  pivot_wider(names_from = person, 
+              values_from = n, 
+              values_fill = 0) %>%
   mutate_if(is.numeric, list(~(. + 1) / (sum(.) + 1))) %>%
   mutate(logratio = log(David / Julia)) %>%
   arrange(desc(logratio))
