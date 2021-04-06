@@ -38,6 +38,5 @@ Suggests:
   downlit,
   xml2
 Remotes:
-  rstudio/bookdown,
-  rstudio/bslib
+  rstudio/bookdown
 
