@@ -151,7 +151,7 @@ We see lots of characteristic words specific to a particular newsgroup, such as 
 plot_tf_idf <- function(d) {
   d %>%
     group_by(newsgroup) %>%
-    slice_max(tf_idf, n  = 10) %>% 
+    slice_max(tf_idf, n = 10) %>%
     mutate(word = reorder(word, tf_idf)) %>%
     ggplot(aes(tf_idf, word, fill = newsgroup)) +
     geom_col(show.legend = FALSE) +
@@ -228,7 +228,7 @@ What four topics did this model extract, and did they match the four newsgroups?
 sci_lda %>%
   tidy() %>%
   group_by(topic) %>%
-  slice_max(beta, n = 8) %>% 
+  slice_max(beta, n = 8) %>%
   ungroup() %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
