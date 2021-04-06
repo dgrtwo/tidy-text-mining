@@ -409,7 +409,7 @@ Now that we know we can trust the dictionary to approximate the articles' sentim
 stock_sentiment_count <- stock_tokens %>%
   inner_join(get_sentiments("loughran"), by = "word") %>%
   count(sentiment, company) %>%
-  spread(sentiment, n, fill = 0)
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0)
 
 stock_sentiment_count
 ```
@@ -418,7 +418,7 @@ stock_sentiment_count
 stock_sentiment_count <- stock_tokens %>%
   inner_join(loughran, by = "word") %>%
   count(sentiment, company) %>%
-  spread(sentiment, n, fill = 0)
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0)
 
 stock_sentiment_count
 ```

@@ -205,7 +205,7 @@ tidy_bronte %>%
 
 Interesting that "time", "eyes", and "hand" are in the top 10 for both H.G. Wells and the Brontë sisters.
 
-Now, let's calculate the frequency for each word for the works of Jane Austen, the Brontë sisters, and H.G. Wells by binding the data frames together. We can use `spread` and `gather` from tidyr to reshape our dataframe so that it is just what we need for plotting and comparing the three sets of novels.
+Now, let's calculate the frequency for each word for the works of Jane Austen, the Brontë sisters, and H.G. Wells by binding the data frames together. We can use `pivot_wider()` and `pivot_longer()` from tidyr to reshape our dataframe so that it is just what we need for plotting and comparing the three sets of novels.
 
 ```{r frequency, dependson = c("tidy_bronte", "tidy_hgwells", "tidy_books")}
 library(tidyr)
@@ -218,8 +218,9 @@ frequency <- bind_rows(mutate(tidy_bronte, author = "Brontë Sisters"),
   group_by(author) %>%
   mutate(proportion = n / sum(n)) %>% 
   select(-n) %>% 
-  spread(author, proportion) %>% 
-  gather(author, proportion, `Brontë Sisters`:`H.G. Wells`)
+  pivot_wider(names_from = author, values_from = proportion) %>%
+  pivot_longer(`Brontë Sisters`:`H.G. Wells`,
+               names_to = "author", values_to = "proportion")
 
 frequency
 ```

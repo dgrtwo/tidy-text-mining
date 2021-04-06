@@ -118,7 +118,7 @@ Next, we count up how many positive and negative words there are in defined sect
 The `%/%` operator does integer division (`x %/% y` is equivalent to `floor(x/y)`) so the index keeps track of which 80-line section of text we are counting up negative and positive sentiment in. 
 ```
 
-Small sections of text may not have enough words in them to get a good estimate of sentiment while really large sections can wash out narrative structure. For these books, using 80 lines works well, but this can vary depending on individual texts, how long the lines were to start with, etc. We then use `spread()` so that we have negative and positive sentiment in separate columns, and lastly calculate a net sentiment (positive - negative).
+Small sections of text may not have enough words in them to get a good estimate of sentiment while really large sections can wash out narrative structure. For these books, using 80 lines works well, but this can vary depending on individual texts, how long the lines were to start with, etc. We then use `pivot_wider()` so that we have negative and positive sentiment in separate columns, and lastly calculate a net sentiment (positive - negative).
 
 ```{r janeaustensentiment, dependson = "tidy_books"}
 library(tidyr)
@@ -126,7 +126,7 @@ library(tidyr)
 jane_austen_sentiment <- tidy_books %>%
   inner_join(get_sentiments("bing")) %>%
   count(book, index = linenumber %/% 80, sentiment) %>%
-  spread(sentiment, n, fill = 0) %>%
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>% 
   mutate(sentiment = positive - negative)
 ```
 
@@ -159,7 +159,7 @@ Now, we can use `inner_join()` to calculate the sentiment in different ways.
 Remember from above that the AFINN lexicon measures sentiment with a numeric score between -5 and 5, while the other two lexicons categorize words in a binary fashion, either positive or negative. To find a sentiment score in chunks of text throughout the novel, we will need to use a different pattern for the AFINN lexicon than for the other two. 
 ```
 
-Let's again use integer division (`%/%`) to define larger sections of text that span multiple lines, and we can use the same pattern with `count()`, `spread()`, and `mutate()` to find the net sentiment in each of these sections of text.
+Let's again use integer division (`%/%`) to define larger sections of text that span multiple lines, and we can use the same pattern with `count()`, `pivot_wider()`, and `mutate()` to find the net sentiment in each of these sections of text.
 
 ```{r eval=FALSE}
 afinn <- pride_prejudice %>% 
@@ -179,7 +179,9 @@ bing_and_nrc <- bind_rows(
     ) %>%
     mutate(method = "NRC")) %>%
   count(method, index = linenumber %/% 80, sentiment) %>%
-  spread(sentiment, n, fill = 0) %>%
+  pivot_wider(names_from = sentiment,
+              values_from = n,
+              values_fill = 0) %>% 
   mutate(sentiment = positive - negative)
 ```
 
@@ -201,7 +203,9 @@ bing_and_nrc <- bind_rows(
     ) %>%
     mutate(method = "NRC")) %>%
   count(method, index = linenumber %/% 80, sentiment) %>%
-  spread(sentiment, n, fill = 0) %>%
+  pivot_wider(names_from = sentiment,
+              values_from = n,
+              values_fill = 0) %>% 
   mutate(sentiment = positive - negative)
 ```
 
@@ -262,7 +266,7 @@ This can be shown visually, and we can pipe straight into ggplot2, if we like, b
 ```{r pipetoplot, dependson = "wordcounts", fig.width=6, fig.height=3, fig.cap="Words that contribute to positive and negative sentiment in Jane Austen's novels"}
 bing_word_counts %>%
   group_by(sentiment) %>%
-  top_n(10) %>%
+  slice_max(n, n = 10) %>% 
   ungroup() %>%
   mutate(word = reorder(word, n)) %>%
   ggplot(aes(n, word, fill = sentiment)) +
@@ -367,7 +371,7 @@ tidy_books %>%
   left_join(wordcounts, by = c("book", "chapter")) %>%
   mutate(ratio = negativewords/words) %>%
   filter(chapter != 0) %>%
-  top_n(1) %>%
+  slice_max(ratio, n = 1) %>% 
   ungroup()
 ```
 
