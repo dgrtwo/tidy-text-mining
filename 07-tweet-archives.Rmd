@@ -74,8 +74,7 @@ library(tidyr)
 
 frequency <- frequency %>% 
   select(person, word, freq) %>% 
-  pivot_wider(names_from = person,
-              values_from = freq) %>%
+  pivot_wider(names_from = person, values_from = freq) %>%
   arrange(Julia, David)
 
 frequency
@@ -123,10 +122,8 @@ word_ratios <- tidy_tweets %>%
   group_by(word) %>%
   filter(sum(n) >= 10) %>%
   ungroup() %>%
-  pivot_wider(names_from = person, 
-              values_from = n, 
-              values_fill = 0) %>%
-  mutate(across(where(is.numeric), ~ (. + 1) / (sum(.) + 1))) %>%
+  pivot_wider(names_from = person, values_from = n, values_fill = 0) %>%
+  mutate_if(is.numeric, list(~(. + 1) / (sum(.) + 1))) %>%
   mutate(logratio = log(David / Julia)) %>%
   arrange(desc(logratio))
 ```

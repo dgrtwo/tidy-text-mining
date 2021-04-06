@@ -126,9 +126,7 @@ library(tidyr)
 jane_austen_sentiment <- tidy_books %>%
   inner_join(get_sentiments("bing")) %>%
   count(book, index = linenumber %/% 80, sentiment) %>%
-  pivot_wider(names_from = sentiment,
-              values_from = n,
-              values_fill = 0) %>% 
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>% 
   mutate(sentiment = positive - negative)
 ```
 
@@ -180,7 +178,7 @@ bing_and_nrc <- bind_rows(
                                          "negative"))
     ) %>%
     mutate(method = "NRC")) %>%
-  count(method, index = linenumber %/% 80, sentiment) %>% 
+  count(method, index = linenumber %/% 80, sentiment) %>%
   pivot_wider(names_from = sentiment,
               values_from = n,
               values_fill = 0) %>% 

@@ -218,11 +218,9 @@ frequency <- bind_rows(mutate(tidy_bronte, author = "Brontë Sisters"),
   group_by(author) %>%
   mutate(proportion = n / sum(n)) %>% 
   select(-n) %>% 
-  pivot_wider(names_from = author,
-              values_from = proportion) %>%
+  pivot_wider(names_from = author, values_from = proportion) %>%
   pivot_longer(`Brontë Sisters`:`H.G. Wells`,
-               names_to = "author",
-               values_to = "proportion")
+               names_to = "author", values_to = "proportion")
 
 frequency
 ```
