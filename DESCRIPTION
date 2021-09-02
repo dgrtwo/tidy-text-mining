@@ -1,42 +1,50 @@
 Package: tidy-text-mining
 Title: Text Mining with R: A Tidy Approach
 Version: 0.0.0.9000
-Authors@R: c(person("David", "Robinson", email = "admiral.david@gmail.com", role = c("aut", "cre")),
-             person("Julia", "Silge", email = "julia.silge@gmail.com", role = c("aut")))
-Depends: R (>= 3.3.0)
+Authors@R: 
+    c(person(given = "David",
+             family = "Robinson",
+             role = c("aut", "cre"),
+             email = "admiral.david@gmail.com"),
+      person(given = "Julia",
+             family = "Silge",
+             role = "aut",
+             email = "julia.silge@gmail.com"))
+Depends: 
+    R (>= 3.3.0)
 Imports:
-  bookdown,
-  tidytext,
-  janeaustenr,
-  textdata,
-  dplyr,
-  tidyr,
-  forcats,
-  ggplot2,
-  reshape2,
-  gutenbergr,
-  jsonlite,
-  igraph,
-  ggraph,
-  readr,
-  tm,
-  Matrix,
-  topicmodels,
-  quanteda,
-  XML,
-  wordcloud,
-  lubridate,
-  stringr,
-  ggforce,
-  widyr,
-  mallet,
-  sessioninfo,
-  styler,
-  tidyverse
+    bookdown,
+    dplyr,
+    forcats,
+    ggforce,
+    ggplot2,
+    ggraph,
+    gutenbergr,
+    igraph,
+    janeaustenr,
+    jsonlite,
+    lubridate,
+    mallet,
+    Matrix,
+    quanteda,
+    readr,
+    reshape2,
+    sessioninfo,
+    stringr,
+    styler,
+    textdata,
+    tidyr,
+    tidytext,
+    tidyverse,
+    tm,
+    topicmodels,
+    widyr,
+    wordcloud,
+    XML
 Suggests:
-  bslib,
-  downlit,
-  xml2
+    bslib,
+    downlit,
+    xml2
 Remotes:
-  rstudio/bookdown
-
+    rstudio/bookdown
+Encoding: UTF-8
