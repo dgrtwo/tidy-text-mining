@@ -182,7 +182,7 @@ We can use `nest()` from tidyr to make a data frame with a list column that cont
 
 ```{r nest, dependson = "words_by_time"}
 nested_data <- words_by_time %>%
-  nest(-word, -person) 
+  nest(data = c(-word, -person)) 
 
 nested_data
 ```
