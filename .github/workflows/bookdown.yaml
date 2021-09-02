@@ -1,12 +1,8 @@
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master]
   pull_request:
-    branches:
-      - main
-      - master
+    branches: [main, master]
 
 name: bookdown
 
@@ -15,15 +11,13 @@ jobs:
     runs-on: macOS-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v1
+      - uses: r-lib/actions/setup-pandoc@v1
 
-      - name: Install pandoc
-        uses: r-lib/actions/setup-pandoc@v1
+      - uses: r-lib/actions/setup-r@v1
 
       - name: Install system dependencies
         run: |
