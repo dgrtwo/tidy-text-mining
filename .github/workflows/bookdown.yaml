@@ -6,53 +6,49 @@ on:
 
 name: bookdown
 
+env:
+  isExtPR: ${{ github.event.pull_request.head.repo.fork == true }}
+
 jobs:
   build:
-    runs-on: macOS-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-
+    runs-on: macOS-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repo
+        uses: actions/checkout@v2
 
-      - uses: r-lib/actions/setup-pandoc@v1
+      - name: Setup R
+        id: install-r
+        uses: r-lib/actions/setup-r@v1
 
-      - uses: r-lib/actions/setup-r@v1
-
-      - name: Install system dependencies
-        run: |
-          brew install --cask xquartz
-          brew install pkg-config cairo
-          brew install gsl
-          brew install libxml2
+      - name: Setup pandoc
+        uses: r-lib/actions/setup-pandoc@v1
 
       - name: Install pak and query dependencies
         run: |
           install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
-          saveRDS(pak::pkg_deps_tree("local::.", dependencies = TRUE), ".github/r-depends.rds")
+          saveRDS(pak::local_dev_deps_tree(), ".github/r-depends.rds")
         shell: Rscript {0}
 
       - name: Cache R packages
         uses: actions/cache@v2
         with:
-          path: |
-            ${{ env.R_LIBS_USER }}/*
-            !${{ env.R_LIBS_USER }}/pak
-          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
-          restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
-
-      - name: Cache bookdown results
-        uses: actions/cache@v2
-        with:
-          path: _bookdown_files
-          key: bookdown-2-${{ hashFiles('**/*Rmd') }}
-          restore-keys: bookdown-2-
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
+          restore-keys: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
 
       - name: Install dependencies
         run: |
           pak::local_install_dev_deps(upgrade = TRUE)
-          pak::pkg_install("rcmdcheck")
         shell: Rscript {0}
+
+      - name: Install more system dependencies
+        run: |
+          brew install --cask xquartz
+          brew install pkg-config cairo
+          brew install gsl
+          brew install libxml2
 
       - name: Configure Git user
         run: |
@@ -62,15 +58,19 @@ jobs:
       - name: Build site
         run: Rscript -e 'bookdown::render_book("index.Rmd", quiet = TRUE)'
 
-      - name: Install npm
-        uses: actions/setup-node@v1
-
       - name: Deploy to Netlify
-        if: github.ref == 'refs/heads/master'
-        # NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID added in the repo's secrets
+        if: contains(env.isExtPR, 'false')
+        id: netlify-deploy
+        uses: nwtgck/actions-netlify@v1.1
+        with:
+          publish-dir: './_book'
+          production-branch: master
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message:
+            'Deploy from GHA: ${{ github.event.pull_request.title || github.event.head_commit.message }} (${{ github.sha }})'
+          enable-pull-request-comment: false
+          enable-commit-comment: false
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        run: |
-          npm install netlify-cli -g
-          netlify deploy --prod --dir _book
+        timeout-minutes: 1
