@@ -235,21 +235,23 @@ plot_physics <- physics_words %>%
   group_by(author) %>% 
   slice_max(tf_idf, n = 15) %>%
   ungroup() %>%
-  mutate(word = reorder_within(word, tf_idf, author)) %>%
+  mutate(word = fct_reorder(word, tf_idf)) %>%
   mutate(author = factor(author, levels = c("Galilei, Galileo",
                                             "Huygens, Christiaan",
                                             "Tesla, Nikola",
                                             "Einstein, Albert")))
 
-ggplot(plot_physics, aes(word, tf_idf, fill = author)) +
+ggplot(plot_physics, aes(tf_idf, word, fill = author)) +
   geom_col(show.legend = FALSE) +
-  labs(x = NULL, y = "tf-idf") +
   facet_wrap(~author, ncol = 2, scales = "free") +
-  coord_flip() +
-  scale_x_reordered()
+  labs(x = "tf-idf", y = NULL)
 ```
 
 One thing we can conclude from Figure \@ref(fig:mystopwords) is that we don't hear enough about ramparts or things being ethereal in physics today.
+
+```{block2, type = "rmdnote"}
+The Jane Austen and physics examples in this chapter did not have much overlap in words with high tf-idf across categories (books, authors). If you find you do share words with high tf-idf across categories, you may want to use `reorder_within()` and `scale_*_reordered()` to create visualizations, as shown in Section \@ref(word-topic-probabilities).
+```
 
 ## Summary 
 
