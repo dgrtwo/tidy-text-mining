@@ -137,7 +137,7 @@ Some of the values for idf are the same for different terms because there are 6 
 
 Let's look at a visualization for these high tf-idf words in Figure \@ref(fig:plotseparate).
 
-```{r plotseparate, dependson = "plot_austen", fig.height=8, fig.width=6, fig.cap="Highest tf-idf words in each of Jane Austen's Novels"}
+```{r plotseparate, dependson = "plot_austen", fig.height=8, fig.width=6, fig.cap="Highest tf-idf words in each Jane Austen novel"}
 library(forcats)
 
 book_tf_idf %>%
