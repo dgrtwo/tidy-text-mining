@@ -99,7 +99,7 @@ bigram_tf_idf <- bigrams_united %>%
 bigram_tf_idf
 ```
 
-```{r bigramtfidf, dependson = "bigram_tf_idf", echo = FALSE, fig.width=6, fig.height=8, fig.cap = "Bigrams with the highest tf-idf from each Jane Austen novel"}
+```{r bigramtfidf, dependson = "bigram_tf_idf", echo = FALSE, fig.width=6, fig.height=8, fig.cap = "Bigrams with the highest tf-idf from each of Jane Austen's novels"}
 library(ggplot2)
 
 bigram_tf_idf %>%
