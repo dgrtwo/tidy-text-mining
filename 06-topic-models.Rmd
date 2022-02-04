@@ -186,8 +186,7 @@ by_chapter_word <- by_chapter %>%
 # find document-word counts
 word_counts <- by_chapter_word %>%
   anti_join(stop_words) %>%
-  count(document, word, sort = TRUE) %>%
-  ungroup()
+  count(document, word, sort = TRUE)
 
 word_counts
 ```
