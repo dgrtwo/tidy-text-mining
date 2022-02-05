@@ -57,11 +57,9 @@ Now we can calculate word frequencies for each person. First, we group by person
 
 ```{r frequency, dependson = "tidytweets"}
 frequency <- tidy_tweets %>% 
-  group_by(person) %>% 
-  count(word, sort = TRUE) %>% 
+  count(person, word, sort = TRUE) %>% 
   left_join(tidy_tweets %>% 
-              group_by(person) %>% 
-              summarise(total = n())) %>%
+              count(person, name = "total")) %>%
   mutate(freq = n/total)
 
 frequency
