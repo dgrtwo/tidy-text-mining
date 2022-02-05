@@ -12,8 +12,8 @@ library(ggplot2)
 library(dplyr)
 library(readr)
 
-tweets_julia <- read_csv("data/tweets_julia.csv")
-tweets_dave <- read_csv("data/tweets_dave.csv")
+tweets_julia <- read_csv("https://raw.github.com/dgrtwo/tidy-text-mining/master/data/tweets_julia.csv")
+tweets_dave <- read_csv("https://raw.github.com/dgrtwo/tidy-text-mining/master/data/tweets_dave.csv")
 tweets <- bind_rows(tweets_julia %>% 
                       mutate(person = "Julia"),
                     tweets_dave %>% 
