@@ -281,7 +281,6 @@ We will consider each description field a document, and the whole set of descrip
 ```{r desc_tf_idf, dependson = "my_stopwords"}
 desc_tf_idf <- nasa_desc %>% 
   count(id, word, sort = TRUE) %>%
-  ungroup() %>%
   bind_tf_idf(word, id, n)
 ```
 
