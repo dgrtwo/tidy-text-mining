@@ -44,7 +44,7 @@ Let's set up separate tidy data frames for title, description, and keyword, keep
 ```{r title, dependson = "download", message=FALSE}
 library(dplyr)
 
-nasa_title <- tibble(id = metadata$dataset$`_id`$`$oid`, 
+nasa_title <- tibble(id = metadata$dataset$identifier, 
                      title = metadata$dataset$title)
 nasa_title
 ```
@@ -52,7 +52,7 @@ nasa_title
 These are just a few example titles from the datasets we will be exploring. Notice that we have the NASA-assigned ids here, and also that there are duplicate titles on separate datasets.
 
 ```{r desc, dependson = "download", dplyr.width = 150}
-nasa_desc <- tibble(id = metadata$dataset$`_id`$`$oid`, 
+nasa_desc <- tibble(id = metadata$dataset$identifier, 
                     desc = metadata$dataset$description)
 
 nasa_desc %>% 
@@ -67,7 +67,7 @@ Now we can build the tidy data frame for the keywords. For this one, we need to 
 ```{r keyword, dependson = "download"}
 library(tidyr)
 
-nasa_keyword <- tibble(id = metadata$dataset$`_id`$`$oid`, 
+nasa_keyword <- tibble(id = metadata$dataset$identifier, 
                        keyword = metadata$dataset$keyword) %>%
   unnest(keyword)
 
