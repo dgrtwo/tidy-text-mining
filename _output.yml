@@ -1,7 +1,8 @@
 bookdown::bs4_book:
   theme:
     primary: "#5b7886"
-    base_font: "Roboto"
+    base_font:
+      google: Roboto
   repo: https://github.com/dgrtwo/tidy-text-mining
   includes:
     in_header: _includes/analytics.html
