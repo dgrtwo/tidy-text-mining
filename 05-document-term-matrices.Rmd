@@ -324,7 +324,7 @@ The top terms for each are visualized in Figure \@ref(fig:stocktfidf). As we'd e
 ```{r stocktfidf, dependson = "stocktfidfdata", echo = FALSE, fig.cap = "The 8 words with the highest tf-idf in recent articles specific to each company", fig.height = 8, fig.width = 8}
 stock_tf_idf %>%
   group_by(company) %>%
-  top_n(8, tf_idf) %>%
+  slice_max(tf_idf, n = 8) %>%
   ungroup() %>%
   mutate(word = reorder(word, tf_idf)) %>%
   ggplot(aes(word, tf_idf, fill = company)) +
