@@ -61,7 +61,7 @@ In other analyses, we may want to work with the recombined words. tidyr's `unite
 
 ```{r bigrams_united, dependson = "bigram_counts"}
 bigrams_united <- bigrams_filtered %>%
-  unite(bigram, word1, word2, sep = " ")
+  unite(bigram, word1, word2, sep = " ", na.rm = TRUE)
 
 bigrams_united
 ```
