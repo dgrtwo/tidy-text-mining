@@ -45,4 +45,5 @@ Suggests:
     bslib,
     downlit,
     xml2
+Remotes: ropensci/gutenbergr
 Encoding: UTF-8
