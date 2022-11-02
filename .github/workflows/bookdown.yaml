@@ -3,6 +3,7 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
 
 name: bookdown
 
@@ -11,9 +12,9 @@ env:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-    runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -24,13 +25,6 @@ jobs:
           use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
-
-      - name: Install more system dependencies
-        run: |
-          brew install --cask xquartz
-          brew install pkg-config cairo
-          brew install gsl
-          brew install libxml2
 
       - name: Build site
         run: Rscript -e 'bookdown::render_book("index.Rmd", quiet = TRUE)'
