@@ -16,7 +16,8 @@ library(tidytext)
 library(janeaustenr)
 
 austen_bigrams <- austen_books() %>%
-  unnest_tokens(bigram, text, token = "ngrams", n = 2)
+  unnest_tokens(bigram, text, token = "ngrams", n = 2) %>%
+  filter(!is.na(bigram))
 
 austen_bigrams
 ```
@@ -71,6 +72,7 @@ In other analyses you may be interested in the most common trigrams, which are c
 ```{r}
 austen_books() %>%
   unnest_tokens(trigram, text, token = "ngrams", n = 3) %>%
+  filter(!is.na(trigram)) %>%
   separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
   filter(!word1 %in% stop_words$word,
          !word2 %in% stop_words$word,
@@ -114,9 +116,9 @@ bigram_tf_idf %>%
   labs(x = "tf-idf of bigram", y = NULL)
 ```
 
-Much as we discovered in Chapter \@ref(tfidf), the units that distinguish each Austen book are almost exclusively names. We also notice some pairings of a common verb and a name, such as "replied elizabeth" in Pride & Prejudice, or "cried emma" in Emma.
+Much as we discovered in Chapter \@ref(tfidf), the units that distinguish each Austen book are almost exclusively names. We also notice some pairings of a common verb and a name, such as "replied elinor" in *Sense & Sensibility*, or "cried catherine" in *Northanger Abbey*.
 
-There are advantages and disadvantages to examining the tf-idf of bigrams rather than individual words. Pairs of consecutive words might capture structure that isn't present when one is just counting single words, and may provide context that makes tokens more understandable (for example, "pulteney street", in Northanger Abbey, is more informative than "pulteney"). However, the per-bigram counts are also *sparser*: a typical two-word pair is rarer than either of its component words. Thus, bigrams can be especially useful when you have a very large text dataset.
+There are advantages and disadvantages to examining the tf-idf of bigrams rather than individual words. Pairs of consecutive words might capture structure that isn't present when one is just counting single words, and may provide context that makes tokens more understandable (for example, "maple grove", in *Emma*, is more informative than "maple"). However, the per-bigram counts are also *sparser*: a typical two-word pair is rarer than either of its component words. Thus, bigrams can be especially useful when you have a very large text dataset.
 
 ### Using bigrams to provide context in sentiment analysis
 
