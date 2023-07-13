@@ -276,8 +276,9 @@ company <- c("Microsoft", "Apple", "Google", "Amazon", "Facebook",
 symbol  <- c("MSFT", "AAPL", "GOOG", "AMZN", "FB", 
              "TWTR", "IBM", "YHOO", "NFLX")
 
+# it appears that the Google Finance function doesn't work anymore, but the Yahoo Finance one does. Also tm.plugin.webmining doesn't seem to be supported any longer?
 download_articles <- function(symbol) {
-  WebCorpus(GoogleFinanceSource(paste0("NASDAQ:", symbol)))
+  WebCorpus(YahooFinanceSource(paste0("NASDAQ:", symbol)))
 }
 
 stock_articles <- tibble(company = company,
