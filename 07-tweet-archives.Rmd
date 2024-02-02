@@ -31,10 +31,10 @@ David and Julia tweet at about the same rate currently and joined Twitter about 
 
 Let's use `unnest_tokens()` to make a tidy data frame of all the words in our tweets, and remove the common English stop words. There are certain conventions in how people use text on Twitter, so we will use a specialized tokenizer and do a bit more work with our text here than, for example, we did with the narrative text from Project Gutenberg. 
 
-First, we will remove tweets from this dataset that are retweets so that we only have tweets that we wrote ourselves. Next, the `mutate()` line cleans out some characters that we don't want like ampersands and such. 
+First, we will remove tweets from this dataset that are retweets so that we only have tweets that we wrote ourselves. Next, the `mutate()` line removes links and cleans out some characters that we don't want like ampersands and such. 
 
 ```{block, type = "rmdnote"}
-In the call to `unnest_tokens()`, we unnest using the specialized `"tweets"` tokenizer that is built in to the tokenizers package [@R-tokenizers]. This tool is very useful for dealing with Twitter text or other text from online forums; it retains hashtags and mentions of usernames with the `@` symbol. 
+In the call to `unnest_tokens()`, we unnest using a regex pattern, instead of just looking for single unigrams (words). This regex pattern very useful for dealing with Twitter text or other text from online forums; it retains hashtags and mentions of usernames with the `@` symbol. 
 ```
 
 Because we have kept text such as hashtags and usernames in the dataset, we can't use a simple `anti_join()` to remove stop words. Instead, we can take the approach shown in the `filter()` line that uses `str_detect()` from the stringr package.
@@ -43,11 +43,13 @@ Because we have kept text such as hashtags and usernames in the dataset, we can'
 library(tidytext)
 library(stringr)
 
-remove_reg <- "&amp;|&lt;|&gt;"
+replace_reg <- "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https"
+unnest_reg <- "([^A-Za-z_\\d#@']|'(?![A-Za-z_\\d#@]))"
+
 tidy_tweets <- tweets %>% 
   filter(!str_detect(text, "^RT")) %>%
-  mutate(text = str_remove_all(text, remove_reg)) %>%
-  unnest_tokens(word, text, token = "tweets") %>%
+  mutate(text = str_replace_all(text, replace_reg, "")) %>%
+  unnest_tokens(word, text, token = "regex", pattern = unnest_reg) %>%
   filter(!word %in% stop_words$word,
          !word %in% str_remove_all(stop_words$word, "'"),
          str_detect(word, "[a-z]"))
@@ -133,7 +135,7 @@ word_ratios %>%
   arrange(abs(logratio))
 ```
 
-We are about equally likely to tweet about words, science, ideas, and email.
+We are about equally likely to tweet about maps, email, files, and APIs.
 
 Which words are most likely to be from Julia's account or from David's account? Let's just take the top 15 most distinctive words for each account and plot them in Figure \@ref(fig:plotratios).
 
@@ -270,15 +272,13 @@ Now that we have this second, smaller set of only recent tweets, let's again use
 ```{r tidy_tweets2, dependson = "setup2"}
 tidy_tweets <- tweets %>% 
   filter(!str_detect(text, "^(RT|@)")) %>%
-  mutate(text = str_remove_all(text, remove_reg)) %>%
-  unnest_tokens(word, text, token = "tweets", strip_url = TRUE) %>%
+  mutate(text = str_replace_all(text, replace_reg, "")) %>%
+  unnest_tokens(word, text, token = "regex", pattern = unnest_reg) %>%
   filter(!word %in% stop_words$word,
          !word %in% str_remove_all(stop_words$word, "'"))
 
 tidy_tweets
 ```
-
-Notice that the `word` column contains tokenized emoji.
 
 To start with, let’s look at the number of times each of our tweets was retweeted. Let's find the total number of retweets for each person.
 
@@ -328,7 +328,7 @@ word_by_rts %>%
        y = "Median # of retweets for tweets containing each word")
 ```
 
-We see lots of word about R packages, including tidytext, a package about which you are reading right now!
+We see lots of word about R packages, including tidytext, a package about which you are reading right now! The "0" for David comes from tweets where he mentions version numbers of packages, like ["broom 0.4.0"](https://twitter.com/drob/status/671430703234576384) or similar.
 
 We can follow a similar procedure to see which words led to more favorites. Are they different than the words that lead to more retweets?
 
