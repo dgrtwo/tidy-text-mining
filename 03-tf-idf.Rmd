@@ -47,7 +47,7 @@ ggplot(book_words, aes(n/total, fill = book)) +
   facet_wrap(~book, ncol = 2, scales = "free_y")
 ```
 
-There are very long tails to the right for these novels (those extremely rare words!) that we have not shown in these plots. These plots exhibit similar distributions for all the novels, with many words that occur rarely and fewer words that occur frequently.
+There are long tails to the right for these novels (those extremely common words!) that we have not shown in these plots. These plots exhibit similar distributions for all the novels, with many words that occur rarely and fewer words that occur frequently.
 
 ## Zipf's law
 
