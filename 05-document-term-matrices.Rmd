@@ -264,7 +264,7 @@ acq_tokens %>%
 Here we'll retrieve recent articles relevant to nine major technology stocks: Microsoft, Apple, Google, Amazon, Facebook, Twitter, IBM, Yahoo, and Netflix.
 
 ```{block, type = "rmdnote"}
-These results were downloaded in January 2017, when this chapter was written, but you'll certainly find different results if you ran it for yourself. Note that this code takes several minutes to run.
+These results were downloaded in January 2017, when this chapter was written, but you'll certainly find different results if you are able to run it for yourself. Note that https://cran.r-project.org/web/packages/tm.plugin.webmining/index.html states that tm.plugin.webmining is no longer available for the latest versions of R. Also note that this code takes several minutes to run.
 ```
 
 ```{r stock_articles_run, eval = FALSE}
