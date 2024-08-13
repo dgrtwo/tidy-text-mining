@@ -79,7 +79,6 @@ library(ggplot2)
 
 ap_sentiments %>%
   count(sentiment, term, wt = count) %>%
-  ungroup() %>%
   filter(n >= 200) %>%
   mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
   mutate(term = reorder(term, n)) %>%
