@@ -323,7 +323,7 @@ Lots of useful work can be done by tokenizing at the word level, but sometimes i
 
 > I am not having a good day.
 
-is a sad sentence, not a happy one, because of negation. R packages such as coreNLP [@R-coreNLP], cleanNLP [@R-cleanNLP], and sentimentr [@R-sentimentr] are examples of such sentiment analysis algorithms. For these, we may want to tokenize text into sentences, and it makes sense to use a new name for the output column in such a case.
+is a sad sentence, not a happy one, because of negation. R packages including coreNLP [@R-coreNLP], cleanNLP [@R-cleanNLP], and sentimentr [@R-sentimentr] are examples of such sentiment analysis algorithms. For these, we may want to tokenize text into sentences, and it makes sense to use a new name for the output column in such a case.
 
 ```{r PandP}
 p_and_p_sentences <- tibble(text = prideprejudice) %>% 
