@@ -12,7 +12,7 @@ biblio-style: apalike
 link-citations: true
 links-as-notes: true
 colorlinks: true
-github-repo: dgrtwo/tidy-text-mining
+github-repo: juliasilge/tidy-text-mining
 cover-image: images/cover.png
 url: https://www.tidytextmining.com/
 description: "A guide to text analysis within the tidy data framework, using the tidytext package and other tidy tools"
@@ -29,7 +29,7 @@ knitr::write_bib(c(
 
 <a href="http://amzn.to/2tZkmxG"><img src="images/cover.png" width="350" height="460" alt="Buy from Amazon" class="cover" /></a>
 
-This is the [website](http://tidytextmining.com/) for *Text Mining with R*! Visit the [GitHub repository for this site](https://github.com/dgrtwo/tidy-text-mining), find the book at [O'Reilly](http://www.jdoqocy.com/click-4428796-11290546?url=http%3A%2F%2Fshop.oreilly.com%2Fproduct%2F0636920067153.do%3Fcmp%3Daf-strata-books-video-product_cj_0636920067153_%25zp&cjsku=0636920067153), or [buy it on Amazon](http://amzn.to/2tZkmxG).
+This is the [website](http://tidytextmining.com/) for *Text Mining with R*! Visit the [GitHub repository for this site](https://github.com/juliasilge/tidy-text-mining), find the book at [O'Reilly](http://www.jdoqocy.com/click-4428796-11290546?url=http%3A%2F%2Fshop.oreilly.com%2Fproduct%2F0636920067153.do%3Fcmp%3Daf-strata-books-video-product_cj_0636920067153_%25zp&cjsku=0636920067153), or [buy it on Amazon](http://amzn.to/2tZkmxG).
 
 This work by [Julia Silge](http://juliasilge.com/) and [David Robinson](http://varianceexplained.org/) is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/us/">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 United States License</a>.
 
@@ -96,7 +96,7 @@ We do assume that the reader is at least slightly familiar with dplyr, ggplot2, 
 
 ## Using code examples {-}
 
-This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [website](https://www.tidytextmining.com/) is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). While we show the code behind the vast majority of the analyses, in the interest of space we sometimes choose not to show the code generating a particular visualization if we've already provided the code for several similar graphs. We trust the reader can learn from and build on our examples, and the code used to generate the book can be found in our [public GitHub repository](https://github.com/dgrtwo/tidy-text-mining). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its light theme (`theme_light()`).
+This book was written in [RStudio](http://www.rstudio.com/ide/) using [bookdown](http://bookdown.org/). The [website](https://www.tidytextmining.com/) is hosted via [Netlify](http://netlify.com/), and automatically built after every push by [GitHub Actions](https://help.github.com/actions). While we show the code behind the vast majority of the analyses, in the interest of space we sometimes choose not to show the code generating a particular visualization if we've already provided the code for several similar graphs. We trust the reader can learn from and build on our examples, and the code used to generate the book can be found in our [public GitHub repository](https://github.com/juliasilge/tidy-text-mining). We generated all plots in this book using [ggplot2](https://ggplot2.tidyverse.org/) and its light theme (`theme_light()`).
 
 This version of the book was built with `r R.version.string` and the following packages:
 
@@ -123,7 +123,7 @@ We received thoughtful, thorough technical reviews that improved the quality of 
 ```{r, eval = FALSE, echo = FALSE}
 library(tidyverse)
 contribs_all_json <- gh::gh("/repos/:owner/:repo/contributors",
-  owner = "dgrtwo",
+  owner = "juliasilge",
   repo = "tidy-text-mining",
   .limit = Inf
 )

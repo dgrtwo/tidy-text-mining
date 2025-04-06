@@ -309,7 +309,7 @@ word_by_rts %>%
   arrange(desc(retweets))
 ```
 
-At the top of this sorted data frame, we see tweets from Julia and David about packages that they work on, like [gganimate](https://github.com/dgrtwo/gganimate) and [tidytext](https://cran.r-project.org/package=tidytext). Let's plot the words that have the highest median retweets for each of our accounts (Figure \@ref(fig:plotrts)).
+At the top of this sorted data frame, we see tweets from Julia and David about packages that they work on, like [gganimate](https://gganimate.com/) and [tidytext](https://cran.r-project.org/package=tidytext). Let's plot the words that have the highest median retweets for each of our accounts (Figure \@ref(fig:plotrts)).
 
 ```{r plotrts, dependson = "word_by_rts", fig.width=8, fig.height=4, fig.cap="Words with highest median retweets"}
 word_by_rts %>%
