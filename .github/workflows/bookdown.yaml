@@ -33,7 +33,7 @@ jobs:
 
 
       - name: Install npm
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
 
       - name: Deploy to Netlify
         if: contains(env.isExtPR, 'false')
